@@ -1,8 +1,8 @@
-# mural-mcp-portal
+# ai-uc-mural-mcp-portal
 
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_mural-mcp-portal&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=DEFRA_mural-mcp-portal)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_mural-mcp-portal&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DEFRA_mural-mcp-portal)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_mural-mcp-portal&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DEFRA_mural-mcp-portal)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_ai-uc-mural-mcp-portal&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=DEFRA_ai-uc-mural-mcp-portal)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_ai-uc-mural-mcp-portal&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DEFRA_ai-uc-mural-mcp-portal)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_ai-uc-mural-mcp-portal&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DEFRA_ai-uc-mural-mcp-portal)
 
 Core delivery platform Node.js Frontend Template.
 
@@ -14,6 +14,7 @@ Core delivery platform Node.js Frontend Template.
   - [Setup](#setup)
   - [Development](#development)
   - [Production](#production)
+  - [Guidance API mock data](#guidance-api-mock-data)
   - [Npm scripts](#npm-scripts)
   - [Update dependencies](#update-dependencies)
   - [Formatting](#formatting)
@@ -36,7 +37,7 @@ Please install Node Version Manager [nvm](https://github.com/creationix/nvm)
 To use the correct version of Node.js for this application, via nvm:
 
 ```bash
-cd mural-mcp-portal
+cd ai-uc-mural-mcp-portal
 nvm use
 ```
 
@@ -104,7 +105,7 @@ npm run git:hooks
 To run the application in `development` mode run:
 
 ```bash
-npm run dev
+npm run start:dev
 ```
 
 ### Production
@@ -151,18 +152,18 @@ git config --global core.autocrlf false
 
 > [!TIP]
 > For Apple Silicon users, you may need to add `--platform linux/amd64` to the `docker run` command to ensure
-> compatibility fEx: `docker build --platform=linux/arm64 --no-cache --tag mural-mcp-portal`
+> compatibility fEx: `docker build --platform=linux/arm64 --no-cache --tag ai-uc-mural-mcp-portal`
 
 Build:
 
 ```bash
-docker build --target development --no-cache --tag mural-mcp-portal:development .
+docker build --target development --no-cache --tag ai-uc-mural-mcp-portal:development .
 ```
 
 Run:
 
 ```bash
-docker run -p 3000:3000 mural-mcp-portal:development
+docker run -p 3000:3000 ai-uc-mural-mcp-portal:development
 ```
 
 ### Production image
@@ -170,13 +171,13 @@ docker run -p 3000:3000 mural-mcp-portal:development
 Build:
 
 ```bash
-docker build --no-cache --tag mural-mcp-portal .
+docker build --no-cache --tag ai-uc-mural-mcp-portal .
 ```
 
 Run:
 
 ```bash
-docker run -p 3000:3000 mural-mcp-portal
+docker run -p 3000:3000 ai-uc-mural-mcp-portal
 ```
 
 ### Docker Compose

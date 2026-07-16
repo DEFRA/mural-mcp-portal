@@ -1,0 +1,45 @@
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  sonarcloud:
+    name: Run Tests and SonarCloud Scan
+    if: ${{ github.event_name != 'schedule' && github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Test code and Create Test Coverage Reports
+        run: |
+          mkdir -p coverage
+          chmod -R a+rw ./coverage
+          npm ci
+          npm run test
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  unpinned-dependencies:
+    name: Check for Unpinned NPM Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Check for unpinned NPM dependencies
+        run: |
+          chmod +x ./scripts/check-unpinned-dependencies.sh
+          ./scripts/check-unpinned-dependencies.sh
