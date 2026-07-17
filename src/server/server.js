@@ -11,7 +11,6 @@ import HapiPino from 'hapi-pino'
 import { config } from '../config/config.js'
 import { catchAll } from './catch-all.js'
 import { options as loggerOptions } from '../infra/logging/options.js'
-import { setupProxy } from '../infra/proxy/setup-proxy.js'
 
 import { contentSecurityPolicy } from './plugins/content-security-policy.js'
 import { requestTracing } from './plugins/request-tracing.js'
@@ -28,7 +27,6 @@ import { pulse } from './plugins/pulse.js'
  * @returns {Promise<Hapi.Server>} A promise representing a Hapi server instance
  */
 async function createServer () {
-  setupProxy()
   const server = Hapi.server({
     host: config.get('host'),
     port: config.get('port'),
