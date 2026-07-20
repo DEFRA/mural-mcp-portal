@@ -13,6 +13,7 @@ import { catchAll } from './catch-all.js'
 import { options as loggerOptions } from '../infra/logging/options.js'
 
 import { contentSecurityPolicy } from './plugins/content-security-policy.js'
+import { devAuth } from './plugins/dev-auth.js'
 import { requestTracing } from './plugins/request-tracing.js'
 import { router } from './plugins/router.js'
 import { serveStaticFiles } from './plugins/serve-static-files.js'
@@ -78,6 +79,7 @@ async function createServer () {
     secureContext,
     pulse,
     sessionCache,
+    ...(!config.get('isProduction') ? [devAuth] : []),
     Scooter,
     HapiInert,
     serveStaticFiles,

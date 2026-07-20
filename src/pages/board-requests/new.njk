@@ -1,0 +1,48 @@
+{% extends "common/layout.njk" %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = 'Request a Mural board' %}
+{% set page = 'board-requests' %}
+
+{% block content %}
+  <div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content">
+
+      {% if errorList %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorList
+        }) }}
+      {% endif %}
+
+      <h1 class="govuk-heading-l">Request a Mural board</h1>
+
+      <form method="post" action="/board-requests" novalidate>
+
+        {{ govukInput({
+          label: { text: "Board ID", classes: "govuk-label--m" },
+          hint: { text: "The unique identifier for the Mural board." },
+          id: "boardId",
+          name: "boardId",
+          value: values.boardId,
+          errorMessage: errors.boardId
+        }) }}
+
+        {{ govukInput({
+          label: { text: "Information Asset Owner", classes: "govuk-label--m" },
+          hint: { text: "Must be a defra.gov.uk email address." },
+          id: "iao",
+          name: "iao",
+          value: values.iao,
+          errorMessage: errors.iao
+        }) }}
+
+        {{ govukButton({ text: "Submit request" }) }}
+
+      </form>
+
+    </main>
+  </div>
+{% endblock %}

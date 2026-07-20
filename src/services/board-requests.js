@@ -1,0 +1,56 @@
+import { constants as http2StatusCodes } from 'node:http2'
+
+import * as approvalsApi from '../infra/mural/approvals.js'
+
+/**
+ * Submit a board approval request
+ * @param {Object} approvalRequest - The approval request
+ * @returns {Promise<Object>} The approval request response data
+ * @throws {Error} If submission fails (conflict or unexpected error)
+ */
+async function submitBoardRequest (approvalRequest) {
+  const res = await approvalsApi.submitBoardRequest(approvalRequest)
+
+  if (res.ok) {
+    return res.data
+  }
+
+  if (res.status === http2StatusCodes.HTTP_STATUS_CONFLICT) {
+    const error = new Error('Board approval request already exists')
+    error.statusCode = res.status
+    throw error
+  }
+
+  // Unexpected — will surface as 500 via catch-all
+  const error = new Error(`Unexpected status ${res.status} from approvals API`)
+  error.statusCode = res.status
+  throw error
+}
+
+/**
+ * Get a board approval request
+ * @param {Object} approvalRequest - The approval request (only boardId is used)
+ * @returns {Promise<Object|null>} The approval request data, or null if not found
+ * @throws {Error} If an unexpected error occurs
+ */
+async function getBoardRequest (approvalRequest) {
+  const res = await approvalsApi.getBoardRequest(approvalRequest)
+
+  if (res.ok) {
+    return res.data
+  }
+
+  if (res.status === http2StatusCodes.HTTP_STATUS_NOT_FOUND) {
+    return null
+  }
+
+  // Unexpected — will surface as 500 via catch-all
+  const error = new Error(`Unexpected status ${res.status} from approvals API`)
+  error.statusCode = res.status
+  throw error
+}
+
+export {
+  submitBoardRequest,
+  getBoardRequest
+}

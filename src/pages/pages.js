@@ -1,3 +1,4 @@
+import { boardRequestsRouter } from './board-requests/router.js'
 import { homeRouter } from './home/router.js'
 
 const pageRouter = {
@@ -5,7 +6,8 @@ const pageRouter = {
     name: 'pageRouter',
     async register (server) {
       await server.register([
-        homeRouter
+        homeRouter,
+        boardRequestsRouter
       ])
     }
   }

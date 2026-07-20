@@ -1,0 +1,44 @@
+{% extends "common/layout.njk" %}
+{% from "govuk/components/panel/macro.njk" import govukPanel %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% set pageTitle = 'Board request submitted' %}
+{% set page = 'board-requests' %}
+
+{% block content %}
+  <div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content">
+
+      {{ govukPanel({
+        titleText: "Board request submitted",
+        html: "Your request is <strong>pending review</strong>"
+      }) }}
+
+      <h2 class="govuk-heading-m govuk-!-margin-top-6">Request details</h2>
+
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: { text: "Board ID" },
+            value: { text: boardRequest.boardId }
+          },
+          {
+            key: { text: "Information Asset Owner" },
+            value: { text: boardRequest.iao }
+          },
+          {
+            key: { text: "Status" },
+            value: {
+              html: '<strong class="govuk-tag govuk-tag--yellow">Pending</strong>'
+            }
+          }
+        ]
+      }) }}
+
+      <p class="govuk-body">
+        <a href="/board-requests/new" class="govuk-link">Submit another board request</a>
+      </p>
+
+    </main>
+  </div>
+{% endblock %}
