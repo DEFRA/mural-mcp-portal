@@ -1,5 +1,5 @@
 import * as controller from './controller.js'
-import { boardRequestSchema } from './schema.js'
+import { boardRequestSchema } from './schemas.js'
 
 const routes = [
   {
