@@ -25,5 +25,5 @@ class ApprovalRequestViewModel {
 }
 
 export {
-  ApprovalRequestViewModel 
+  ApprovalRequestViewModel
 }
