@@ -3,7 +3,7 @@ const devAuth = {
     name: 'devAuth',
     register (server) {
       server.auth.scheme('dev-auth', () => ({
-        authenticate (request, h) {
+        authenticate (_request, h) {
           return h.authenticated({ credentials: { email: 'test@example.com' } })
         }
       }))

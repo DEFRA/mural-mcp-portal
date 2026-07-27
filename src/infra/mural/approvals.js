@@ -1,5 +1,3 @@
-import { statusCodes } from '../../constants/status-codes.js'
-
 import { config } from '../../config/config.js'
 
 const baseUrl = config.get('muralMcp.url')
@@ -22,28 +20,16 @@ const baseUrl = config.get('muralMcp.url')
  * @property {string} email - The email of the requester
  */
 
-async function request (path, { method = 'GET', body, expected = [] } = {}) {
+async function request (path, { method = 'GET', body } = {}) {
   const response = await fetch(`${baseUrl}${path}`, {
     method,
     headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined
   })
 
-  if (response.ok) {
-    const data = await response.json()
-    return { ok: true, status: response.status, data }
-  }
+  const data = response.ok ? await response.json() : null
 
-  if (expected.includes(response.status)) {
-    return { ok: false, status: response.status, data: null }
-  }
-
-  const error = new Error(
-    `Mural MCP API ${method} ${path} failed: ${response.status} ${response.statusText}`
-  )
-
-  error.statusCode = response.status
-  throw error
+  return { ok: response.ok, status: response.status, data }
 }
 
 /**
@@ -60,8 +46,7 @@ async function submitBoardRequest (approvalRequest) {
 
   return request('/approvals/boards', {
     method: 'POST',
-    body,
-    expected: [statusCodes.HTTP_STATUS_CONFLICT]
+    body
   })
 }
 
@@ -71,9 +56,7 @@ async function submitBoardRequest (approvalRequest) {
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
  */
 async function getBoardRequest (approvalRequest) {
-  return request(`/approvals/boards/${encodeURIComponent(approvalRequest.boardId)}`, {
-    expected: [statusCodes.HTTP_STATUS_NOT_FOUND]
-  })
+  return request(`/approvals/boards/${encodeURIComponent(approvalRequest.boardId)}`)
 }
 
 export {

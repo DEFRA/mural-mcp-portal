@@ -40,6 +40,15 @@ describe('#boardRequestsService', () => {
       await expect(submitBoardRequest(approvalRequest))
         .rejects.toThrow('Network error')
     })
+
+    test('throws with statusCode on an unexpected status', async () => {
+      approvalsApi.submitBoardRequest.mockResolvedValue({ ok: false, status: 500, data: null })
+
+      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
+
+      await expect(submitBoardRequest(approvalRequest))
+        .rejects.toMatchObject({ message: 'Unexpected status 500 from approvals API', statusCode: 500 })
+    })
   })
 
   describe('getBoardRequest', () => {
@@ -71,6 +80,15 @@ describe('#boardRequestsService', () => {
       const approvalRequest = { boardId: 'board-abc' }
 
       await expect(getBoardRequest(approvalRequest)).rejects.toThrow('Service unavailable')
+    })
+
+    test('throws with statusCode on an unexpected status', async () => {
+      approvalsApi.getBoardRequest.mockResolvedValue({ ok: false, status: 500, data: null })
+
+      const approvalRequest = { boardId: 'board-abc' }
+
+      await expect(getBoardRequest(approvalRequest))
+        .rejects.toMatchObject({ message: 'Unexpected status 500 from approvals API', statusCode: 500 })
     })
   })
 })

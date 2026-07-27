@@ -49,19 +49,17 @@ describe('#approvalsApi', () => {
       expect(result.data).toBeNull()
     })
 
-    test('throws with statusCode on unexpected 500', async () => {
+    test('returns ok:false with status 500 on unexpected error', async () => {
       nock(MURAL_MCP_URL)
         .post('/approvals/boards')
         .reply(500, { message: 'Internal server error' })
 
       const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
+      const result = await submitBoardRequest(approvalRequest)
 
-      await expect(
-        submitBoardRequest(approvalRequest)
-      ).rejects.toMatchObject({
-        message: expect.stringContaining('500'),
-        statusCode: 500
-      })
+      expect(result.ok).toBe(false)
+      expect(result.status).toBe(500)
+      expect(result.data).toBeNull()
     })
 
     test('throws on network error', async () => {
@@ -106,17 +104,17 @@ describe('#approvalsApi', () => {
       expect(result.data).toBeNull()
     })
 
-    test('throws with statusCode on unexpected 500', async () => {
+    test('returns ok:false with status 500 on unexpected error', async () => {
       nock(MURAL_MCP_URL)
         .get('/approvals/boards/board-abc')
         .reply(500, { message: 'Internal server error' })
 
       const approvalRequest = { boardId: 'board-abc' }
+      const result = await getBoardRequest(approvalRequest)
 
-      await expect(getBoardRequest(approvalRequest)).rejects.toMatchObject({
-        message: expect.stringContaining('500'),
-        statusCode: 500
-      })
+      expect(result.ok).toBe(false)
+      expect(result.status).toBe(500)
+      expect(result.data).toBeNull()
     })
 
     test('URL-encodes boardId in the path', async () => {

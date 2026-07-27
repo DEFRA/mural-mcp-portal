@@ -16,15 +16,15 @@ async function submitBoardRequest (approvalRequest) {
   }
 
   if (res.status === http2StatusCodes.HTTP_STATUS_CONFLICT) {
-    const error = new Error('Board approval request already exists')
-    error.statusCode = res.status
-    throw error
+    const conflictError = new Error('Board approval request already exists')
+    conflictError.statusCode = res.status
+    throw conflictError
   }
 
   // Unexpected — will surface as 500 via catch-all
-  const error = new Error(`Unexpected status ${res.status} from approvals API`)
-  error.statusCode = res.status
-  throw error
+  const unexpectedError = new Error(`Unexpected status ${res.status} from approvals API`)
+  unexpectedError.statusCode = res.status
+  throw unexpectedError
 }
 
 /**
