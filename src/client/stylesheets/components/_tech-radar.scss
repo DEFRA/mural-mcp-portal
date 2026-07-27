@@ -109,7 +109,7 @@
 .radar-entry:target h3,
 .radar-entry:focus h3,
 .radar-entry:focus-visible h3 {
-  background-color: #00a33b;
+  background-color: #008531;
   color: #ffffff;
   display: inline-block;
   padding: 0.12rem 0.5rem;
@@ -118,6 +118,6 @@
 .radar-entry:target,
 .radar-entry:focus,
 .radar-entry:focus-visible {
-  border-bottom: 1px solid #00a33b;
+  border-bottom: 1px solid #008531;
   padding-bottom: 0.5rem;
 }

@@ -237,6 +237,15 @@ const config = convict({
       env: 'CDP_UPLOADER_BROWSER_URL'
     }
   },
+  muralMcp: {
+    url: {
+      doc: 'Mural MCP API base URL',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'MURAL_MCP_URL'
+    }
+  },
   aceSlackChannel: {
     doc: 'Ask ACE Slack channel URL',
     format: String,
