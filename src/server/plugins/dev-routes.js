@@ -1,16 +1,13 @@
-const devAuth = {
+/**
+ * Routes that only make sense under the 'local' auth provider (see
+ * `pages/login/controller.js`) - local dev and integration tests use these
+ * to reach states a real Entra sign-in would otherwise be needed for,
+ * without performing any OAuth round-trip.
+ */
+const devRoutes = {
   plugin: {
-    name: 'devAuth',
+    name: 'devRoutes',
     register (server) {
-      server.auth.scheme('dev-auth', () => ({
-        authenticate (_request, h) {
-          return h.authenticated({ credentials: { email: 'test@example.com' } })
-        }
-      }))
-
-      server.auth.strategy('dev', 'dev-auth')
-      server.auth.default('dev')
-
       // Seed a Mural connection into the session — useful in tests and local dev
       server.route({
         method: 'GET',
@@ -26,5 +23,5 @@ const devAuth = {
 }
 
 export {
-  devAuth
+  devRoutes
 }

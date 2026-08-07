@@ -38,6 +38,7 @@ async function postBoardRequest (request, h) {
     boardId,
     iao,
     email: request.auth.credentials.email,
+    token: request.auth.credentials.token,
     status: 'pending',
     submittedAt: new Date().toISOString()
   }

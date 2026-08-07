@@ -19,6 +19,8 @@ services:
       REDIS_HOST: redis
       LOCALSTACK_ENDPOINT: http://localstack:4566
       USE_SINGLE_INSTANCE_CACHE: true
+    volumes:
+      - ./src:/home/node/src
     networks:
       - ai-uc-mural-mcp-portal
 
