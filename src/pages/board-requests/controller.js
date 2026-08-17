@@ -33,12 +33,12 @@ async function postBoardRequest (request, h) {
   }
 
   const { boardId, iao } = request.payload
+  const { email } = request.auth.credentials.profile
 
   const boardRequest = {
     boardId,
     iao,
-    email: request.auth.credentials.email,
-    token: request.auth.credentials.token,
+    email,
     status: 'pending',
     submittedAt: new Date().toISOString()
   }

@@ -19,14 +19,11 @@
 
 .govuk-main-wrapper {
   display: block;
-  padding-top: 20px;
-  padding-bottom: 20px;
   overflow-x: visible;
+}
 
-  @media (min-width: 40.0625em) {
-    padding-top: 40px;
-    padding-bottom: 40px;
-  }
+.govuk-main-wrapper > .defra-hero:first-child {
+  margin-top: -40px;
 }
 
 html,
