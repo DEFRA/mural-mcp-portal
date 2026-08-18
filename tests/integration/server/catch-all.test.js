@@ -21,7 +21,7 @@ describe('#catchAll integration', () => {
     })
 
     expect(result).toEqual(
-      expect.stringContaining('Page not found | RPA Guidance AI Usecase PoC')
+      expect.stringContaining('Page not found | Mural MCP Portal')
     )
     expect(statusCode).toBe(statusCodes.HTTP_STATUS_NOT_FOUND)
   })

@@ -7,7 +7,7 @@ import * as formats from './formats.js'
 
 const dirname = path.dirname(url.fileURLToPath(import.meta.url))
 
-const fourHoursMs = 14400000
+const oneDayMs = 86400000
 const oneWeekMs = 604800000
 
 const isProduction = process.env.NODE_ENV === 'production'
@@ -45,7 +45,7 @@ const config = convict({
   serviceName: {
     doc: 'Applications Service Name',
     format: String,
-    default: 'RPA Guidance AI Usecase PoC',
+    default: 'Mural MCP Portal'
   },
   root: {
     doc: 'Project root',
@@ -136,7 +136,7 @@ const config = convict({
       ttl: {
         doc: 'server side session cache ttl',
         format: Number,
-        default: fourHoursMs,
+        default: oneDayMs,
         env: 'SESSION_CACHE_TTL'
       }
     },
@@ -144,7 +144,7 @@ const config = convict({
       ttl: {
         doc: 'Session cookie ttl',
         format: Number,
-        default: fourHoursMs,
+        default: oneDayMs,
         env: 'SESSION_COOKIE_TTL'
       },
       password: {
@@ -213,14 +213,6 @@ const config = convict({
       default: isDevelopment
     }
   },
-  guidanceApi: {
-    url: {
-      doc: 'Guidance backend API base URL',
-      format: String,
-      default: null,
-      env: 'GUIDANCE_API_URL'
-    }
-  },
   cdpUploader: {
     url: {
       doc: 'CDP Uploader base URL for server-to-server calls. Only required in development to target the local emulator',
@@ -244,6 +236,63 @@ const config = convict({
       nullable: true,
       default: null,
       env: 'MURAL_MCP_URL'
+    }
+  },
+  auth: {
+    provider: {
+      doc: 'Authentication provider to use',
+      format: process.env.NODE_ENV === 'production' ? ['entra'] : ['entra', 'local'],
+      default: 'entra',
+      env: 'AUTH_PROVIDER'
+    },
+    entra: {
+      tenantId: {
+        doc: 'Entra ID (Azure AD) tenant ID (GUID) that issues tokens for this app registration',
+        format: String,
+        default: null,
+        nullable: process.env.NODE_ENV !== 'production',
+        env: 'ENTRA_TENANT_ID'
+      },
+      clientId: {
+        doc: 'Entra ID application (client) ID registered for this portal',
+        format: String,
+        default: null,
+        nullable: process.env.NODE_ENV !== 'production',
+        env: 'ENTRA_CLIENT_ID'
+      },
+      clientSecret: {
+        doc: 'Entra ID application client secret',
+        format: String,
+        default: null,
+        nullable: process.env.NODE_ENV !== 'production',
+        env: 'ENTRA_CLIENT_SECRET',
+        sensitive: true
+      },
+      authorityHost: {
+        doc: 'Entra authority host used to build the authorize/token/JWKS/logout endpoints',
+        format: String,
+        default: 'https://login.microsoftonline.com',
+        env: 'ENTRA_AUTHORITY_HOST'
+      },
+      redirectHost: {
+        doc: 'Entra redirect host used to build the redirect URI for the OIDC flow',
+        format: String,
+        default: null,
+        nullable: process.env.NODE_ENV !== 'production',
+        env: 'ENTRA_REDIRECT_HOST'
+      },
+      useRefreshTokens: {
+        doc: 'Whether to refresh expired Entra ID tokens using the stored refresh token instead of forcing re-login',
+        format: Boolean,
+        default: false,
+        env: 'ENTRA_USE_REFRESH_TOKENS'
+      },
+      refreshTokenAcquisitionTimeout: {
+        doc: 'Timeout in milliseconds for acquiring a new access token using the refresh token.',
+        format: Number,
+        default: 5000,
+        env: 'ENTRA_REFRESH_TOKEN_ACQUISITION_TIMEOUT'
+      }
     }
   },
   aceSlackChannel: {

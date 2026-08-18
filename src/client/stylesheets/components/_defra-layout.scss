@@ -18,8 +18,12 @@
 }
 
 .govuk-main-wrapper {
-  padding-top: 0;
+  display: block;
   overflow-x: visible;
+}
+
+.govuk-main-wrapper > .defra-hero:first-child {
+  margin-top: -40px;
 }
 
 html,

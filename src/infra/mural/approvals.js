@@ -20,10 +20,13 @@ const baseUrl = config.get('muralMcp.url')
  * @property {string} email - The email of the requester
  */
 
-async function request (path, { method = 'GET', body } = {}) {
+async function request (path, { method = 'GET', body, token } = {}) {
   const response = await fetch(`${baseUrl}${path}`, {
     method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    headers: {
+      ...(body ? { 'Content-Type': 'application/json' } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
     body: body ? JSON.stringify(body) : undefined
   })
 
@@ -46,7 +49,8 @@ async function submitBoardRequest (approvalRequest) {
 
   return request('/approvals/boards', {
     method: 'POST',
-    body
+    body,
+    token: approvalRequest.token
   })
 }
 
@@ -56,7 +60,9 @@ async function submitBoardRequest (approvalRequest) {
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
  */
 async function getBoardRequest (approvalRequest) {
-  return request(`/approvals/boards/${encodeURIComponent(approvalRequest.boardId)}`)
+  return request(`/approvals/boards/${encodeURIComponent(approvalRequest.boardId)}`, {
+    token: approvalRequest.token
+  })
 }
 
 export {

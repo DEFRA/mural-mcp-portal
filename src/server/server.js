@@ -4,6 +4,7 @@ import { metrics } from '@defra/cdp-metrics'
 import { secureContext } from '@defra/hapi-secure-context'
 
 import Hapi from '@hapi/hapi'
+import HapiCookie from '@hapi/cookie'
 import HapiInert from '@hapi/inert'
 import Scooter from '@hapi/scooter'
 import HapiPino from 'hapi-pino'
@@ -12,8 +13,9 @@ import { config } from '../config/config.js'
 import { catchAll } from './catch-all.js'
 import { options as loggerOptions } from '../infra/logging/options.js'
 
+import { auth } from './plugins/auth.js'
 import { contentSecurityPolicy } from './plugins/content-security-policy.js'
-import { devAuth } from './plugins/dev-auth.js'
+import { devRoutes } from './plugins/dev-routes.js'
 import { requestTracing } from './plugins/request-tracing.js'
 import { router } from './plugins/router.js'
 import { serveStaticFiles } from './plugins/serve-static-files.js'
@@ -79,11 +81,15 @@ async function createServer () {
     secureContext,
     pulse,
     sessionCache,
-    ...(!config.get('isProduction') ? [devAuth] : []),
+    HapiCookie,
     Scooter,
     HapiInert,
     serveStaticFiles,
     viewPlugin,
+    auth,
+    // Only meaningful under the 'local' auth provider (see dev-routes.js) -
+    // never register these against a real Entra-authenticated environment.
+    ...(config.get('auth.provider') === 'local' ? [devRoutes] : []),
     router
   ]
 
@@ -92,6 +98,12 @@ async function createServer () {
   if (!config.get('cdpUploader.browserUrl')) {
     plugins.push(contentSecurityPolicy)
   }
+
+  server.app.cache = server.cache({
+    cache: config.get('session.cache.name'),
+    segment: 'auth-session',
+    expiresIn: config.get('session.cache.ttl')
+  })
 
   await server.register(plugins)
 
