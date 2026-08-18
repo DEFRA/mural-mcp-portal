@@ -1,9 +1,9 @@
 import { constants as statusCodes } from 'node:http2'
 
-import { mergeCookies } from '../../helpers/cookies.js'
-import { loginAsDevUser } from '../../helpers/login.js'
+import { mergeCookies } from '../../../helpers/cookies.js'
+import { loginAsDevUser } from '../../../helpers/login.js'
 
-const { createServer } = await import('../../../../src/server/server.js')
+const { createServer } = await import('../../../../../src/server/server.js')
 
 function form (fields) {
   return new URLSearchParams(fields).toString()
@@ -59,12 +59,12 @@ describe('#boardRequestsController', () => {
       })
     })
 
-    describe('POST /board-requests', () => {
+    describe('POST /board-requests/new', () => {
       describe('Mural connection guard', () => {
         test('redirects to home when Mural connection is not set', async () => {
           const { statusCode, headers } = await server.inject({
             method: 'POST',
-            url: '/board-requests',
+            url: '/board-requests/new',
             headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
             payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk' })
           })
@@ -80,7 +80,7 @@ describe('#boardRequestsController', () => {
 
           const { statusCode, payload } = await server.inject({
             method: 'POST',
-            url: '/board-requests',
+            url: '/board-requests/new',
             headers: { Cookie: muralCookie, 'content-type': 'application/x-www-form-urlencoded' },
             payload: form({ boardId: '', iao: 'jane.smith@defra.gov.uk' })
           })
@@ -94,7 +94,7 @@ describe('#boardRequestsController', () => {
 
           const { statusCode, payload } = await server.inject({
             method: 'POST',
-            url: '/board-requests',
+            url: '/board-requests/new',
             headers: { Cookie: muralCookie, 'content-type': 'application/x-www-form-urlencoded' },
             payload: form({ boardId: 'abc-123', iao: '' })
           })
@@ -108,7 +108,7 @@ describe('#boardRequestsController', () => {
 
           const { statusCode, payload } = await server.inject({
             method: 'POST',
-            url: '/board-requests',
+            url: '/board-requests/new',
             headers: { Cookie: muralCookie, 'content-type': 'application/x-www-form-urlencoded' },
             payload: form({ boardId: '', iao: '' })
           })
@@ -124,7 +124,7 @@ describe('#boardRequestsController', () => {
 
           const { statusCode, payload } = await server.inject({
             method: 'POST',
-            url: '/board-requests',
+            url: '/board-requests/new',
             headers: { Cookie: muralCookie, 'content-type': 'application/x-www-form-urlencoded' },
             payload: form({ boardId: 'abc-123', iao: 'not-an-email' })
           })
@@ -138,7 +138,7 @@ describe('#boardRequestsController', () => {
 
           const { statusCode, payload } = await server.inject({
             method: 'POST',
-            url: '/board-requests',
+            url: '/board-requests/new',
             headers: { Cookie: muralCookie, 'content-type': 'application/x-www-form-urlencoded' },
             payload: form({ boardId: 'abc-123', iao: 'jane@example.com' })
           })
@@ -152,7 +152,7 @@ describe('#boardRequestsController', () => {
 
           const { payload } = await server.inject({
             method: 'POST',
-            url: '/board-requests',
+            url: '/board-requests/new',
             headers: { Cookie: muralCookie, 'content-type': 'application/x-www-form-urlencoded' },
             payload: form({ boardId: 'abc-123', iao: '' })
           })
@@ -167,41 +167,14 @@ describe('#boardRequestsController', () => {
 
           const { statusCode, headers } = await server.inject({
             method: 'POST',
-            url: '/board-requests',
+            url: '/board-requests/new',
             headers: { Cookie: muralCookie, 'content-type': 'application/x-www-form-urlencoded' },
             payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk' })
           })
 
           expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
-          expect(headers.location).toBe('/board-requests/confirmation')
+          expect(headers.location).toBe('/board-requests/new/confirmation')
         })
-      })
-    })
-
-    describe('GET /board-requests/confirmation', () => {
-      test('shows pending request details after successful submission', async () => {
-        const muralCookie = await seedMuralConnection(server, cookie)
-
-        const postRes = await server.inject({
-          method: 'POST',
-          url: '/board-requests',
-          headers: { Cookie: muralCookie, 'content-type': 'application/x-www-form-urlencoded' },
-          payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk' })
-        })
-
-        const sessionCookie = mergeCookies(muralCookie, postRes.headers['set-cookie'])
-
-        const { statusCode, payload } = await server.inject({
-          method: 'GET',
-          url: '/board-requests/confirmation',
-          headers: { Cookie: sessionCookie }
-        })
-
-        expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
-        expect(payload).toContain('Board request submitted')
-        expect(payload).toContain('abc-123')
-        expect(payload).toContain('jane.smith@defra.gov.uk')
-        expect(payload).toContain('Pending')
       })
     })
   })
@@ -229,10 +202,10 @@ describe('#boardRequestsController', () => {
       expect(headers.location).toContain('/login')
     })
 
-    test('POST /board-requests redirects to login', async () => {
+    test('POST /board-requests/new redirects to login', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'POST',
-        url: '/board-requests',
+        url: '/board-requests/new',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk' })
       })

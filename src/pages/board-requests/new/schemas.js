@@ -10,6 +10,7 @@ const boardRequestSchema = Joi.object({
       if (!value.toLowerCase().endsWith('@defra.gov.uk')) {
         return helpers.error('iao.domain')
       }
+
       return value
     })
     .messages({

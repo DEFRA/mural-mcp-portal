@@ -1,5 +1,6 @@
 import { config } from '../../config/config.js'
-import * as controller from './controller.js'
+
+import * as loginController from './controller.js'
 
 const callbackAuth = config.get('auth.provider') === 'entra'
   ? { mode: 'try', strategy: 'entra' }
@@ -15,7 +16,7 @@ const routes = [
         strategy: 'session'
       }
     },
-    handler: controller.getLogin
+    handler: loginController.getLogin
   },
   {
     method: 'GET',
@@ -23,7 +24,7 @@ const routes = [
     options: {
       auth: callbackAuth
     },
-    handler: controller.handleLoginCallback
+    handler: loginController.handleLoginCallback
   },
   {
     method: 'GET',
@@ -34,19 +35,10 @@ const routes = [
         strategy: 'session'
       }
     },
-    handler: controller.logout
+    handler: loginController.logout
   }
 ]
 
-const loginRouter = {
-  plugin: {
-    name: 'loginRouter',
-    register (server) {
-      server.route(routes)
-    }
-  }
-}
-
 export {
-  loginRouter
+  routes
 }
