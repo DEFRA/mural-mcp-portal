@@ -21,6 +21,10 @@ const sessionCache = {
       password: sessionConfig.cookie.password,
       ttl: sessionConfig.cookie.ttl,
       isSecure: config.get('session.cookie.secure'),
+      // See the matching comment in auth.js: this cookie also needs to
+      // survive the top-level redirect back from Mural's/Entra's OAuth
+      // pages, which 'Strict' (the default) would strip it from.
+      isSameSite: 'Lax',
       clearInvalid: true
     }
   }

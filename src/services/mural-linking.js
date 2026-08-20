@@ -1,0 +1,137 @@
+import { linkingOutcomes } from '../constants/linking-outcomes.js'
+import { statusCodes } from '../constants/status-codes.js'
+import { createLogger } from '../infra/logging/logger.js'
+import { buildErrorLog } from '../infra/logging/utils/build-error-log.js'
+import * as linkingApi from '../infra/mural/linking.js'
+
+const logger = createLogger()
+
+/**
+ * Get a user's Mural linking status, and - only when they're not
+ * connected - an authorization URL to start linking.
+ *
+ * Either request failing (a non-ok response or a thrown error) is treated
+ * as fatal to the page: there's no useful state to show if we know the
+ * user isn't connected but can't give them a way to connect, so both
+ * collapse to the same `statusError` result.
+ *
+ * @param {string} userId - The user ID for which to get the linking status
+ * @returns {Promise<{linkingStatus: object|null, statusError: boolean, authorizationUrl: string|null}>}
+ */
+async function getLinkingStatus (userId) {
+  try {
+    const linkingStatus = await _fetchLinkingStatus(userId)
+    const authorizationUrl = linkingStatus.linked
+      ? null
+      : await _fetchAuthorizationUrl(userId)
+
+    return { linkingStatus, statusError: false, authorizationUrl }
+  } catch (error) {
+    logger.warn(buildErrorLog(error, { type: 'mural_linking_status_failed' }))
+    return { linkingStatus: null, statusError: true, authorizationUrl: null }
+  }
+}
+
+/**
+ * Check whether a user currently has a linked Mural account.
+ *
+ * Any failure - a non-ok response or a thrown error - is treated as "not connected" so
+ * gated pages fail closed rather than assuming access.
+ *
+ * @param {string} userId - The user ID to check
+ * @returns {Promise<boolean>}
+ */
+async function isMuralLinked (userId) {
+  try {
+    const linkingStatus = await _fetchLinkingStatus(userId)
+
+    return linkingStatus.linked
+  } catch (error) {
+    logger.error(buildErrorLog(error, { type: 'mural_connection_check_failed' }))
+    return false
+  }
+}
+
+/**
+ * Complete the OAuth linking flow
+ *
+ * Interprets the OAuth callback response and classifies the outcome into
+ * a discriminated result, using the fixed outcome codes in
+ * `linkingOutcomes` rather than ad-hoc strings.
+ *
+ * @param {string} userId - The user ID
+ * @param {object} params - OAuth callback parameters
+ * @param {string} params.code - The authorization code
+ * @param {string} params.state - The CSRF state parameter
+ * @returns {Promise<{outcome: string}>} outcome is one of `linkingOutcomes`
+ */
+async function completeLinking (userId, params) {
+  try {
+    const response = await linkingApi.completeLinking(userId, params)
+
+    if (response.ok) {
+      return { outcome: linkingOutcomes.SUCCESS }
+    }
+
+    if (response.status === statusCodes.HTTP_STATUS_BAD_REQUEST) {
+      return { outcome: linkingOutcomes.VALIDATION_FAILED }
+    }
+
+    logger.error(buildErrorLog(new Error(`Unexpected status ${response.status}`), {
+      type: 'mural_linking_completion_failed'
+    }))
+    return { outcome: linkingOutcomes.FAILED }
+  } catch (error) {
+    logger.error(buildErrorLog(error, { type: 'mural_linking_completion_failed' }))
+    return { outcome: linkingOutcomes.FAILED }
+  }
+}
+
+/**
+ * @private
+ * Fetch a user's linking status from the Mural MCP API.
+ *
+ * Throws on a non-ok response, so a failure here is handled by the
+ * caller's try/catch rather than swallowed - `getLinkingStatus` treats it
+ * as fatal.
+ *
+ * @param {string} userId - The user ID for which to check linking status
+ * @returns {Promise<object>} The linking status data
+ */
+async function _fetchLinkingStatus (userId) {
+  const response = await linkingApi.checkLinkingStatus(userId)
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch linking status: ${response.status}`)
+  }
+
+  return response.data
+}
+
+/**
+ * @private
+ * Fetch an authorization URL from the Mural MCP API.
+ *
+ * Throws on a non-ok response, for the same reason as `_fetchLinkingStatus`
+ * - `getLinkingStatus` only calls this when the user needs to link, so
+ * failing to get them a link is just as fatal as failing to get their
+ * status in the first place.
+ *
+ * @param {string} userId - The user ID for which to get the authorization URL
+ * @returns {Promise<string>} The authorization URL
+ */
+async function _fetchAuthorizationUrl (userId) {
+  const response = await linkingApi.getAuthorizationUrl(userId)
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch authorization URL: ${response.status}`)
+  }
+
+  return response.data.authorizationUrl
+}
+
+export {
+  getLinkingStatus,
+  isMuralLinked,
+  completeLinking
+}

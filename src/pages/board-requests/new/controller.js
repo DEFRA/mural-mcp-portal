@@ -1,13 +1,15 @@
 import { statusCodes } from '../../../constants/status-codes.js'
-import { hasMuralConnection } from './helpers/mural-connection.js'
 import { BoardRequestFormViewModel } from './view-models.js'
 
-async function getNewBoardRequest (request, h) {
-  if (!hasMuralConnection(request)) {
-    return h.redirect('/').code(statusCodes.HTTP_STATUS_FOUND)
-  }
-
+/**
+ * GET /board-requests/new - by the time this runs, the `muralConnection`
+ * server plugin has already redirected away any request that isn't Mural
+ * linked (see `routes.js`'s `requiresMuralLink` option), so no guard is
+ * needed here.
+ */
+async function getNewBoardRequest (_request, h) {
   const viewModel = BoardRequestFormViewModel.empty()
+
   return h.view('board-requests/new/new.njk', { ...viewModel })
     .code(statusCodes.HTTP_STATUS_OK)
 }
@@ -18,13 +20,13 @@ async function postBoardRequestFailAction (request, h, err) {
     .code(statusCodes.HTTP_STATUS_BAD_REQUEST).takeover()
 }
 
+/**
+ * POST /board-requests/new - same Mural-linked guarantee as
+ * `getNewBoardRequest`, enforced by the `muralConnection` server plugin.
+ */
 async function postBoardRequest (request, h) {
-  if (!hasMuralConnection(request)) {
-    return h.redirect('/').code(statusCodes.HTTP_STATUS_FOUND)
-  }
-
   const { boardId, iao } = request.payload
-  const email = request.auth?.credentials?.profile?.email || request.auth?.profile?.email
+  const email = request.auth.credentials.profile.email || request.auth?.profile?.email
 
   const boardRequest = {
     boardId,

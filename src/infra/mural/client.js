@@ -36,7 +36,12 @@ class MuralClient {
       body: options.body ? JSON.stringify(options.body) : undefined
     })
 
-    const data = response.ok ? await response.json() : null
+    let data = null
+    try {
+      data = await response.json()
+    } catch {
+      data = null
+    }
 
     return { ok: response.ok, status: response.status, data }
   }

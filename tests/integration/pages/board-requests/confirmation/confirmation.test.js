@@ -1,17 +1,20 @@
 import { constants as statusCodes } from 'node:http2'
 
+import nock from 'nock'
+
 import { mergeCookies } from '../../../helpers/cookies.js'
 import { loginAsDevUser } from '../../../helpers/login.js'
 
 const { createServer } = await import('../../../../../src/server/server.js')
 
+const MURAL_MCP_URL = 'http://localhost:8086'
+
 function form (fields) {
   return new URLSearchParams(fields).toString()
 }
 
-async function seedMuralConnection (server, cookie) {
-  const res = await server.inject({ method: 'GET', url: '/dev/mural-connect', headers: { Cookie: cookie } })
-  return mergeCookies(cookie, res.headers['set-cookie'])
+function mockLinkingStatus (connected) {
+  nock(MURAL_MCP_URL).get('/linking/status').reply(200, { connected })
 }
 
 describe('#confirmationPage', () => {
@@ -22,26 +25,32 @@ describe('#confirmationPage', () => {
     beforeAll(async () => {
       server = await createServer()
       await server.initialize()
+      nock.disableNetConnect()
 
       cookie = await loginAsDevUser(server)
     })
 
     afterAll(async () => {
+      nock.enableNetConnect()
       await server.stop({ timeout: 0 })
+    })
+
+    afterEach(() => {
+      nock.cleanAll()
     })
 
     describe('GET /board-requests/new/confirmation', () => {
       test('shows pending request details after successful submission', async () => {
-        const muralCookie = await seedMuralConnection(server, cookie)
+        mockLinkingStatus(true)
 
         const postRes = await server.inject({
           method: 'POST',
           url: '/board-requests/new',
-          headers: { Cookie: muralCookie, 'content-type': 'application/x-www-form-urlencoded' },
+          headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
           payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk' })
         })
 
-        const sessionCookie = mergeCookies(muralCookie, postRes.headers['set-cookie'])
+        const sessionCookie = mergeCookies(cookie, postRes.headers['set-cookie'])
 
         const { statusCode, payload } = await server.inject({
           method: 'GET',

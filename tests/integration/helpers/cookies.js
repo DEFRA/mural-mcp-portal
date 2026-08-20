@@ -7,9 +7,9 @@ function splitPair (pair) {
  * Merges a response's `Set-Cookie` header into an existing `Cookie` header,
  * keyed by cookie name.
  *
- * A response only re-issues the cookies it actually changed - e.g. hitting
- * `/dev/mural-connect` only touches the session cookie, not the auth one -
- * so replacing the whole `Cookie` header with just that response's
+ * A response only re-issues the cookies it actually changed - e.g.
+ * submitting a board request only touches the session cookie, not the auth
+ * one - so replacing the whole `Cookie` header with just that response's
  * `Set-Cookie` would silently drop whichever cookie it didn't mention.
  *
  * @param {string} [cookieHeader] the `Cookie` header sent on the request
