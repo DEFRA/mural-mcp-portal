@@ -32,17 +32,18 @@ async function submitBoardRequest (approvalRequest) {
 
   return muralClient.request('/approvals/boards', {
     method: 'POST',
-    body
+    body,
+    userId: approvalRequest.email
   })
 }
 
 /**
  * Get a board approval request
- * @param {ApprovalRequest} approvalRequest - The approval request (only boardId is used)
+ * @param {string} boardId - The ID of the board
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
  */
-async function getBoardRequest (approvalRequest) {
-  return muralClient.request(`/approvals/boards/${encodeURIComponent(approvalRequest.boardId)}`)
+async function getBoardRequest (boardId) {
+  return muralClient.request(`/approvals/boards/${encodeURIComponent(boardId)}`)
 }
 
 export {
