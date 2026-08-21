@@ -22,31 +22,21 @@ async function handleMuralLinkingCallback (request, h) {
   const userId = request.auth.credentials.profile.email
   const { code, error, state } = request.query
 
-  console.log('handleMuralLinkingCallback', { userId, code, error, state })
-
   if (error || !code) {
     request.yar.flash(LINKING_OUTCOME_SESSION_KEY, linkingOutcomes.CANCELLED)
     return h.redirect('/account/mural-linking')
   }
 
-  console.log('completing linking for user', { userId, code, state })
-
   const result = await completeLinking(userId, { code, state })
-
-  console.log('handleMuralLinkingCallback result', { result })
 
   if (result.outcome === linkingOutcomes.SUCCESS) {
     const required = request.yar.get(MURAL_LINK_REQUIRED_SESSION_KEY)
-
-    console.log('setting linking outcome to SUCCESS and checking for required redirect', { required })
 
     if (required) {
       request.yar.clear(MURAL_LINK_REQUIRED_SESSION_KEY)
       return h.redirect(required.returnTo)
     }
   }
-
-  console.log('outcome not SUCCESS or no required redirect, flashing outcome and redirecting to linking page', { outcome: result.outcome })
 
   request.yar.flash(LINKING_OUTCOME_SESSION_KEY, result.outcome)
 
