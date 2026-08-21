@@ -29,7 +29,7 @@ async function submitBoardRequest (approvalRequest) {
 
 /**
  * Get a board approval request
- * @param {Object} boardId - The approval request (only boardId is used)
+ * @param {Object} boardId - The ID of the board for which to retrieve the approval request
  * @returns {Promise<Object|null>} The approval request data, or null if not found
  * @throws {Error} If an unexpected error occurs
  */
