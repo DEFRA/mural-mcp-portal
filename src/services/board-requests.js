@@ -12,10 +12,7 @@ async function submitBoardRequest (approvalRequest) {
   const res = await approvalsApi.submitBoardRequest(approvalRequest)
 
   if (res.ok) {
-    return {
-      success: true,
-      data: res.data
-    }
+    return res.data
   }
 
   if (res.status === statusCodes.HTTP_STATUS_CONFLICT) {
@@ -42,6 +39,10 @@ async function getBoardRequest (boardId) {
   if (res.status === statusCodes.HTTP_STATUS_NOT_FOUND) {
     return null
   }
+
+  const error = new Error(`Unexpected status ${res.status} from approvals API`)
+  error.statusCode = res.status
+  throw error
 }
 
 export {
