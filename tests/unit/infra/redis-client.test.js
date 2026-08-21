@@ -16,12 +16,12 @@ vi.mock('ioredis', () => ({
 }))
 
 describe('#buildRedisClient', () => {
-  describe('When Redis Single InstanceCache is requested', () => {
+  describe('when a Redis single instance cache is requested', () => {
     beforeEach(() => {
       buildRedisClient(config.get('redis'))
     })
 
-    test('Should instantiate a single Redis client', () => {
+    test('should instantiate a single Redis client', () => {
       expect(Redis).toHaveBeenCalledWith({
         db: 0,
         host: '127.0.0.1',
@@ -33,7 +33,7 @@ describe('#buildRedisClient', () => {
     })
   })
 
-  describe('When a Redis Cluster is requested', () => {
+  describe('when a Redis cluster is requested', () => {
     beforeEach(() => {
       buildRedisClient({
         ...config.get('redis'),
@@ -44,7 +44,7 @@ describe('#buildRedisClient', () => {
       })
     })
 
-    test('Should instantiate a Redis Cluster client', () => {
+    test('should instantiate a Redis cluster client', () => {
       expect(Cluster).toHaveBeenCalledWith(
         [{ host: '127.0.0.1', port: 6379 }],
         {

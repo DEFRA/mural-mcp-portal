@@ -13,7 +13,7 @@ import * as linkingApi from '../../../src/infra/mural/linking.js'
 
 describe('#muralLinkingService', () => {
   describe('getLinkingStatus', () => {
-    test('returns connected status without fetching auth URL', async () => {
+    test('should return connected status without fetching auth URL', async () => {
       const statusData = { linked: true, expired: false }
       linkingApi.checkLinkingStatus.mockResolvedValue({ ok: true, status: 200, data: statusData })
 
@@ -26,7 +26,7 @@ describe('#muralLinkingService', () => {
       expect(linkingApi.getAuthorizationUrl).not.toHaveBeenCalled()
     })
 
-    test('fetches auth URL when not connected', async () => {
+    test('should fetch auth URL when not connected', async () => {
       const statusData = { linked: false }
       const authData = { authorizationUrl: 'https://mural.co/oauth/authorize?state=abc' }
 
@@ -41,7 +41,7 @@ describe('#muralLinkingService', () => {
       expect(linkingApi.getAuthorizationUrl).toHaveBeenCalledWith('user-123')
     })
 
-    test('returns error state when status fetch throws', async () => {
+    test('should return error state when status fetch throws', async () => {
       const error = new Error('Network error')
       error.name = 'MuralApiError'
       linkingApi.checkLinkingStatus.mockRejectedValue(error)
@@ -54,7 +54,7 @@ describe('#muralLinkingService', () => {
       expect(linkingApi.getAuthorizationUrl).not.toHaveBeenCalled()
     })
 
-    test('returns error state when auth URL fetch throws', async () => {
+    test('should return error state when auth URL fetch throws', async () => {
       const statusData = { linked: false }
       const error = new Error('Network timeout')
       error.name = 'MuralApiError'
@@ -71,7 +71,7 @@ describe('#muralLinkingService', () => {
   })
 
   describe('isMuralLinked', () => {
-    test('returns true when connected', async () => {
+    test('should return true when connected', async () => {
       linkingApi.checkLinkingStatus.mockResolvedValue({ ok: true, status: 200, data: { linked: true } })
 
       const result = await isMuralLinked('user-123')
@@ -81,7 +81,7 @@ describe('#muralLinkingService', () => {
       expect(linkingApi.getAuthorizationUrl).not.toHaveBeenCalled()
     })
 
-    test('returns false when not connected', async () => {
+    test('should return false when not connected', async () => {
       linkingApi.checkLinkingStatus.mockResolvedValue({ ok: true, status: 200, data: { linked: false } })
 
       const result = await isMuralLinked('user-123')
@@ -89,7 +89,7 @@ describe('#muralLinkingService', () => {
       expect(result).toBe(false)
     })
 
-    test('returns false (fails closed) when the status fetch throws', async () => {
+    test('should return false (fails closed) when the status fetch throws', async () => {
       const error = new Error('Network error')
       error.name = 'MuralApiError'
       linkingApi.checkLinkingStatus.mockRejectedValue(error)
@@ -101,7 +101,7 @@ describe('#muralLinkingService', () => {
   })
 
   describe('completeLinking', () => {
-    test('returns success on 200', async () => {
+    test('should return success on 200', async () => {
       linkingApi.completeLinking.mockResolvedValue({ ok: true, status: 200, data: { linked: true } })
 
       const result = await completeLinking('user-123', { code: 'auth-code', state: 'state-xyz' })
@@ -110,7 +110,7 @@ describe('#muralLinkingService', () => {
       expect(linkingApi.completeLinking).toHaveBeenCalledWith('user-123', { code: 'auth-code', state: 'state-xyz' })
     })
 
-    test('returns validation_failed on 400', async () => {
+    test('should return validation_failed on 400', async () => {
       linkingApi.completeLinking.mockResolvedValue({ ok: false, status: 400, data: { detail: 'OAuth state mismatch' } })
 
       const result = await completeLinking('user-123', { code: 'bad-code', state: 'bad-state' })
@@ -118,7 +118,7 @@ describe('#muralLinkingService', () => {
       expect(result).toEqual({ outcome: linkingOutcomes.VALIDATION_FAILED })
     })
 
-    test('returns failed when infra throws (unexpected error)', async () => {
+    test('should return failed when infra throws (unexpected error)', async () => {
       const error = new Error('Network error')
       error.name = 'MuralApiError'
       linkingApi.completeLinking.mockRejectedValue(error)

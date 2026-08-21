@@ -88,8 +88,8 @@ describe('#loginController', () => {
     vi.clearAllMocks()
   })
 
-  describe('#handleLoginCallback with entra provider', () => {
-    test('throws when authentication has failed', async () => {
+  describe('#handleLoginCallback when AUTH_PROVIDER is "entra"', () => {
+    test('should throw when authentication has failed', async () => {
       const handleLoginCallback = await getHandleLoginCallback()
       const request = buildRequest()
       const h = buildResponseToolkit()
@@ -111,7 +111,7 @@ describe('#loginController', () => {
       expectSessionNotCreated(request)
     })
 
-    test('logs a warning and hides token verification errors', async () => {
+    test('should log a warning and hide token verification errors', async () => {
       const handleLoginCallback = await getHandleLoginCallback()
       const request = buildAuthenticatedRequest()
       const h = buildResponseToolkit()
@@ -156,14 +156,14 @@ describe('#loginController', () => {
         result = await handleLoginCallback(request, h)
       })
 
-      test('verifies the ID token', () => {
+      test('should verify the ID token', () => {
         expect(request.server.verifyEntraToken).toHaveBeenCalledOnce()
         expect(request.server.verifyEntraToken).toHaveBeenCalledWith(
           credentials.idToken
         )
       })
 
-      test('stores the authenticated session', () => {
+      test('should store the authenticated session', () => {
         expect(request.server.app.cache.set).toHaveBeenCalledOnce()
 
         const [sessionId, storedSession] = request.server.app.cache.set.mock.calls[0]
@@ -176,7 +176,7 @@ describe('#loginController', () => {
         })
       })
 
-      test('sets the authentication cookie to the stored session ID', () => {
+      test('should set the authentication cookie to the stored session ID', () => {
         const [cacheKey] = request.server.app.cache.set.mock.calls[0]
         const storedSessionId = cacheKey.replace(/^auth-session:/, '')
 
@@ -186,7 +186,7 @@ describe('#loginController', () => {
         })
       })
 
-      test('redirects to the home page', () => {
+      test('should redirect to the home page', () => {
         expect(h.redirect).toHaveBeenCalledOnce()
         expect(h.redirect).toHaveBeenCalledWith('/')
         expect(result).toEqual({

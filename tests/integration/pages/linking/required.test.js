@@ -34,7 +34,7 @@ describe('#muralLinkRequiredController', () => {
     })
 
     describe('GET /account/mural-linking/required', () => {
-      test('redirects to the general linking page when reached without gate context', async () => {
+      test('should redirect to the general linking page when reached without gate context', async () => {
         const { statusCode, headers } = await server.inject({
           method: 'GET',
           url: '/account/mural-linking/required',
@@ -45,7 +45,7 @@ describe('#muralLinkRequiredController', () => {
         expect(headers.location).toBe('/account/mural-linking')
       })
 
-      test('sends the user back to what they were doing once already connected', async () => {
+      test('should send the user back to what they were doing once already connected', async () => {
         mockLinkingStatus(false)
 
         const gatedResponse = await server.inject({
@@ -69,7 +69,7 @@ describe('#muralLinkRequiredController', () => {
         expect(headers.location).toBe('/board-requests/new')
       })
 
-      test('treats a failed status check as not connected and shows the gate content', async () => {
+      test('should treat a failed status check as not connected and show the gate content', async () => {
         nock(MURAL_MCP_URL).get('/linking/status').reply(500, { error: 'Internal server error' })
 
         const gatedResponse = await server.inject({
@@ -91,7 +91,7 @@ describe('#muralLinkRequiredController', () => {
         expect(payload).toContain("You tried to request a new Mural board, but this service isn't connected to your Mural account yet.")
       })
 
-      test('links to the general linking page to actually connect', async () => {
+      test('should link to the general linking page to actually connect', async () => {
         mockLinkingStatus(false)
 
         const gatedResponse = await server.inject({
@@ -124,7 +124,7 @@ describe('#muralLinkRequiredController', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('GET /account/mural-linking/required redirects to login', async () => {
+    test('should redirect to login on GET /account/mural-linking/required', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/account/mural-linking/required'

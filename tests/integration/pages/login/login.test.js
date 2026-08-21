@@ -15,8 +15,8 @@ describe('#loginController', () => {
     await server.stop({ timeout: 0 })
   })
 
-  describe('When logged in as a dev user', () => {
-    test('Should respond with 302 and redirect to home page', async () => {
+  describe('when logged in as a dev user', () => {
+    test('should respond with 302 and redirect to the home page', async () => {
       const cookie = await loginAsDevUser(server)
 
       const { headers, statusCode } = await server.inject({
@@ -30,8 +30,8 @@ describe('#loginController', () => {
     })
   })
 
-  describe('When not logged in', () => {
-    test('Should respond with 200 and render the login page', async () => {
+  describe('when not logged in', () => {
+    test('should respond with 200 and render the login page', async () => {
       const { statusCode, payload } = await server.inject({
         method: 'GET',
         url: '/login'
@@ -43,7 +43,7 @@ describe('#loginController', () => {
   })
 
   describe('#handleLoginCallback', () => {
-    test('Should establish a dev-session and redirect to / when hitting the callback under the local provider', async () => {
+    test('should establish a dev-session and redirect to / when hitting the callback under the local provider', async () => {
       const callback = await server.inject({
         method: 'GET',
         url: '/login/callback'
@@ -72,7 +72,7 @@ describe('#loginController', () => {
   })
 
   describe('#logout', () => {
-    test('Should end the session and redirect to / when authenticated', async () => {
+    test('should end the session and redirect to / when authenticated', async () => {
       const cookie = await loginAsDevUser(server)
 
       const { statusCode, headers } = await server.inject({
@@ -97,7 +97,7 @@ describe('#loginController', () => {
       expect(reuse.headers.location).toBe('/login')
     })
 
-    test('Should redirect to / without requiring a session when not authenticated', async () => {
+    test('should redirect to / without requiring a session when not authenticated', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/logout'

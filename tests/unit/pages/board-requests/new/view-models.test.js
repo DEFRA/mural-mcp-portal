@@ -10,13 +10,13 @@ describe('#ApprovalRequestViewModel', () => {
     submittedAt: '2024-01-01T00:00:00.000Z'
   }
 
-  test('constructor maps all fields from the provided data', () => {
+  test('should map all fields from the provided data via the constructor', () => {
     const viewModel = new viewModels.ApprovalRequestViewModel(data)
 
     expect(viewModel).toMatchObject(data)
   })
 
-  test('fromResponse builds a view model from API response data', () => {
+  test('should build a view model from API response data via fromResponse', () => {
     const viewModel = viewModels.ApprovalRequestViewModel.fromResponse(data)
 
     expect(viewModel).toBeInstanceOf(viewModels.ApprovalRequestViewModel)
@@ -25,7 +25,7 @@ describe('#ApprovalRequestViewModel', () => {
 })
 
 describe('#BoardRequestFormViewModel', () => {
-  test('constructor initializes with provided values', () => {
+  test('should initialize with provided values via the constructor', () => {
     const data = {
       boardId: 'board-123',
       iao: 'jane@defra.gov.uk',
@@ -43,13 +43,13 @@ describe('#BoardRequestFormViewModel', () => {
     expect(viewModel.errorList).toEqual([{ text: 'Invalid email', href: '#iao' }])
   })
 
-  test('constructor defaults reason to null when not provided', () => {
+  test('should default reason to null when not provided via the constructor', () => {
     const viewModel = new viewModels.BoardRequestFormViewModel({ boardId: 'board-123', iao: 'jane@defra.gov.uk' })
 
     expect(viewModel.reason).toBeNull()
   })
 
-  test('empty() creates a blank form instance', () => {
+  test('should create a blank form instance via empty()', () => {
     const viewModel = viewModels.BoardRequestFormViewModel.empty()
 
     expect(viewModel.boardId).toBe(null)
@@ -59,7 +59,7 @@ describe('#BoardRequestFormViewModel', () => {
     expect(viewModel.errorList).toBe(null)
   })
 
-  test('fromValidationError() extracts Joi errors into structured errors and errorList', () => {
+  test('should extract Joi errors into structured errors and errorList via fromValidationError()', () => {
     const payload = {
       boardId: 'board-123',
       iao: 'invalid-email',
@@ -91,7 +91,7 @@ describe('#BoardRequestFormViewModel', () => {
     ])
   })
 
-  test('fromValidationError() preserves payload values even with validation errors', () => {
+  test('should preserve payload values even with validation errors via fromValidationError()', () => {
     const payload = {
       boardId: 'valid-board',
       iao: 'invalid-email',

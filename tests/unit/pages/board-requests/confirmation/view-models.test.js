@@ -9,7 +9,7 @@ describe('#BoardRequestConfirmationViewModel', () => {
     submittedAt: '2024-01-01T00:00:00.000Z'
   }
 
-  test('constructor maps all fields from the provided data', () => {
+  test('should map all fields from the provided data via the constructor', () => {
     const viewModel = new viewModels.BoardRequestConfirmationViewModel(boardRequest)
 
     expect(viewModel.boardId).toBe('board-abc')
@@ -19,7 +19,7 @@ describe('#BoardRequestConfirmationViewModel', () => {
     expect(viewModel.submittedAt).toBe('2024-01-01T00:00:00.000Z')
   })
 
-  test('fromSession() builds a view model from session-stored board request', () => {
+  test('should build a view model from session-stored board request via fromSession()', () => {
     const viewModel = viewModels.BoardRequestConfirmationViewModel.fromSession(boardRequest)
 
     expect(viewModel).toBeInstanceOf(viewModels.BoardRequestConfirmationViewModel)

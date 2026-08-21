@@ -26,7 +26,7 @@ vi.mock('../../../../src/config/config.js', () => ({
   }
 }))
 
-describe('views plugin', () => {
+describe('#viewsPlugin', () => {
   beforeEach(() => {
     mockReadFileSync.mockReset()
     mockExistsSyncFn.mockReset()
@@ -48,7 +48,7 @@ describe('views plugin', () => {
     vi.resetModules()
   })
 
-  describe('Context configuration', () => {
+  describe('context configuration', () => {
     beforeEach(() => {
       mockExistsSyncFn.mockReturnValue(true)
       mockReadFileSync.mockReturnValue(
@@ -71,7 +71,7 @@ describe('views plugin', () => {
       mockNunjucksConfigure.mockReturnValue({ addFilter: vi.fn() })
     })
 
-    test('Should provide correct context properties', async () => {
+    test('should provide correct context properties', async () => {
       const { viewPlugin } = await import('../../../../src/server/plugins/views.js')
 
       const ctx = viewPlugin.options.context()
@@ -85,7 +85,7 @@ describe('views plugin', () => {
       )
     })
 
-    test('Should provide correct assetPath in context', async () => {
+    test('should provide correct assetPath in context', async () => {
       const { viewPlugin } = await import('../../../../src/server/plugins/views.js')
 
       const ctx = viewPlugin.options.context()
@@ -93,7 +93,7 @@ describe('views plugin', () => {
       expect(ctx.assetPath).toBe('/public/assets')
     })
 
-    test('Should provide correct serviceName in context', async () => {
+    test('should provide correct serviceName in context', async () => {
       const { viewPlugin } = await import('../../../../src/server/plugins/views.js')
 
       const ctx = viewPlugin.options.context()
@@ -101,7 +101,7 @@ describe('views plugin', () => {
       expect(ctx.serviceName).toBe('Mural MCP Portal')
     })
 
-    test('Should expose cspNonce when Blankie is registered', async () => {
+    test('should expose cspNonce when Blankie is registered', async () => {
       const { viewPlugin } =
         await import('../../../../src/server/plugins/views.js')
 
@@ -121,7 +121,7 @@ describe('views plugin', () => {
       })
     })
 
-    test('Should have empty cspNonce when Blankie is not registered', async () => {
+    test('should have empty cspNonce when Blankie is not registered', async () => {
       const { viewPlugin } =
         await import('../../../../src/server/plugins/views.js')
 
@@ -132,7 +132,7 @@ describe('views plugin', () => {
       expect(ctx.cspNonce).toBeUndefined()
     })
 
-    test('Should have empty cspNonce when Blankie registered but nonces not generated', async () => {
+    test('should have empty cspNonce when Blankie registered but nonces not generated', async () => {
       const { viewPlugin } =
         await import('../../../../src/server/plugins/views.js')
 
@@ -143,7 +143,7 @@ describe('views plugin', () => {
       expect(ctx.cspNonce).toBeUndefined()
     })
 
-    test('Should expose isAuthenticated and userDisplayName when signed in', async () => {
+    test('should expose isAuthenticated and userDisplayName when signed in', async () => {
       const { viewPlugin } =
         await import('../../../../src/server/plugins/views.js')
 
@@ -160,7 +160,7 @@ describe('views plugin', () => {
       expect(ctx.userDisplayName).toBe('Test User')
     })
 
-    test('Should expose isAuthenticated as false and userDisplayName as null when signed out', async () => {
+    test('should expose isAuthenticated as false and userDisplayName as null when signed out', async () => {
       const { viewPlugin } =
         await import('../../../../src/server/plugins/views.js')
 
@@ -172,7 +172,7 @@ describe('views plugin', () => {
       expect(ctx.userDisplayName).toBeNull()
     })
 
-    test('Should default isAuthenticated to false and userDisplayName to null when request.auth is missing', async () => {
+    test('should default isAuthenticated to false and userDisplayName to null when request.auth is missing', async () => {
       const { viewPlugin } =
         await import('../../../../src/server/plugins/views.js')
 
@@ -182,7 +182,7 @@ describe('views plugin', () => {
       expect(ctx.userDisplayName).toBeNull()
     })
 
-    test('Should default userDisplayName to null when authenticated but profile is missing', async () => {
+    test('should default userDisplayName to null when authenticated but profile is missing', async () => {
       const { viewPlugin } =
         await import('../../../../src/server/plugins/views.js')
 
@@ -194,13 +194,13 @@ describe('views plugin', () => {
     })
   })
 
-  describe('Vite manifest handling', () => {
+  describe('vite manifest handling', () => {
     beforeEach(() => {
       mockExistsSyncFn.mockReturnValue(true)
       mockNunjucksConfigure.mockReturnValue({ addFilter: vi.fn() })
     })
 
-    test('Should read vite manifest file', async () => {
+    test('should read vite manifest file', async () => {
       mockReadFileSync.mockReturnValue(
         JSON.stringify({
           'src/client/javascripts/application.js': {
@@ -220,7 +220,7 @@ describe('views plugin', () => {
       )
     })
 
-    test('Should parse vite manifest JSON', async () => {
+    test('should parse vite manifest JSON', async () => {
       mockReadFileSync.mockReturnValue(
         JSON.stringify({
           'src/client/javascripts/application.js': {
@@ -250,7 +250,7 @@ describe('views plugin', () => {
   })
 
   describe('loadManifest error handling', () => {
-    test('Should handle missing manifest file in development mode', async () => {
+    test('should handle missing manifest file in development mode', async () => {
       mockExistsSyncFn.mockReturnValue(false)
       mockConfigGet.mockImplementation((key) => {
         const configValues = {
@@ -280,7 +280,7 @@ describe('views plugin', () => {
       warnSpy.mockRestore()
     })
 
-    test('Should throw error on invalid JSON', async () => {
+    test('should throw error on invalid JSON', async () => {
       mockExistsSyncFn.mockReturnValue(true)
       mockReadFileSync.mockReturnValue('{ invalid json')
       mockConfigGet.mockImplementation((key) => {
@@ -301,7 +301,7 @@ describe('views plugin', () => {
       ).rejects.toThrow(SyntaxError)
     })
 
-    test('Should return empty manifest when file does not exist', async () => {
+    test('should return empty manifest when file does not exist', async () => {
       mockExistsSyncFn.mockReturnValue(false)
       mockConfigGet.mockImplementation((key) => {
         const configValues = {
@@ -331,13 +331,13 @@ describe('views plugin', () => {
     })
   })
 
-  describe('getAssetPath function', () => {
+  describe('getAssetPath', () => {
     beforeEach(() => {
       mockExistsSyncFn.mockReturnValue(true)
       mockNunjucksConfigure.mockReturnValue({ addFilter: vi.fn() })
     })
 
-    test('Should return versioned asset path when asset exists in manifest', async () => {
+    test('should return versioned asset path when asset exists in manifest', async () => {
       mockReadFileSync.mockReturnValue(
         JSON.stringify({
           'src/client/javascripts/application.js': {
@@ -367,7 +367,7 @@ describe('views plugin', () => {
       )
     })
 
-    test('Should return original asset path when asset does not exist in manifest', async () => {
+    test('should return original asset path when asset does not exist in manifest', async () => {
       mockReadFileSync.mockReturnValue(
         JSON.stringify({
           'src/client/javascripts/application.js': {
@@ -388,7 +388,7 @@ describe('views plugin', () => {
       )
     })
 
-    test('Should handle empty manifest', async () => {
+    test('should handle empty manifest', async () => {
       mockReadFileSync.mockReturnValue(JSON.stringify({}))
 
       const { viewPlugin } =
@@ -400,7 +400,7 @@ describe('views plugin', () => {
       )
     })
 
-    test('Should return versioned path for defra-logo image', async () => {
+    test('should return versioned path for defra-logo image', async () => {
       mockReadFileSync.mockReturnValue(
         JSON.stringify({
           'src/client/images/defra-logo.svg': {
@@ -419,7 +419,7 @@ describe('views plugin', () => {
       )
     })
 
-    test('Should support backwards compatibility with string manifest values', async () => {
+    test('should support backwards compatibility with string manifest values', async () => {
       mockReadFileSync.mockReturnValue(
         JSON.stringify({
           'application.js': 'javascripts/application.abc123.js'
@@ -436,14 +436,14 @@ describe('views plugin', () => {
     })
   })
 
-  describe('Template compilation', () => {
+  describe('template compilation', () => {
     beforeEach(() => {
       mockExistsSyncFn.mockReturnValue(true)
       mockReadFileSync.mockReturnValue(JSON.stringify({}))
       mockNunjucksConfigure.mockReturnValue({ addFilter: vi.fn() })
     })
 
-    test('Should compile templates with nunjucks environment', async () => {
+    test('should compile templates with nunjucks environment', async () => {
       const mockTemplate = { render: vi.fn().mockReturnValue('<html></html>') }
       mockNunjucksCompile.mockReturnValue(mockTemplate)
 
@@ -463,7 +463,7 @@ describe('views plugin', () => {
       expect(compiledTemplate).toBeInstanceOf(Function)
     })
 
-    test('Should render compiled template with context', async () => {
+    test('should render compiled template with context', async () => {
       const mockTemplate = {
         render: vi.fn().mockReturnValue('<html>Test</html>')
       }

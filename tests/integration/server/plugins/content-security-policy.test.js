@@ -12,7 +12,7 @@ describe('#contentSecurityPolicy', () => {
     await server.stop({ timeout: 0 })
   })
 
-  test('Should set the CSP policy header', async () => {
+  test('should set the CSP policy header', async () => {
     const resp = await server.inject({
       method: 'GET',
       url: '/'
@@ -21,7 +21,7 @@ describe('#contentSecurityPolicy', () => {
     expect(resp.headers['content-security-policy']).toBeDefined()
   })
 
-  test('Should include nonces in CSP header when enabled', async () => {
+  test('should include nonces in the CSP header when enabled', async () => {
     const resp = await server.inject({
       method: 'GET',
       url: '/'

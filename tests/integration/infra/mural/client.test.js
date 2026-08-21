@@ -17,12 +17,12 @@ afterEach(() => {
 
 describe('#muralClient', () => {
   describe('constructor', () => {
-    test('uses provided baseUrl when supplied', () => {
+    test('should use provided baseUrl when supplied', () => {
       const client = new MuralClient('http://custom.url')
       expect(client.baseUrl).toBe('http://custom.url')
     })
 
-    test('defaults to config baseUrl when not supplied', () => {
+    test('should default to config baseUrl when not supplied', () => {
       const client = new MuralClient()
       // The default uses config.get('muralMcp.url'), which is set by config
       expect(client.baseUrl).toBeDefined()
@@ -30,7 +30,7 @@ describe('#muralClient', () => {
   })
 
   describe('request', () => {
-    test('sends GET request with userId header', async () => {
+    test('should send a GET request with userId header', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -44,7 +44,7 @@ describe('#muralClient', () => {
       expect(response.data).toEqual({ result: 'ok' })
     })
 
-    test('sends POST request with body', async () => {
+    test('should send a POST request with body', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -62,7 +62,7 @@ describe('#muralClient', () => {
       expect(response.data).toEqual({ created: true })
     })
 
-    test('includes Content-Type header when body is provided', async () => {
+    test('should include Content-Type header when body is provided', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -80,7 +80,7 @@ describe('#muralClient', () => {
       expect(nock.isDone()).toBe(true)
     })
 
-    test('throws MuralApiError with preserved error body on unexpected 400', async () => {
+    test('should throw MuralApiError with preserved error body on unexpected 400', async () => {
       const client = new MuralClient(TEST_BASE_URL)
       const errorBody = { detail: 'OAuth state mismatch' }
 
@@ -98,7 +98,7 @@ describe('#muralClient', () => {
       }
     })
 
-    test('returns null data when response is not JSON', async () => {
+    test('should return null data when response is not JSON', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -112,7 +112,7 @@ describe('#muralClient', () => {
       expect(response.data).toBeNull()
     })
 
-    test('returns null data when response body is empty', async () => {
+    test('should return null data when response body is empty', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -126,7 +126,7 @@ describe('#muralClient', () => {
       expect(response.data).toBeNull()
     })
 
-    test('returns {ok:false, status} when status is in expected array', async () => {
+    test('should return {ok:false, status} when status is in expected array', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -142,7 +142,7 @@ describe('#muralClient', () => {
       expect(response.data).toBeNull()
     })
 
-    test('throws MuralApiError when status is not ok and not in expected array', async () => {
+    test('should throw MuralApiError when status is not ok and not in expected array', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -153,7 +153,7 @@ describe('#muralClient', () => {
         .rejects.toThrow('Mural API GET /test-endpoint failed: 500')
     })
 
-    test('throws MuralApiError with statusCode property', async () => {
+    test('should throw MuralApiError with statusCode property', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -171,7 +171,7 @@ describe('#muralClient', () => {
       }
     })
 
-    test('throws MuralApiError even when expected array is empty', async () => {
+    test('should throw MuralApiError even when expected array is empty', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -185,7 +185,7 @@ describe('#muralClient', () => {
         })
     })
 
-    test('merges additional headers with defaults', async () => {
+    test('should merge additional headers with defaults', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -200,7 +200,7 @@ describe('#muralClient', () => {
       expect(response.ok).toBe(true)
     })
 
-    test('does not include body in request when method is GET', async () => {
+    test('should not include body in request when method is GET', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -215,7 +215,7 @@ describe('#muralClient', () => {
       expect(response.ok).toBe(true)
     })
 
-    test('throws MuralApiError on 500 error response', async () => {
+    test('should throw MuralApiError on 500 error response', async () => {
       const client = new MuralClient(TEST_BASE_URL)
       const errorBody = { error: 'Internal server error', code: 'INTERNAL_ERROR' }
 

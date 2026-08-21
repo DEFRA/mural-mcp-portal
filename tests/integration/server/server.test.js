@@ -22,14 +22,14 @@ describe('#startServer', () => {
     vi.unstubAllEnvs()
   })
 
-  describe('When server starts', () => {
+  describe('when the server starts', () => {
     let server
 
     afterAll(async () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('Should start up server as expected', async () => {
+    test('should start up the server as expected', async () => {
       server = await serverImport.createServer()
       await serverImport.startServer(server)
 
@@ -46,8 +46,8 @@ describe('#startServer', () => {
     })
   })
 
-  describe('When server start fails', () => {
-    test('Should log failed startup message', async () => {
+  describe('when the server fails to start', () => {
+    test('should log a failed startup message', async () => {
       createServerSpy.mockRejectedValue(new Error('Server failed to start'))
 
       await expect(serverImport.createServer()).rejects.toThrow('Server failed to start')

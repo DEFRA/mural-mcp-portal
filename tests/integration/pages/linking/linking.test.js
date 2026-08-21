@@ -29,7 +29,7 @@ describe('#linkingController', () => {
     })
 
     describe('GET /account/mural-linking', () => {
-      test('renders the page with status unavailable on API error', async () => {
+      test('should render the page with status unavailable on API error', async () => {
         nock(MURAL_MCP_URL)
           .get('/linking/status')
           .reply(500, { error: 'Internal server error' })
@@ -44,7 +44,7 @@ describe('#linkingController', () => {
         expect(response.result).toMatch(/error|try again|retry/i)
       })
 
-      test('renders the page with not-connected status', async () => {
+      test('should render the page with not-connected status', async () => {
         nock(MURAL_MCP_URL)
           .get('/linking/status')
           .reply(200, { linked: false })
@@ -63,7 +63,7 @@ describe('#linkingController', () => {
         expect(response.result).toMatch(/not connected|not\s+connected/i)
       })
 
-      test('renders the page with connected status', async () => {
+      test('should render the page with connected status', async () => {
         nock(MURAL_MCP_URL)
           .get('/linking/status')
           .reply(200, { linked: true })
@@ -78,7 +78,7 @@ describe('#linkingController', () => {
         expect(response.result).toMatch(/connected|mural@example\.com/i)
       })
 
-      test('shows connect button when not connected', async () => {
+      test('should show the connect button when not connected', async () => {
         nock(MURAL_MCP_URL)
           .get('/linking/status')
           .reply(200, { linked: false })
@@ -98,7 +98,7 @@ describe('#linkingController', () => {
         expect(response.result).toContain('https://mural.co/oauth/authorize?state=abc')
       })
 
-      test('explains what happens when you connect when not connected', async () => {
+      test('should explain what happens when you connect when not connected', async () => {
         nock(MURAL_MCP_URL)
           .get('/linking/status')
           .reply(200, { linked: false })
@@ -133,7 +133,7 @@ describe('#linkingController', () => {
     })
 
     describe('GET /account/mural-linking', () => {
-      test('redirects to login', async () => {
+      test('should redirect to login', async () => {
         const response = await server.inject({
           method: 'GET',
           url: '/account/mural-linking'

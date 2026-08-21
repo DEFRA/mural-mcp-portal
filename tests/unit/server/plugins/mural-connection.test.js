@@ -56,7 +56,7 @@ async function buildServer ({ authenticated = true } = {}) {
 }
 
 describe('#muralConnectionPlugin', () => {
-  test('lets a connected request through, decorated with muralConnected', async () => {
+  test('should let a connected request through, decorated with muralConnected', async () => {
     isMuralLinked.mockResolvedValue(true)
     const { server } = await buildServer()
 
@@ -67,7 +67,7 @@ describe('#muralConnectionPlugin', () => {
     expect(isMuralLinked).toHaveBeenCalledWith('user@example.com')
   })
 
-  test('redirects to the connect-Mural gate page and stashes the return path and reason when not connected', async () => {
+  test('should redirect to the connect-Mural gate page and stash the return path and reason when not connected', async () => {
     isMuralLinked.mockResolvedValue(false)
     const { server, set } = await buildServer()
 
@@ -81,7 +81,7 @@ describe('#muralConnectionPlugin', () => {
     })
   })
 
-  test('stashes a default reason when the route does not give one', async () => {
+  test('should stash a default reason when the route does not give one', async () => {
     isMuralLinked.mockResolvedValue(false)
     const { server, set } = await buildServer()
 
@@ -93,7 +93,7 @@ describe('#muralConnectionPlugin', () => {
     })
   })
 
-  test('does not check connection status on a route that does not require it', async () => {
+  test('should not check connection status on a route that does not require it', async () => {
     const { server, set } = await buildServer()
 
     const { statusCode, result } = await server.inject({ method: 'GET', url: '/ungated' })
@@ -104,7 +104,7 @@ describe('#muralConnectionPlugin', () => {
     expect(set).not.toHaveBeenCalled()
   })
 
-  test('redirects to login when there is no authenticated user', async () => {
+  test('should redirect to login when there is no authenticated user', async () => {
     const { server, set } = await buildServer({ authenticated: false })
 
     const { statusCode, headers } = await server.inject({ method: 'GET', url: '/gated' })

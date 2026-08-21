@@ -141,13 +141,13 @@ describe('#auth', () => {
     vi.resetModules()
   })
 
-  describe('When AUTH_PROVIDER is "local"', () => {
+  describe('when AUTH_PROVIDER is "local"', () => {
     beforeEach(() => {
       process.env.AUTH_PROVIDER = 'local'
       vi.resetModules()
     })
 
-    test('Should not set up the entra strategy or verifyEntraToken', async () => {
+    test('should not set up the entra strategy or verifyEntraToken', async () => {
       const server = await buildServer()
 
       expect(server.verifyEntraToken).toBeUndefined()
@@ -162,7 +162,7 @@ describe('#auth', () => {
     })
   })
 
-  describe('When AUTH_PROVIDER is "entra"', () => {
+  describe('when AUTH_PROVIDER is "entra"', () => {
     beforeEach(() => {
       process.env.AUTH_PROVIDER = 'entra'
       process.env.ENTRA_TENANT_ID = ENTRA_TEST_FIXTURE_VALUE
@@ -172,7 +172,7 @@ describe('#auth', () => {
       vi.resetModules()
     })
 
-    test('Should set up the entra strategy and verifyEntraToken', async () => {
+    test('should set up the entra strategy and verifyEntraToken', async () => {
       const server = await buildServer()
 
       expect(typeof server.verifyEntraToken).toBe('function')
@@ -196,7 +196,7 @@ describe('#auth', () => {
         nock.enableNetConnect()
       })
 
-      test('Should resolve with the decoded payload for a validly-signed token with matching kid, aud and iss', async () => {
+      test('should resolve with the decoded payload for a validly-signed token with matching kid, aud and iss', async () => {
         const server = await buildServer()
         const token = generateEntraJwt()
 
@@ -213,7 +213,7 @@ describe('#auth', () => {
         })
       })
 
-      test('Should reject when the signature does not match the resolved public key', async () => {
+      test('should reject when the signature does not match the resolved public key', async () => {
         const server = await buildServer()
         const token = generateEntraJwt()
 
@@ -235,7 +235,7 @@ describe('#auth', () => {
         await expect(server.verifyEntraToken(token)).rejects.toThrow()
       })
 
-      test('Should reject when the audience does not match the configured Entra client ID', async () => {
+      test('should reject when the audience does not match the configured Entra client ID', async () => {
         const server = await buildServer()
         const token = generateEntraJwt({ aud: 'wrong-client-id' })
 
@@ -246,7 +246,7 @@ describe('#auth', () => {
         await expect(server.verifyEntraToken(token)).rejects.toThrow()
       })
 
-      test('Should reject when the issuer does not match the configured authority/tenant', async () => {
+      test('should reject when the issuer does not match the configured authority/tenant', async () => {
         const server = await buildServer()
         const token = generateEntraJwt({
           iss: 'https://login.microsoftonline.com/wrong-tenant-id/v2.0'
@@ -259,7 +259,7 @@ describe('#auth', () => {
         await expect(server.verifyEntraToken(token)).rejects.toThrow()
       })
 
-      test('Should reject when the JWKS response has no key matching the token kid', async () => {
+      test('should reject when the JWKS response has no key matching the token kid', async () => {
         const server = await buildServer()
         const token = generateEntraJwt({ kid: 'unknown-kid' }, { kid: 'unknown-kid' })
 
@@ -270,7 +270,7 @@ describe('#auth', () => {
         await expect(server.verifyEntraToken(token)).rejects.toThrow()
       })
 
-      test('Should reject when the JWKS endpoint returns an error', async () => {
+      test('should reject when the JWKS endpoint returns an error', async () => {
         const server = await buildServer()
         const token = generateEntraJwt()
 
@@ -281,7 +281,7 @@ describe('#auth', () => {
         await expect(server.verifyEntraToken(token)).rejects.toThrow()
       })
 
-      test('Should request keys from a custom ENTRA_AUTHORITY_HOST', async () => {
+      test('should request keys from a custom ENTRA_AUTHORITY_HOST', async () => {
         const customAuthority = 'https://custom.login.example.com'
         process.env.ENTRA_AUTHORITY_HOST = customAuthority
         vi.resetModules()
@@ -302,7 +302,7 @@ describe('#auth', () => {
         expect(result.aud).toBe(ENTRA_TEST_FIXTURE_VALUE)
       })
 
-      test('Should cache JWKS keys across multiple token verifications with the same kid', async () => {
+      test('should cache JWKS keys across multiple token verifications with the same kid', async () => {
         const server = await buildServer()
         const token1 = generateEntraJwt()
         const token2 = generateEntraJwt({ sub: 'user-2' })
@@ -320,7 +320,7 @@ describe('#auth', () => {
         expect(result.sub).toBe('user-2')
       })
 
-      test('Should reject with expired token', async () => {
+      test('should reject with expired token', async () => {
         const server = await buildServer()
         const expiredToken = generateEntraJwt({
           exp: Math.floor(Date.now() / 1000) - 3600
@@ -333,7 +333,7 @@ describe('#auth', () => {
         await expect(server.verifyEntraToken(expiredToken)).rejects.toThrow()
       })
 
-      test('Should reject when token has malformed structure', async () => {
+      test('should reject when token has malformed structure', async () => {
         const server = await buildServer()
 
         await expect(
@@ -354,7 +354,7 @@ describe('#auth', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('Should redirect to /login when the request has no session', async () => {
+    test('should redirect to /login when the request has no session', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/protected'
@@ -364,7 +364,7 @@ describe('#auth', () => {
       expect(headers.location).toBe('/login')
     })
 
-    test('Should redirect to /login when the session cookie is valid but has no stored userAuth', async () => {
+    test('should redirect to /login when the session cookie is valid but has no stored userAuth', async () => {
       const cookie = await loginWithToken(server)
 
       const { statusCode, headers } = await server.inject({
@@ -377,7 +377,7 @@ describe('#auth', () => {
       expect(headers.location).toBe('/login')
     })
 
-    test('Should authenticate the request when the session holds a non-expired token', async () => {
+    test('should authenticate the request when the session holds a non-expired token', async () => {
       const token = generateEntraJwt()
       const cookie = await loginWithToken(server, token)
 
@@ -395,7 +395,7 @@ describe('#auth', () => {
       })
     })
 
-    test('Should redirect to /login and log when the session token has expired and refresh tokens are disabled', async () => {
+    test('should redirect to /login and log when the session token has expired and refresh tokens are disabled', async () => {
       const expiredToken = generateEntraJwt({ exp: Math.floor(Date.now() / 1000) - 3600 })
       const cookie = await loginWithToken(server, expiredToken)
 
@@ -432,7 +432,7 @@ describe('#auth', () => {
       nock.cleanAll()
     })
 
-    test('Should refresh the expired session token and authenticate the request', async () => {
+    test('should refresh the expired session token and authenticate the request', async () => {
       const expiredToken = generateEntraJwt({ exp: Math.floor(Date.now() / 1000) - 3600 })
       const cookie = await loginWithToken(server, expiredToken, 'old-refresh-token')
 
@@ -465,7 +465,7 @@ describe('#auth', () => {
       })
     })
 
-    test('Should redirect to /login when refreshing the expired session token fails', async () => {
+    test('should redirect to /login when refreshing the expired session token fails', async () => {
       const expiredToken = generateEntraJwt({ exp: Math.floor(Date.now() / 1000) - 3600 })
       const cookie = await loginWithToken(server, expiredToken, 'old-refresh-token')
 
@@ -483,7 +483,7 @@ describe('#auth', () => {
       expect(headers.location).toBe('/login')
     })
 
-    test('Should not attempt to refresh a session token that has not expired', async () => {
+    test('should not attempt to refresh a session token that has not expired', async () => {
       const token = generateEntraJwt()
       const cookie = await loginWithToken(server, token, 'old-refresh-token')
 
@@ -502,7 +502,7 @@ describe('#auth', () => {
       expect(refreshScope.isDone()).toBe(false)
     })
 
-    test('Should redirect to /login without calling the token endpoint when the session has no refresh token', async () => {
+    test('should redirect to /login without calling the token endpoint when the session has no refresh token', async () => {
       const expiredToken = generateEntraJwt({ exp: Math.floor(Date.now() / 1000) - 3600 })
       const cookie = await loginWithToken(server, expiredToken)
 
@@ -552,7 +552,7 @@ describe('#auth', () => {
       nock.enableNetConnect()
     })
 
-    test('Should redirect to /login without any outbound request when the session token has expired', async () => {
+    test('should redirect to /login without any outbound request when the session token has expired', async () => {
       const expiredToken = generateEntraJwt({ exp: Math.floor(Date.now() / 1000) - 3600 })
       const cookie = await loginWithToken(server, expiredToken)
 

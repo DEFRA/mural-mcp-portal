@@ -20,7 +20,7 @@ describe('#homepageController', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('Should respond with 200 and render the home page', async () => {
+    test('should respond with 200 and render the home page', async () => {
       const { statusCode, payload } = await server.inject({
         method: 'GET',
         url: '/',
@@ -44,7 +44,7 @@ describe('#homepageController', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('Should redirect to the login page', async () => {
+    test('should redirect to the login page', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/'

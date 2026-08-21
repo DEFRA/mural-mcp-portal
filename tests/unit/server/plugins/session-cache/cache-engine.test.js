@@ -28,53 +28,53 @@ vi.mock('../../../../../src/infra/logging/logger.js', () => ({
 }))
 
 describe('#getCacheEngine', () => {
-  describe('When Redis cache engine has been requested', () => {
+  describe('when a Redis cache engine is requested', () => {
     beforeEach(() => {
       getCacheEngine('redis')
     })
 
-    test('Should setup Redis cache', () => {
+    test('should set up the Redis cache', () => {
       expect(CatboxRedis).toHaveBeenCalledWith(expect.any(Object))
     })
 
-    test('Should log expected Redis message', () => {
+    test('should log the expected Redis message', () => {
       expect(mockLoggerInfo).toHaveBeenCalledWith('Using Redis session cache')
     })
   })
 
-  describe('When In memory cache engine has been requested', () => {
+  describe('when an in-memory cache engine is requested', () => {
     beforeEach(() => {
       getCacheEngine()
     })
 
-    test('Should setup In memory cache', () => {
+    test('should set up the in-memory cache', () => {
       expect(CatboxMemory).toHaveBeenCalledTimes(1)
     })
 
-    test('Should log expected CatBox memory message', () => {
+    test('should log the expected CatBox memory message', () => {
       expect(mockLoggerInfo).toHaveBeenCalledWith(
         'Using Catbox Memory session cache'
       )
     })
   })
 
-  describe('When In memory cache engine has been requested in Production', () => {
+  describe('when an in-memory cache engine is requested in production', () => {
     beforeEach(() => {
       config.set('isProduction', true)
       getCacheEngine()
     })
 
-    test('Should log Production warning message', () => {
+    test('should log the production warning message', () => {
       expect(mockLoggerError).toHaveBeenCalledWith(
         'Catbox Memory is for local development only, it should not be used in production!'
       )
     })
 
-    test('Should setup In memory cache', () => {
+    test('should set up the in-memory cache', () => {
       expect(CatboxMemory).toHaveBeenCalledTimes(1)
     })
 
-    test('Should log expected message', () => {
+    test('should log the expected message', () => {
       expect(mockLoggerInfo).toHaveBeenCalledWith(
         'Using Catbox Memory session cache'
       )

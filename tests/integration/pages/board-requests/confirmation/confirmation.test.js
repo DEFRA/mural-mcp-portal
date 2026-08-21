@@ -40,32 +40,31 @@ describe('#confirmationPage', () => {
       nock.cleanAll()
     })
 
-    describe('GET /board-requests/new/confirmation', () => {
-      test('shows pending request details after successful submission', async () => {
-        mockLinkingStatus(true)
-        nock(MURAL_MCP_URL).post('/approvals/boards').reply(201, { success: true, id: 'req-1' })
+    test('should show pending request details after a successful submission to GET /board-requests/new/confirmation', async () => {
+      mockLinkingStatus(true)
+      nock(MURAL_MCP_URL).post('/approvals/boards').reply(201, { success: true, id: 'req-1' })
 
-        const postRes = await server.inject({
-          method: 'POST',
-          url: '/board-requests/new',
-          headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
-          payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON })
-        })
-
-        expect(postRes.statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
-        expect(postRes.headers.location).toBe('/board-requests/new/confirmation')
-
-        const getRes = await server.inject({
-          method: 'GET',
-          url: '/board-requests/new/confirmation',
-          headers: { Cookie: mergeCookies(cookie, postRes.headers['set-cookie']) }
-        })
-
-        expect(getRes.statusCode).toBe(statusCodes.HTTP_STATUS_OK)
-        expect(getRes.payload).toContain('Board request submitted')
-        expect(getRes.payload).toContain('abc-123')
-        expect(getRes.payload).toContain('jane.smith@defra.gov.uk')
+      const postRes = await server.inject({
+        method: 'POST',
+        url: '/board-requests/new',
+        headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
+        payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON })
       })
+
+      expect(postRes.statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
+      expect(postRes.headers.location).toBe('/board-requests/new/confirmation')
+
+      const { statusCode, payload } = await server.inject({
+        method: 'GET',
+        url: '/board-requests/new/confirmation',
+        headers: { Cookie: mergeCookies(cookie, postRes.headers['set-cookie']) }
+      })
+
+      expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
+      expect(payload).toContain('Board request submitted')
+      expect(payload).toContain('abc-123')
+      expect(payload).toContain('jane.smith@defra.gov.uk')
+      expect(payload).toContain('Pending')
     })
   })
 
@@ -81,7 +80,7 @@ describe('#confirmationPage', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('GET /board-requests/new/confirmation redirects to login', async () => {
+    test('should redirect to login on GET /board-requests/new/confirmation', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/board-requests/new/confirmation'

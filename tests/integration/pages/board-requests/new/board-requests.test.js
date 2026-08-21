@@ -46,7 +46,7 @@ describe('#boardRequestsController', () => {
     })
 
     describe('GET /board-requests/new', () => {
-      test('redirects to the connect-Mural gate page when Mural connection is not set', async () => {
+      test('should redirect to the connect-Mural gate page when Mural connection is not set', async () => {
         mockLinkingStatus(false)
 
         const { statusCode, headers } = await server.inject({
@@ -59,7 +59,7 @@ describe('#boardRequestsController', () => {
         expect(headers.location).toBe('/account/mural-linking/required')
       })
 
-      test('renders the form when connected', async () => {
+      test('should render the form with Board ID and IAO fields when connected', async () => {
         mockLinkingStatus(true)
 
         const { statusCode, payload } = await server.inject({
@@ -79,8 +79,8 @@ describe('#boardRequestsController', () => {
     })
 
     describe('POST /board-requests/new', () => {
-      describe('Mural connection guard', () => {
-        test('redirects to the connect-Mural gate page when Mural connection is not set', async () => {
+      describe('mural connection guard', () => {
+        test('should redirect to the connect-Mural gate page when Mural connection is not set', async () => {
           mockLinkingStatus(false)
 
           const { statusCode, headers } = await server.inject({
@@ -94,7 +94,7 @@ describe('#boardRequestsController', () => {
           expect(headers.location).toBe('/account/mural-linking/required')
         })
 
-        test('gate page explains what was being attempted and links to the linking page', async () => {
+        test('should explain what was being attempted and link to the linking page on the gate page', async () => {
           mockLinkingStatus(false)
 
           const postRes = await server.inject({
@@ -120,8 +120,8 @@ describe('#boardRequestsController', () => {
         })
       })
 
-      describe('Validation', () => {
-        test('shows error for Board ID when empty', async () => {
+      describe('validation', () => {
+        test('should show error for Board ID when empty', async () => {
           mockLinkingStatus(true)
 
           const { statusCode, payload } = await server.inject({
@@ -135,7 +135,7 @@ describe('#boardRequestsController', () => {
           expect(payload).toContain('Enter a Board ID')
         })
 
-        test('shows error for IAO when empty', async () => {
+        test('should show error for IAO when empty', async () => {
           mockLinkingStatus(true)
 
           const { statusCode, payload } = await server.inject({
@@ -149,7 +149,7 @@ describe('#boardRequestsController', () => {
           expect(payload).toContain('Enter an Information Asset Owner email address')
         })
 
-        test('shows all errors and error summary when every field is empty', async () => {
+        test('should show all errors and error summary when every field is empty', async () => {
           mockLinkingStatus(true)
 
           const { statusCode, payload } = await server.inject({
@@ -166,7 +166,7 @@ describe('#boardRequestsController', () => {
           expect(payload).toContain('Enter a reason for requesting this Mural board')
         })
 
-        test('shows error when IAO is not a valid email address', async () => {
+        test('should show error when IAO is not a valid email address', async () => {
           mockLinkingStatus(true)
 
           const { statusCode, payload } = await server.inject({
@@ -180,7 +180,7 @@ describe('#boardRequestsController', () => {
           expect(payload).toContain('Enter a valid email address for the Information Asset Owner')
         })
 
-        test('shows error when IAO is not a defra.gov.uk address', async () => {
+        test('should show error when IAO is not a defra.gov.uk address', async () => {
           mockLinkingStatus(true)
 
           const { statusCode, payload } = await server.inject({
@@ -194,7 +194,7 @@ describe('#boardRequestsController', () => {
           expect(payload).toContain('Information Asset Owner must be a defra.gov.uk email address')
         })
 
-        test('shows error for reason when empty', async () => {
+        test('should show error for reason when empty', async () => {
           mockLinkingStatus(true)
 
           const { statusCode, payload } = await server.inject({
@@ -208,7 +208,7 @@ describe('#boardRequestsController', () => {
           expect(payload).toContain('Enter a reason for requesting this Mural board')
         })
 
-        test('shows error when reason is shorter than 10 characters', async () => {
+        test('should show error when reason is shorter than 10 characters', async () => {
           mockLinkingStatus(true)
 
           const { statusCode, payload } = await server.inject({
@@ -222,7 +222,7 @@ describe('#boardRequestsController', () => {
           expect(payload).toContain('Reason must be at least 10 characters')
         })
 
-        test('shows error when reason is longer than 255 characters', async () => {
+        test('should show error when reason is longer than 255 characters', async () => {
           mockLinkingStatus(true)
 
           const { statusCode, payload } = await server.inject({
@@ -236,7 +236,7 @@ describe('#boardRequestsController', () => {
           expect(payload).toContain('Reason must be at most 255 characters')
         })
 
-        test('re-populates valid field values on failure', async () => {
+        test('should re-populate valid field values on failure', async () => {
           mockLinkingStatus(true)
 
           const { payload } = await server.inject({
@@ -251,55 +251,49 @@ describe('#boardRequestsController', () => {
         })
       })
 
-      describe('Successful submission', () => {
-        test('redirects to confirmation when the API accepts the request', async () => {
-          mockLinkingStatus(true)
-          mockApprovalSubmission(statusCodes.HTTP_STATUS_CREATED, { success: true, id: 'req-1' })
+      test('should redirect to confirmation when the API accepts the request (successful submission)', async () => {
+        mockLinkingStatus(true)
+        mockApprovalSubmission(statusCodes.HTTP_STATUS_CREATED, { success: true, id: 'req-1' })
 
-          const { statusCode, headers } = await server.inject({
-            method: 'POST',
-            url: '/board-requests/new',
-            headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
-            payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON })
-          })
-
-          expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
-          expect(headers.location).toBe('/board-requests/new/confirmation')
+        const { statusCode, headers } = await server.inject({
+          method: 'POST',
+          url: '/board-requests/new',
+          headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
+          payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON })
         })
+
+        expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
+        expect(headers.location).toBe('/board-requests/new/confirmation')
       })
 
-      describe('API conflict', () => {
-        test('shows an error against Board ID when a request for the board already exists', async () => {
-          mockLinkingStatus(true)
-          mockApprovalSubmission(statusCodes.HTTP_STATUS_CONFLICT, { message: 'Board approval request already exists' })
+      test('should show an error against Board ID when a request for the board already exists (api conflict)', async () => {
+        mockLinkingStatus(true)
+        mockApprovalSubmission(statusCodes.HTTP_STATUS_CONFLICT, { message: 'Board approval request already exists' })
 
-          const { statusCode, payload } = await server.inject({
-            method: 'POST',
-            url: '/board-requests/new',
-            headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
-            payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON })
-          })
-
-          expect(statusCode).toBe(statusCodes.HTTP_STATUS_CONFLICT)
-          expect(payload).toContain('A request for this board already exists')
-          expect(payload).toContain('value="abc-123"')
+        const { statusCode, payload } = await server.inject({
+          method: 'POST',
+          url: '/board-requests/new',
+          headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
+          payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON })
         })
+
+        expect(statusCode).toBe(statusCodes.HTTP_STATUS_CONFLICT)
+        expect(payload).toContain('A request for this board already exists')
+        expect(payload).toContain('value="abc-123"')
       })
 
-      describe('Unexpected API error', () => {
-        test('renders the generic error page when the API responds with an unexpected status', async () => {
-          mockLinkingStatus(true)
-          mockApprovalSubmission(statusCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR, { message: 'boom' })
+      test('should render the generic error page when the API responds with an unexpected status (unexpected api error)', async () => {
+        mockLinkingStatus(true)
+        mockApprovalSubmission(statusCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR, { message: 'boom' })
 
-          const { statusCode } = await server.inject({
-            method: 'POST',
-            url: '/board-requests/new',
-            headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
-            payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON })
-          })
-
-          expect(statusCode).toBe(statusCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR)
+        const { statusCode } = await server.inject({
+          method: 'POST',
+          url: '/board-requests/new',
+          headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
+          payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON })
         })
+
+        expect(statusCode).toBe(statusCodes.HTTP_STATUS_INTERNAL_SERVER_ERROR)
       })
     })
   })
@@ -316,7 +310,7 @@ describe('#boardRequestsController', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('GET /board-requests/new redirects to login', async () => {
+    test('should redirect to login on GET /board-requests/new', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/board-requests/new'
@@ -327,7 +321,7 @@ describe('#boardRequestsController', () => {
       expect(headers.location).toContain('/login')
     })
 
-    test('POST /board-requests/new redirects to login', async () => {
+    test('should redirect to login on POST /board-requests/new', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'POST',
         url: '/board-requests/new',

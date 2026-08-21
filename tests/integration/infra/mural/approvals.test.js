@@ -21,7 +21,7 @@ afterEach(() => {
 
 describe('#approvalsApi', () => {
   describe('submitBoardRequest', () => {
-    test('returns ok:true with data on 201', async () => {
+    test('should return ok:true with data on 201', async () => {
       const responseBody = { id: 'req-1', boardId: 'board-abc', status: 'pending' }
 
       nock(MURAL_MCP_URL)
@@ -36,7 +36,7 @@ describe('#approvalsApi', () => {
       expect(result.data).toEqual(responseBody)
     })
 
-    test('sends the requester email as the X-User-Id header', async () => {
+    test('should send the requester email as the X-User-Id header', async () => {
       nock(MURAL_MCP_URL)
         .matchHeader('X-User-Id', 'test@example.com')
         .post('/approvals/boards')
@@ -48,7 +48,7 @@ describe('#approvalsApi', () => {
       expect(result.ok).toBe(true)
     })
 
-    test('returns ok:false with status 409 on conflict', async () => {
+    test('should return ok:false with status 409 on conflict', async () => {
       nock(MURAL_MCP_URL)
         .post('/approvals/boards')
         .reply(409, { message: 'Board request already exists' })
@@ -61,7 +61,7 @@ describe('#approvalsApi', () => {
       expect(result.data).toBeNull()
     })
 
-    test('throws MuralApiError on unexpected status (500)', async () => {
+    test('should throw MuralApiError on unexpected status (500)', async () => {
       nock(MURAL_MCP_URL)
         .post('/approvals/boards')
         .reply(500, { message: 'Internal server error' })
@@ -75,7 +75,7 @@ describe('#approvalsApi', () => {
         })
     })
 
-    test('throws on network error', async () => {
+    test('should throw on network error', async () => {
       nock(MURAL_MCP_URL)
         .post('/approvals/boards')
         .replyWithError('ECONNREFUSED')
@@ -89,7 +89,7 @@ describe('#approvalsApi', () => {
   })
 
   describe('getBoardRequest', () => {
-    test('returns ok:true with data on 200', async () => {
+    test('should return ok:true with data on 200', async () => {
       const responseBody = { id: 'req-1', boardId: 'board-abc', status: 'pending' }
 
       nock(MURAL_MCP_URL)
@@ -103,7 +103,7 @@ describe('#approvalsApi', () => {
       expect(result.data).toEqual(responseBody)
     })
 
-    test('returns ok:false with status 404 when not found', async () => {
+    test('should return ok:false with status 404 when not found', async () => {
       nock(MURAL_MCP_URL)
         .get('/approvals/boards/board-abc')
         .reply(404, { message: 'Not found' })
@@ -115,7 +115,7 @@ describe('#approvalsApi', () => {
       expect(result.data).toBeNull()
     })
 
-    test('throws MuralApiError on unexpected status (500)', async () => {
+    test('should throw MuralApiError on unexpected status (500)', async () => {
       nock(MURAL_MCP_URL)
         .get('/approvals/boards/board-abc')
         .reply(500, { message: 'Internal server error' })
@@ -127,7 +127,7 @@ describe('#approvalsApi', () => {
         })
     })
 
-    test('URL-encodes boardId in the path', async () => {
+    test('should URL-encode boardId in the path', async () => {
       const responseBody = { id: 'req-1', boardId: 'board/with spaces', status: 'pending' }
 
       nock(MURAL_MCP_URL)

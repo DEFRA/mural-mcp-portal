@@ -30,8 +30,8 @@ describe('#linkingCallbackController', () => {
     })
 
     describe('GET /account/mural-linking/callback', () => {
-      describe('with valid code and state', () => {
-        test('calls backend to complete connection', async () => {
+      describe('when the code and state are valid', () => {
+        test('should call the backend to complete the connection', async () => {
           let callMade = false
           nock(MURAL_MCP_URL)
             .get('/linking/callback')
@@ -50,7 +50,7 @@ describe('#linkingCallbackController', () => {
           expect(callMade).toBe(true)
         })
 
-        test('redirects to linking page on success', async () => {
+        test('should redirect to the linking page on success', async () => {
           nock(MURAL_MCP_URL)
             .get('/linking/callback')
             .query(true)
@@ -66,7 +66,7 @@ describe('#linkingCallbackController', () => {
           expect(response.headers.location).toBe('/account/mural-linking')
         })
 
-        test('redirects to linking page on validation error (400)', async () => {
+        test('should redirect to the linking page on validation error (400)', async () => {
           nock(MURAL_MCP_URL)
             .get('/linking/callback')
             .query(true)
@@ -82,7 +82,7 @@ describe('#linkingCallbackController', () => {
           expect(response.headers.location).toBe('/account/mural-linking')
         })
 
-        test('redirects to linking page on server error (500)', async () => {
+        test('should redirect to the linking page on server error (500)', async () => {
           nock(MURAL_MCP_URL)
             .get('/linking/callback')
             .query(true)
@@ -98,7 +98,7 @@ describe('#linkingCallbackController', () => {
           expect(response.headers.location).toBe('/account/mural-linking')
         })
 
-        test('maintains session on error', async () => {
+        test('should maintain the session on error', async () => {
           nock(MURAL_MCP_URL)
             .get('/linking/callback')
             .query(true)
@@ -121,7 +121,7 @@ describe('#linkingCallbackController', () => {
       })
 
       describe('when user denies or request lacks code', () => {
-        test('handles missing code parameter', async () => {
+        test('should handle a missing code parameter', async () => {
           // Ensure backend is not called when code is missing
           nock(MURAL_MCP_URL)
             .get('/linking/callback')
@@ -140,7 +140,7 @@ describe('#linkingCallbackController', () => {
           expect(response.headers.location).toBe('/account/mural-linking')
         })
 
-        test('handles error parameter (user denied)', async () => {
+        test('should handle an error parameter (user denied)', async () => {
           // Ensure backend is not called when error is present
           nock(MURAL_MCP_URL)
             .get('/linking/callback')
@@ -160,65 +160,61 @@ describe('#linkingCallbackController', () => {
         })
       })
 
-      describe('when redirected here from a Mural-gated page', () => {
-        test('redirects back to the original destination on success, not the linking page', async () => {
-          nock(MURAL_MCP_URL)
-            .get('/linking/status')
-            .reply(200, { linked: false })
+      test('should redirect back to the original destination on success when redirected here from a Mural-gated page, not the linking page', async () => {
+        nock(MURAL_MCP_URL)
+          .get('/linking/status')
+          .reply(200, { linked: false })
 
-          const gatedResponse = await server.inject({
-            method: 'GET',
-            url: '/board-requests/new',
-            headers: { Cookie: authCookie }
-          })
-
-          expect(gatedResponse.headers.location).toBe('/account/mural-linking/required')
-          const sessionCookie = mergeCookies(authCookie, gatedResponse.headers['set-cookie'])
-
-          nock(MURAL_MCP_URL)
-            .get('/linking/callback')
-            .query(true)
-            .reply(200, { status: 'success' })
-
-          const callbackResponse = await server.inject({
-            method: 'GET',
-            url: '/account/mural-linking/callback?code=auth_code_123&state=state_xyz',
-            headers: { Cookie: sessionCookie }
-          })
-
-          expect(callbackResponse.statusCode).toBe(302)
-          expect(callbackResponse.headers.location).toBe('/board-requests/new')
+        const gatedResponse = await server.inject({
+          method: 'GET',
+          url: '/board-requests/new',
+          headers: { Cookie: authCookie }
         })
+
+        expect(gatedResponse.headers.location).toBe('/account/mural-linking/required')
+        const sessionCookie = mergeCookies(authCookie, gatedResponse.headers['set-cookie'])
+
+        nock(MURAL_MCP_URL)
+          .get('/linking/callback')
+          .query(true)
+          .reply(200, { status: 'success' })
+
+        const callbackResponse = await server.inject({
+          method: 'GET',
+          url: '/account/mural-linking/callback?code=auth_code_123&state=state_xyz',
+          headers: { Cookie: sessionCookie }
+        })
+
+        expect(callbackResponse.statusCode).toBe(302)
+        expect(callbackResponse.headers.location).toBe('/board-requests/new')
       })
 
-      describe('two-request flow (callback then status check)', () => {
-        test('status page shows connected after successful callback', async () => {
-          nock(MURAL_MCP_URL)
-            .get('/linking/callback')
-            .query(true)
-            .reply(200, { status: 'success' })
-            .get('/linking/status')
-            .reply(200, { linked: true })
+      test('should show the linking page as connected after a successful callback (two-request flow)', async () => {
+        nock(MURAL_MCP_URL)
+          .get('/linking/callback')
+          .query(true)
+          .reply(200, { status: 'success' })
+          .get('/linking/status')
+          .reply(200, { linked: true })
 
-          // First: callback request
-          const callbackResponse = await server.inject({
-            method: 'GET',
-            url: '/account/mural-linking/callback?code=auth_code_123&state=state_xyz',
-            headers: { Cookie: authCookie }
-          })
-
-          expect(callbackResponse.statusCode).toBe(302)
-
-          // Second: subsequent request to linking page should show connected
-          const linkingPageResponse = await server.inject({
-            method: 'GET',
-            url: '/account/mural-linking',
-            headers: { Cookie: authCookie }
-          })
-
-          expect(linkingPageResponse.statusCode).toBe(200)
-          expect(linkingPageResponse.result).toMatch(/connected/i)
+        // First: callback request
+        const callbackResponse = await server.inject({
+          method: 'GET',
+          url: '/account/mural-linking/callback?code=auth_code_123&state=state_xyz',
+          headers: { Cookie: authCookie }
         })
+
+        expect(callbackResponse.statusCode).toBe(302)
+
+        // Second: subsequent request to linking page should show connected
+        const linkingPageResponse = await server.inject({
+          method: 'GET',
+          url: '/account/mural-linking',
+          headers: { Cookie: authCookie }
+        })
+
+        expect(linkingPageResponse.statusCode).toBe(200)
+        expect(linkingPageResponse.result).toMatch(/connected/i)
       })
     })
   })
@@ -238,7 +234,7 @@ describe('#linkingCallbackController', () => {
     })
 
     describe('GET /account/mural-linking/callback', () => {
-      test('redirects to login', async () => {
+      test('should redirect to login', async () => {
         const response = await server.inject({
           method: 'GET',
           url: '/account/mural-linking/callback?code=auth_code_123&state=state_xyz'

@@ -11,7 +11,7 @@ import * as approvalsApi from '../../../src/infra/mural/approvals.js'
 
 describe('#boardRequestsService', () => {
   describe('submitBoardRequest', () => {
-    test('returns response data on 201', async () => {
+    test('should return response data on 201', async () => {
       const data = { id: 'req-1', status: 'pending' }
       approvalsApi.submitBoardRequest.mockResolvedValue({ ok: true, status: 201, data })
 
@@ -22,7 +22,7 @@ describe('#boardRequestsService', () => {
       expect(approvalsApi.submitBoardRequest).toHaveBeenCalledWith(approvalRequest)
     })
 
-    test('returns success:false with reason:conflict on 409', async () => {
+    test('should return success:false with reason:conflict on 409', async () => {
       approvalsApi.submitBoardRequest.mockResolvedValue({ ok: false, status: 409, data: null })
 
       const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
@@ -31,7 +31,7 @@ describe('#boardRequestsService', () => {
       expect(result).toEqual({ success: false, reason: 'conflict' })
     })
 
-    test('throws when the infra layer throws', async () => {
+    test('should throw when the infra layer throws', async () => {
       const error = new Error('Network error')
       error.name = 'MuralApiError'
       error.statusCode = 500
@@ -45,7 +45,7 @@ describe('#boardRequestsService', () => {
   })
 
   describe('getBoardRequest', () => {
-    test('returns data on 200', async () => {
+    test('should return data on 200', async () => {
       const data = { id: 'req-1', boardId: 'board-abc', status: 'pending' }
       approvalsApi.getBoardRequest.mockResolvedValue({ ok: true, status: 200, data })
 
@@ -55,7 +55,7 @@ describe('#boardRequestsService', () => {
       expect(approvalsApi.getBoardRequest).toHaveBeenCalledWith('board-abc')
     })
 
-    test('returns null on 404', async () => {
+    test('should return null on 404', async () => {
       approvalsApi.getBoardRequest.mockResolvedValue({ ok: false, status: 404, data: null })
 
       const result = await getBoardRequest('board-abc')
@@ -63,7 +63,7 @@ describe('#boardRequestsService', () => {
       expect(result).toBeNull()
     })
 
-    test('throws when the infra layer throws', async () => {
+    test('should throw when the infra layer throws', async () => {
       const error = new Error('Service unavailable')
       error.name = 'MuralApiError'
       error.statusCode = 503
