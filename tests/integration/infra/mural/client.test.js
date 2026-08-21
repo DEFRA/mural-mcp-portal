@@ -80,7 +80,7 @@ describe('#muralClient', () => {
       expect(nock.isDone()).toBe(true)
     })
 
-    test('preserves error response body on non-ok status', async () => {
+    test('throws MuralApiError with preserved error body on unexpected 400', async () => {
       const client = new MuralClient(TEST_BASE_URL)
       const errorBody = { detail: 'OAuth state mismatch' }
 
@@ -88,11 +88,14 @@ describe('#muralClient', () => {
         .get('/test-endpoint')
         .reply(400, errorBody)
 
-      const response = await client.request('/test-endpoint')
-
-      expect(response.ok).toBe(false)
-      expect(response.status).toBe(400)
-      expect(response.data).toEqual(errorBody)
+      try {
+        await client.request('/test-endpoint')
+        expect.fail('Should have thrown')
+      } catch (err) {
+        expect(err.name).toBe('MuralApiError')
+        expect(err.statusCode).toBe(400)
+        expect(err.message).toContain('GET /test-endpoint failed: 400')
+      }
     })
 
     test('returns null data when response is not JSON', async () => {
@@ -121,6 +124,65 @@ describe('#muralClient', () => {
       expect(response.ok).toBe(true)
       expect(response.status).toBe(204)
       expect(response.data).toBeNull()
+    })
+
+    test('returns {ok:false, status} when status is in expected array', async () => {
+      const client = new MuralClient(TEST_BASE_URL)
+
+      nock(TEST_BASE_URL)
+        .get('/test-endpoint')
+        .reply(404, { error: 'not found' })
+
+      const response = await client.request('/test-endpoint', {
+        expected: [404]
+      })
+
+      expect(response.ok).toBe(false)
+      expect(response.status).toBe(404)
+      expect(response.data).toBeNull()
+    })
+
+    test('throws MuralApiError when status is not ok and not in expected array', async () => {
+      const client = new MuralClient(TEST_BASE_URL)
+
+      nock(TEST_BASE_URL)
+        .get('/test-endpoint')
+        .reply(500, { error: 'server error' })
+
+      await expect(client.request('/test-endpoint'))
+        .rejects.toThrow('Mural API GET /test-endpoint failed: 500')
+    })
+
+    test('throws MuralApiError with statusCode property', async () => {
+      const client = new MuralClient(TEST_BASE_URL)
+
+      nock(TEST_BASE_URL)
+        .post('/test-endpoint')
+        .reply(503, { error: 'unavailable' })
+
+      try {
+        await client.request('/test-endpoint', { method: 'POST' })
+        expect.fail('Should have thrown')
+      } catch (err) {
+        expect(err.name).toBe('MuralApiError')
+        expect(err.statusCode).toBe(503)
+        expect(err.message).toContain('POST')
+        expect(err.message).toContain('/test-endpoint')
+      }
+    })
+
+    test('throws MuralApiError even when expected array is empty', async () => {
+      const client = new MuralClient(TEST_BASE_URL)
+
+      nock(TEST_BASE_URL)
+        .get('/test-endpoint')
+        .reply(400, { detail: 'validation error' })
+
+      await expect(client.request('/test-endpoint', { expected: [] }))
+        .rejects.toMatchObject({
+          name: 'MuralApiError',
+          statusCode: 400
+        })
     })
 
     test('merges additional headers with defaults', async () => {
@@ -153,7 +215,7 @@ describe('#muralClient', () => {
       expect(response.ok).toBe(true)
     })
 
-    test('handles 500 error with response body', async () => {
+    test('throws MuralApiError on 500 error response', async () => {
       const client = new MuralClient(TEST_BASE_URL)
       const errorBody = { error: 'Internal server error', code: 'INTERNAL_ERROR' }
 
@@ -161,11 +223,12 @@ describe('#muralClient', () => {
         .get('/test-endpoint')
         .reply(500, errorBody)
 
-      const response = await client.request('/test-endpoint')
-
-      expect(response.ok).toBe(false)
-      expect(response.status).toBe(500)
-      expect(response.data).toEqual(errorBody)
+      await expect(client.request('/test-endpoint'))
+        .rejects.toMatchObject({
+          name: 'MuralApiError',
+          statusCode: 500,
+          message: /GET \/test-endpoint failed: 500/
+        })
     })
   })
 })

@@ -41,8 +41,10 @@ describe('#muralLinkingService', () => {
       expect(linkingApi.getAuthorizationUrl).toHaveBeenCalledWith('user-123')
     })
 
-    test('returns error state when status fetch fails', async () => {
-      linkingApi.checkLinkingStatus.mockResolvedValue({ ok: false, status: 500, data: null })
+    test('returns error state when status fetch throws', async () => {
+      const error = new Error('Network error')
+      error.name = 'MuralApiError'
+      linkingApi.checkLinkingStatus.mockRejectedValue(error)
 
       const result = await getLinkingStatus('user-123')
 
@@ -52,32 +54,13 @@ describe('#muralLinkingService', () => {
       expect(linkingApi.getAuthorizationUrl).not.toHaveBeenCalled()
     })
 
-    test('returns error state when auth URL fetch fails', async () => {
-      const statusData = { linked: false }
-      linkingApi.checkLinkingStatus.mockResolvedValue({ ok: true, status: 200, data: statusData })
-      linkingApi.getAuthorizationUrl.mockResolvedValue({ ok: false, status: 500, data: null })
-
-      const result = await getLinkingStatus('user-123')
-
-      expect(result.linkingStatus).toBeNull()
-      expect(result.statusError).toBe(true)
-      expect(result.authorizationUrl).toBeNull()
-    })
-
-    test('returns error state when status fetch throws', async () => {
-      linkingApi.checkLinkingStatus.mockRejectedValue(new Error('Network error'))
-
-      const result = await getLinkingStatus('user-123')
-
-      expect(result.linkingStatus).toBeNull()
-      expect(result.statusError).toBe(true)
-      expect(result.authorizationUrl).toBeNull()
-    })
-
     test('returns error state when auth URL fetch throws', async () => {
       const statusData = { linked: false }
+      const error = new Error('Network timeout')
+      error.name = 'MuralApiError'
+
       linkingApi.checkLinkingStatus.mockResolvedValue({ ok: true, status: 200, data: statusData })
-      linkingApi.getAuthorizationUrl.mockRejectedValue(new Error('Network timeout'))
+      linkingApi.getAuthorizationUrl.mockRejectedValue(error)
 
       const result = await getLinkingStatus('user-123')
 
@@ -106,16 +89,10 @@ describe('#muralLinkingService', () => {
       expect(result).toBe(false)
     })
 
-    test('returns false (fails closed) when the status fetch fails', async () => {
-      linkingApi.checkLinkingStatus.mockResolvedValue({ ok: false, status: 500, data: null })
-
-      const result = await isMuralLinked('user-123')
-
-      expect(result).toBe(false)
-    })
-
     test('returns false (fails closed) when the status fetch throws', async () => {
-      linkingApi.checkLinkingStatus.mockRejectedValue(new Error('Network error'))
+      const error = new Error('Network error')
+      error.name = 'MuralApiError'
+      linkingApi.checkLinkingStatus.mockRejectedValue(error)
 
       const result = await isMuralLinked('user-123')
 
@@ -141,24 +118,10 @@ describe('#muralLinkingService', () => {
       expect(result).toEqual({ outcome: linkingOutcomes.VALIDATION_FAILED })
     })
 
-    test('returns failed on other non-ok statuses', async () => {
-      linkingApi.completeLinking.mockResolvedValue({ ok: false, status: 500, data: null })
-
-      const result = await completeLinking('user-123', { code: 'code', state: 'state' })
-
-      expect(result).toEqual({ outcome: linkingOutcomes.FAILED })
-    })
-
-    test('returns failed on 503 (service unavailable)', async () => {
-      linkingApi.completeLinking.mockResolvedValue({ ok: false, status: 503, data: null })
-
-      const result = await completeLinking('user-123', { code: 'code', state: 'state' })
-
-      expect(result).toEqual({ outcome: linkingOutcomes.FAILED })
-    })
-
-    test('returns failed when infra throws', async () => {
-      linkingApi.completeLinking.mockRejectedValue(new Error('Network error'))
+    test('returns failed when infra throws (unexpected error)', async () => {
+      const error = new Error('Network error')
+      error.name = 'MuralApiError'
+      linkingApi.completeLinking.mockRejectedValue(error)
 
       const result = await completeLinking('user-123', { code: 'code', state: 'state' })
 

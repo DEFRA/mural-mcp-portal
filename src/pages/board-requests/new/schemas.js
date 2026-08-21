@@ -18,7 +18,13 @@ const boardRequestSchema = Joi.object({
       'any.required': 'Enter an Information Asset Owner email address',
       'string.email': 'Enter a valid email address for the Information Asset Owner',
       'iao.domain': 'Information Asset Owner must be a defra.gov.uk email address'
-    })
+    }),
+  reason: Joi.string().trim().min(10).max(255).required().messages({
+    'string.empty': 'Enter a reason for requesting this Mural board',
+    'string.min': 'Reason must be at least 10 characters',
+    'string.max': 'Reason must be at most 255 characters',
+    'any.required': 'Enter a reason for requesting this Mural board'
+  })
 })
 
 export {

@@ -36,16 +36,16 @@ describe('#linkingApi', () => {
       expect(result.data.authorizationUrl).toMatch(/https:\/\/mural\.co/)
     })
 
-    test('returns ok:false on non-200 status', async () => {
+    test('throws MuralApiError on non-200 status', async () => {
       nock(MURAL_MCP_URL)
         .get('/linking/authorization-url')
         .reply(500, { error: 'Internal server error' })
 
-      const result = await getAuthorizationUrl('user-123')
-
-      expect(result.ok).toBe(false)
-      expect(result.status).toBe(500)
-      expect(result.data).toEqual({ error: 'Internal server error' })
+      await expect(getAuthorizationUrl('user-123'))
+        .rejects.toMatchObject({
+          name: 'MuralApiError',
+          statusCode: 500
+        })
     })
 
     test('passes userId to request', async () => {
@@ -75,7 +75,7 @@ describe('#linkingApi', () => {
       expect(result.data.email).toBe('user@example.com')
     })
 
-    test('returns connected: false when not linked', async () => {
+    test('returns linked: false when not linked', async () => {
       const responseBody = { linked: false }
 
       nock(MURAL_MCP_URL)
@@ -103,27 +103,28 @@ describe('#linkingApi', () => {
       expect(result.data.expires_at).toBeDefined()
     })
 
-    test('handles API errors gracefully', async () => {
+    test('throws MuralApiError on API errors', async () => {
       nock(MURAL_MCP_URL)
         .get('/linking/status')
         .reply(500, { error: 'Service unavailable' })
 
-      const result = await checkLinkingStatus('user-123')
-
-      expect(result.ok).toBe(false)
-      expect(result.status).toBe(500)
-      expect(result.data).toEqual({ error: 'Service unavailable' })
+      await expect(checkLinkingStatus('user-123'))
+        .rejects.toMatchObject({
+          name: 'MuralApiError',
+          statusCode: 500
+        })
     })
 
-    test('handles 404 error (user not found)', async () => {
+    test('throws MuralApiError on 404 (user not found)', async () => {
       nock(MURAL_MCP_URL)
         .get('/linking/status')
         .reply(404, { error: 'User not found' })
 
-      const result = await checkLinkingStatus('user-nonexistent')
-
-      expect(result.ok).toBe(false)
-      expect(result.status).toBe(404)
+      await expect(checkLinkingStatus('user-nonexistent'))
+        .rejects.toMatchObject({
+          name: 'MuralApiError',
+          statusCode: 404
+        })
     })
   })
 
@@ -153,19 +154,20 @@ describe('#linkingApi', () => {
 
       expect(result.ok).toBe(false)
       expect(result.status).toBe(400)
-      expect(result.data.detail).toBe('OAuth state mismatch')
+      expect(result.data).toBeNull()
     })
 
-    test('returns ok:false on server error (500)', async () => {
+    test('throws MuralApiError on server error (500)', async () => {
       nock(MURAL_MCP_URL)
         .get('/linking/callback')
         .query({ code: 'auth-code', state: 'state' })
         .reply(500, { error: 'Internal server error' })
 
-      const result = await completeLinking('user-123', { code: 'auth-code', state: 'state' })
-
-      expect(result.ok).toBe(false)
-      expect(result.status).toBe(500)
+      await expect(completeLinking('user-123', { code: 'auth-code', state: 'state' }))
+        .rejects.toMatchObject({
+          name: 'MuralApiError',
+          statusCode: 500
+        })
     })
 
     test('passes userId in headers for authentication', async () => {
