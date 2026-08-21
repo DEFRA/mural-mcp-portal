@@ -29,12 +29,12 @@ async function submitBoardRequest (approvalRequest) {
 
 /**
  * Get a board approval request
- * @param {Object} approvalRequest - The approval request (only boardId is used)
+ * @param {Object} boardId - The approval request (only boardId is used)
  * @returns {Promise<Object|null>} The approval request data, or null if not found
  * @throws {Error} If an unexpected error occurs
  */
-async function getBoardRequest (approvalRequest) {
-  const res = await approvalsApi.getBoardRequest(approvalRequest)
+async function getBoardRequest (boardId) {
+  const res = await approvalsApi.getBoardRequest(boardId)
 
   if (res.ok) {
     return res.data

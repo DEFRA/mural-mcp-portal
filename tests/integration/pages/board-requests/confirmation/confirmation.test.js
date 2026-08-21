@@ -2,6 +2,7 @@ import { constants as statusCodes } from 'node:http2'
 
 import nock from 'nock'
 
+import { mergeCookies } from '../../../helpers/cookies.js'
 import { loginAsDevUser } from '../../../helpers/login.js'
 
 const { createServer } = await import('../../../../../src/server/server.js')
@@ -12,8 +13,8 @@ function form (fields) {
   return new URLSearchParams(fields).toString()
 }
 
-function mockLinkingStatus (connected) {
-  nock(MURAL_MCP_URL).get('/linking/status').reply(200, { connected })
+function mockLinkingStatus (linked) {
+  nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked })
 }
 
 describe('#confirmationPage', () => {
@@ -50,7 +51,18 @@ describe('#confirmationPage', () => {
         })
 
         expect(postRes.statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
-        expect(postRes.headers.location).toBe('/account/mural-linking/required')
+        expect(postRes.headers.location).toBe('/board-requests/new/confirmation')
+
+        const getRes = await server.inject({
+          method: 'GET',
+          url: '/board-requests/new/confirmation',
+          headers: { Cookie: mergeCookies(cookie, postRes.headers['set-cookie']) }
+        })
+
+        expect(getRes.statusCode).toBe(statusCodes.HTTP_STATUS_OK)
+        expect(getRes.payload).toContain('Board request submitted')
+        expect(getRes.payload).toContain('abc-123')
+        expect(getRes.payload).toContain('jane.smith@defra.gov.uk')
       })
     })
   })

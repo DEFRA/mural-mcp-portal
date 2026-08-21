@@ -13,8 +13,8 @@ function form (fields) {
   return new URLSearchParams(fields).toString()
 }
 
-function mockLinkingStatus (connected) {
-  nock(MURAL_MCP_URL).get('/linking/status').reply(200, { connected })
+function mockLinkingStatus (linked) {
+  nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked })
 }
 
 describe('#boardRequestsController', () => {
@@ -53,17 +53,17 @@ describe('#boardRequestsController', () => {
         expect(headers.location).toBe('/account/mural-linking/required')
       })
 
-      test('renders the form with Board ID and IAO fields when connected', async () => {
+      test('renders the form when connected', async () => {
         mockLinkingStatus(true)
 
-        const { statusCode, headers } = await server.inject({
+        const { statusCode, payload } = await server.inject({
           method: 'GET',
           url: '/board-requests/new',
           headers: { Cookie: cookie }
         })
 
-        expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
-        expect(headers.location).toBe('/account/mural-linking/required')
+        expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
+        expect(payload).toContain('<form')
       })
     })
 
@@ -208,7 +208,7 @@ describe('#boardRequestsController', () => {
           })
 
           expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
-          expect(headers.location).toBe('/account/mural-linking/required')
+          expect(headers.location).toBe('/board-requests/new/confirmation')
         })
       })
     })

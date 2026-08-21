@@ -61,7 +61,7 @@ describe('#linkingApi', () => {
 
   describe('checkLinkingStatus', () => {
     test('returns ok:true with connected status', async () => {
-      const responseBody = { connected: true, email: 'user@example.com' }
+      const responseBody = { linked: true, email: 'user@example.com' }
 
       nock(MURAL_MCP_URL)
         .get('/linking/status')
@@ -71,12 +71,12 @@ describe('#linkingApi', () => {
 
       expect(result.ok).toBe(true)
       expect(result.status).toBe(200)
-      expect(result.data.connected).toBe(true)
+      expect(result.data.linked).toBe(true)
       expect(result.data.email).toBe('user@example.com')
     })
 
     test('returns connected: false when not linked', async () => {
-      const responseBody = { connected: false }
+      const responseBody = { linked: false }
 
       nock(MURAL_MCP_URL)
         .get('/linking/status')
@@ -85,11 +85,11 @@ describe('#linkingApi', () => {
       const result = await checkLinkingStatus('user-123')
 
       expect(result.ok).toBe(true)
-      expect(result.data.connected).toBe(false)
+      expect(result.data.linked).toBe(false)
     })
 
     test('returns token expiry status when available', async () => {
-      const responseBody = { connected: true, email: 'user@example.com', expired: true, expires_at: '2026-08-20T20:00:00Z' }
+      const responseBody = { linked: true, email: 'user@example.com', expired: true, expires_at: '2026-08-20T20:00:00Z' }
 
       nock(MURAL_MCP_URL)
         .get('/linking/status')
@@ -98,6 +98,7 @@ describe('#linkingApi', () => {
       const result = await checkLinkingStatus('user-123')
 
       expect(result.ok).toBe(true)
+      expect(result.data.linked).toBe(true)
       expect(result.data.expired).toBe(true)
       expect(result.data.expires_at).toBeDefined()
     })
