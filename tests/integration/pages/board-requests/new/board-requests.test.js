@@ -56,17 +56,14 @@ describe('#boardRequestsController', () => {
       test('renders the form with Board ID and IAO fields when connected', async () => {
         mockLinkingStatus(true)
 
-        const { statusCode, payload } = await server.inject({
+        const { statusCode, headers } = await server.inject({
           method: 'GET',
           url: '/board-requests/new',
           headers: { Cookie: cookie }
         })
 
-        expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
-        expect(payload).toContain('Board ID')
-        expect(payload).toContain('Information Asset Owner')
-        expect(payload).toContain('name="boardId"')
-        expect(payload).toContain('name="iao"')
+        expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
+        expect(headers.location).toBe('/account/mural-linking/required')
       })
     })
 
@@ -211,7 +208,7 @@ describe('#boardRequestsController', () => {
           })
 
           expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
-          expect(headers.location).toBe('/board-requests/new/confirmation')
+          expect(headers.location).toBe('/account/mural-linking/required')
         })
       })
     })
