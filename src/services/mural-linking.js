@@ -10,10 +10,10 @@ const logger = createLogger()
  * Get a user's Mural linking status, and - only when they're not
  * connected - an authorization URL to start linking.
  *
- * Either request failing (a non-ok response or a thrown error) is treated
- * as fatal to the page: there's no useful state to show if we know the
- * user isn't connected but can't give them a way to connect, so both
- * collapse to the same `statusError` result.
+ * Either request failing (a thrown error) is treated as fatal to the page:
+ * there's no useful state to show if we know the user isn't connected but
+ * can't give them a way to connect, so both collapse to the same
+ * `statusError` result.
  *
  * @param {string} userId - The user ID for which to get the linking status
  * @returns {Promise<{linkingStatus: object|null, statusError: boolean, authorizationUrl: string|null}>}
@@ -77,6 +77,7 @@ async function completeLinking (userId, params) {
       return { outcome: linkingOutcomes.VALIDATION_FAILED }
     }
 
+    // Should never reach here — client.js throws on unexpected statuses
     logger.error(buildErrorLog(new Error(`Unexpected status ${response.status}`), {
       type: 'mural_linking_completion_failed'
     }))
@@ -91,20 +92,14 @@ async function completeLinking (userId, params) {
  * @private
  * Fetch a user's linking status from the Mural MCP API.
  *
- * Throws on a non-ok response, so a failure here is handled by the
- * caller's try/catch rather than swallowed - `getLinkingStatus` treats it
- * as fatal.
+ * Throws on a non-ok response from the infra layer (MuralApiError).
  *
  * @param {string} userId - The user ID for which to check linking status
  * @returns {Promise<object>} The linking status data
+ * @throws {MuralApiError} - On any non-ok response
  */
 async function _fetchLinkingStatus (userId) {
   const response = await linkingApi.checkLinkingStatus(userId)
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch linking status: ${response.status}`)
-  }
-
   return response.data
 }
 
@@ -112,21 +107,16 @@ async function _fetchLinkingStatus (userId) {
  * @private
  * Fetch an authorization URL from the Mural MCP API.
  *
- * Throws on a non-ok response, for the same reason as `_fetchLinkingStatus`
- * - `getLinkingStatus` only calls this when the user needs to link, so
- * failing to get them a link is just as fatal as failing to get their
- * status in the first place.
+ * Throws on a non-ok response from the infra layer (MuralApiError) —
+ * `getLinkingStatus` only calls this when the user needs to link, so
+ * failing to get them a link is handled by the caller's try/catch.
  *
  * @param {string} userId - The user ID for which to get the authorization URL
  * @returns {Promise<string>} The authorization URL
+ * @throws {MuralApiError} - On any non-ok response
  */
 async function _fetchAuthorizationUrl (userId) {
   const response = await linkingApi.getAuthorizationUrl(userId)
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch authorization URL: ${response.status}`)
-  }
-
   return response.data.authorizationUrl
 }
 

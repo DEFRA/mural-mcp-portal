@@ -22,32 +22,25 @@ describe('#boardRequestsService', () => {
       expect(approvalsApi.submitBoardRequest).toHaveBeenCalledWith(approvalRequest)
     })
 
-    test('throws ConflictError on 409', async () => {
+    test('returns success:false with reason:conflict on 409', async () => {
       approvalsApi.submitBoardRequest.mockResolvedValue({ ok: false, status: 409, data: null })
 
       const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
+      const result = await submitBoardRequest(approvalRequest)
 
-      await expect(submitBoardRequest(approvalRequest))
-        .rejects.toThrow('Board approval request already exists')
+      expect(result).toEqual({ success: false, reason: 'conflict' })
     })
 
     test('throws when the infra layer throws', async () => {
       const error = new Error('Network error')
+      error.name = 'MuralApiError'
+      error.statusCode = 500
       approvalsApi.submitBoardRequest.mockRejectedValue(error)
 
       const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
 
       await expect(submitBoardRequest(approvalRequest))
         .rejects.toThrow('Network error')
-    })
-
-    test('throws with statusCode on an unexpected status', async () => {
-      approvalsApi.submitBoardRequest.mockResolvedValue({ ok: false, status: 500, data: null })
-
-      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
-
-      await expect(submitBoardRequest(approvalRequest))
-        .rejects.toMatchObject({ message: 'Unexpected status 500 from approvals API', statusCode: 500 })
     })
   })
 
@@ -72,6 +65,7 @@ describe('#boardRequestsService', () => {
 
     test('throws when the infra layer throws', async () => {
       const error = new Error('Service unavailable')
+      error.name = 'MuralApiError'
       error.statusCode = 503
       approvalsApi.getBoardRequest.mockRejectedValue(error)
 

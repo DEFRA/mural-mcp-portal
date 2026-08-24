@@ -8,6 +8,7 @@ import { loginAsDevUser } from '../../../helpers/login.js'
 const { createServer } = await import('../../../../../src/server/server.js')
 
 const MURAL_MCP_URL = 'http://localhost:8086'
+const VALID_REASON = 'Need this board to run a team retrospective'
 
 function form (fields) {
   return new URLSearchParams(fields).toString()
@@ -42,12 +43,13 @@ describe('#confirmationPage', () => {
     describe('GET /board-requests/new/confirmation', () => {
       test('shows pending request details after successful submission', async () => {
         mockLinkingStatus(true)
+        nock(MURAL_MCP_URL).post('/approvals/boards').reply(201, { success: true, id: 'req-1' })
 
         const postRes = await server.inject({
           method: 'POST',
           url: '/board-requests/new',
           headers: { Cookie: cookie, 'content-type': 'application/x-www-form-urlencoded' },
-          payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk' })
+          payload: form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON })
         })
 
         expect(postRes.statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)

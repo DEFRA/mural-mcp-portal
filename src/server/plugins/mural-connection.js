@@ -34,7 +34,11 @@ const muralConnection = {
           return h.continue
         }
 
-        const userId = request.auth.credentials?.profile?.email
+        if (!request.auth.isAuthenticated) {
+          return h.redirect('/login').takeover()
+        }
+
+        const userId = request.auth.credentials.profile.email
         const connected = Boolean(userId) && await isMuralLinked(userId)
 
         request.app.muralConnected = connected

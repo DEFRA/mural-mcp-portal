@@ -1,3 +1,4 @@
+import { statusCodes } from '../../constants/status-codes.js'
 import { muralClient } from './client.js'
 
 /**
@@ -6,34 +7,27 @@ import { muralClient } from './client.js'
  * @property {string} boardId - The ID of the board
  * @property {string} iao - The Integrated Assurance Officer
  * @property {string} email - The email of the requester
- * @property {string} [status] - The status of the approval
- * @property {string} [submittedAt] - When the request was submitted
- */
-
-/**
- * ApprovalRequestPayload - API request body for submission
- * @typedef {Object} ApprovalRequestPayload
- * @property {string} boardId - The ID of the board
- * @property {string} iao - The Integrated Assurance Officer
- * @property {string} email - The email of the requester
+ * @property {string} reason - The reason for the request
  */
 
 /**
  * Submit a board approval request
  * @param {ApprovalRequest} approvalRequest - The approval request
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
+ * @throws {MuralApiError} - When response is not ok and not a 409 conflict
  */
 async function submitBoardRequest (approvalRequest) {
   const body = {
     boardId: approvalRequest.boardId,
     iao: approvalRequest.iao,
-    email: approvalRequest.email
+    reason: approvalRequest.reason
   }
 
   return muralClient.request('/approvals/boards', {
     method: 'POST',
     body,
-    userId: approvalRequest.email
+    userId: approvalRequest.email,
+    expected: [statusCodes.HTTP_STATUS_CONFLICT]
   })
 }
 
@@ -41,9 +35,12 @@ async function submitBoardRequest (approvalRequest) {
  * Get a board approval request
  * @param {string} boardId - The ID of the board
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
+ * @throws {MuralApiError} - When response is not ok and not a 404 not found
  */
 async function getBoardRequest (boardId) {
-  return muralClient.request(`/approvals/boards/${encodeURIComponent(boardId)}`)
+  return muralClient.request(`/approvals/boards/${encodeURIComponent(boardId)}`, {
+    expected: [statusCodes.HTTP_STATUS_NOT_FOUND]
+  })
 }
 
 export {

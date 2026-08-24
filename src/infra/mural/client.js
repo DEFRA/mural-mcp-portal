@@ -1,12 +1,32 @@
 import { config } from '../../config/config.js'
 
 /**
+ * MuralApiError - Error class for unexpected Mural API responses
+ */
+class MuralApiError extends Error {
+  constructor (message, statusCode) {
+    super(message)
+    this.name = 'MuralApiError'
+    this.statusCode = statusCode
+  }
+
+  static fromResponse (method, path, response) {
+    const message =
+      `Mural API ${method} ${path} ` +
+      `failed: ${response.status} ${response.statusText}`
+
+    return new MuralApiError(message, response.status)
+  }
+}
+
+/**
  * RequestOptions - Options for the request function
  * @typedef {Object} RequestOptions
  * @property {string} [method] - The HTTP method (default: 'GET')
  * @property {Object<string, any>?} [body] - The request body
  * @property {string} [userId] - The user ID for authentication
  * @property {Object<string, string>?} [headers] - Additional headers
+ * @property {number[]} [expected] - List of expected non-ok status codes that should be returned as {ok:false} rather than thrown
  */
 
 class MuralClient {
@@ -24,10 +44,12 @@ class MuralClient {
    * @param {string} path - The API endpoint path
    * @param {RequestOptions} [options] - The request options
    * @returns {Promise<{ok: boolean, status: number, data: any}>} - The response object
+   * @throws {MuralApiError} - When response is not ok and status is not in expected list
    */
   async request (path, options = {}) {
+    const method = options.method || 'GET'
     const response = await fetch(`${this.baseUrl}${path}`, {
-      method: options.method || 'GET',
+      method,
       headers: {
         ...(options.body ? { 'Content-Type': 'application/json' } : {}),
         'X-User-Id': options.userId,
@@ -43,10 +65,20 @@ class MuralClient {
       data = null
     }
 
-    return { ok: response.ok, status: response.status, data }
+    if (response.ok) {
+      return { ok: true, status: response.status, data }
+    }
+
+    const expected = options.expected || []
+
+    if (expected.includes(response.status)) {
+      return { ok: false, status: response.status, data: null }
+    }
+
+    throw MuralApiError.fromResponse(method, path, response)
   }
 }
 
 const muralClient = new MuralClient()
 
-export { MuralClient, muralClient }
+export { MuralClient, MuralApiError, muralClient }

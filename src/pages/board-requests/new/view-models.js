@@ -32,6 +32,7 @@ class BoardRequestFormViewModel {
   constructor (data) {
     this.boardId = data?.boardId || null
     this.iao = data?.iao || null
+    this.reason = data?.reason || null
     this.errors = data?.errors || null
     this.errorList = data?.errorList || null
   }
@@ -60,6 +61,7 @@ class BoardRequestFormViewModel {
     return new BoardRequestFormViewModel({
       boardId: payload.boardId,
       iao: payload.iao,
+      reason: payload.reason,
       errors,
       errorList
     })

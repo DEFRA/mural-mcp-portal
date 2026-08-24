@@ -21,9 +21,12 @@ async function buildServer ({ authenticated = true } = {}) {
 
   server.ext('onPreAuth', (request, h) => {
     if (authenticated) {
+      request.auth = { isAuthenticated: true }
       request.auth.credentials = { profile: { email: 'user@example.com' } }
     }
+
     request.yar = { set }
+
     return h.continue
   })
 
@@ -101,17 +104,14 @@ describe('#muralConnectionPlugin', () => {
     expect(set).not.toHaveBeenCalled()
   })
 
-  test('fails closed and redirects when there is no authenticated user', async () => {
+  test('redirects to login when there is no authenticated user', async () => {
     const { server, set } = await buildServer({ authenticated: false })
 
     const { statusCode, headers } = await server.inject({ method: 'GET', url: '/gated' })
 
     expect(statusCode).toBe(302)
-    expect(headers.location).toBe('/account/mural-linking/required')
+    expect(headers.location).toBe('/login')
     expect(isMuralLinked).not.toHaveBeenCalled()
-    expect(set).toHaveBeenCalledWith(MURAL_LINK_REQUIRED_SESSION_KEY, {
-      returnTo: '/gated',
-      reason: 'do the gated thing'
-    })
+    expect(set).not.toHaveBeenCalled()
   })
 })
