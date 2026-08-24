@@ -4,7 +4,7 @@ metadata:
     github-path: plugins/github-actions/skills/github-actions-style-guide
     github-ref: refs/heads/main
     github-repo: https://github.com/DEFRA/aice-team
-    github-tree-sha: d7f6d4c0abb4861fcce87df34a4278221b2db968
+    github-tree-sha: f0e1433a45789cbb36d8bea0adffe24b4c7f879b
 name: github-actions-style-guide
 ---
 Read the full AICE GitHub Actions style guide at [AICE GitHub Actions Style Guide](references/github-actions-style-guide.md). before writing or reviewing any workflow files.

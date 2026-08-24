@@ -97,4 +97,109 @@ Where a third-party action is necessary, pin to a specific commit SHA and monito
 
 Before using a third-party action, audit its source code to verify it handles repository contents and secrets as expected. Prefer actions from [GitHub Verified Creators](https://github.com/marketplace?type=actions&verification=verified_creator) where possible.
 
-For brevity, other details omitted in this reference file.
+Do this:
+
+```yaml
+# Pin to a full-length commit SHA, with the tag documented in a comment
+- uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+```
+
+Don't do this:
+
+```yaml
+# Tag — can be moved by a bad actor
+- uses: actions/checkout@v4
+
+# No pin at all
+- uses: actions/checkout@main
+```
+
+### 1.4 Security Scanning
+
+#### 1.4.1 scan.yml — Reusable Scan Workflow
+
+`scan.yml` must be structured as a reusable workflow using `workflow_call`, so that it can be called from `check-pull-request.yml`, `publish.yml`, and `publish-hotfix.yml`. It must also support `schedule` and `workflow_dispatch` triggers so that it runs as a standalone nightly scan.
+
+```yaml
+# .github/workflows/scan.yml
+name: Security scan
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+  workflow_call:
+```
+
+Calling workflows must invoke `scan.yml` as the first job so that a build or publish never proceeds if the security scan fails:
+
+```yaml
+# check-pull-request.yml / publish.yml / publish-hotfix.yml
+jobs:
+  security-scan:
+    name: Security Scanning
+    uses: ./.github/workflows/scan.yml
+    secrets: inherit
+
+  build:
+    needs: security-scan
+    ...
+```
+
+#### 1.4.2 SonarCloud Code Scanning
+
+All repositories must be connected to [SonarCloud](https://sonarcloud.io/) for static analysis and code quality scanning. The SonarCloud scan job runs within `scan.yml` alongside the Trivy scan.
+
+The SonarCloud job should be skipped for scheduled runs, as it requires a valid `SONAR_TOKEN` scoped to a branch or PR:
+
+```yaml
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    if: ${{ github.event_name != 'schedule' && github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Test code and create coverage reports
+        run: |
+          pipx install uv
+          uv sync --locked
+          mkdir -p coverage
+          chmod -R a+rw ./coverage
+          uv run task test
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+```
+
+For JavaScript projects, replace the Python setup and test steps with the appropriate Node.js equivalents.
+
+#### 1.4.3 Unpinned Dependency Check
+
+All AICE projects must include a `scripts/check-unpinned-dependencies.sh` script and run it as part of the Trivy scan job. This enforces the dependency pinning rules described in the [JavaScript](./javascript.md#14-dependency-management) and [Python](./python.md#14-dependency-management) style guides at CI time.
+
+```yaml
+- name: Check for unpinned dependencies
+  run: |
+    chmod +x ./scripts/check-unpinned-dependencies.sh
+    ./scripts/check-unpinned-dependencies.sh
+```
+
+## Contributions
+
+If you would like to contribute to this style guide, please open a pull request on the [Defra AICE Team GitHub](https://github.com/DEFRA/aice-team) repository.
+
+For anything not covered by this style guide, refer to the official [GitHub Actions security hardening documentation](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions) and the [GitHub Actions secure use reference](https://docs.github.com/en/actions/reference/security/secure-use). If alignment across AICE is required, please raise an issue in [Defra AICE Team GitHub](https://github.com/DEFRA/aice-team/issues).
