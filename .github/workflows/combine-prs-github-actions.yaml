@@ -1,7 +1,7 @@
 # Combines multiple GitHub Actions dependabot PRs into a single PR to reduce management overhead.
 #
 # How it works:
-#   - Runs on a schedule (Tuesday mornings) after dependabot's Monday run has completed
+#   - Runs on a schedule after dependabot's Monday run has completed
 #   - Filters for GitHub Actions dependabot PRs (branch prefix: dependabot/github_actions/)
 #   - Groups all matching PRs into a single combined PR
 #   - Can be triggered manually via workflow_dispatch for immediate combining
@@ -20,19 +20,22 @@ name: Combine GitHub Actions PRs
 on:
   schedule:
     # Tuesday 11:00 UTC - gives Monday's dependabot run time to complete
-    - cron: '0 11 * * 2'
+    - cron: '0 11 * * 1'
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 jobs:
   combine-github-actions:
+    permissions:
+      pull-requests: write
+
     runs-on: ubuntu-latest
     steps:
       - name: Combine GitHub Actions dependabot PRs
-        uses: github/combine-prs@v4
+        uses: github/combine-prs@2909f404763c3177a456e052bdb7f2e85d3a7cb3
         with:
           github_token: ${{ github.token }}
           branch_prefix: 'dependabot/github_actions/'

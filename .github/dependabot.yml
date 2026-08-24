@@ -5,8 +5,8 @@
 # automatically consolidate these into single PRs per package manager, reducing
 # management overhead while preserving the grouped update strategy.
 #
-# Schedule: Dependabot runs weekly on Mondays at 10:30 UTC
-# Combining: Happens Tuesdays at 11:00 UTC (or manually via workflow_dispatch)
+# Schedule: Dependabot runs weekly on Mondays at 10:00 Europe/London (UTC+1).
+# Combining: Happens Mondays at 11:00 UTC (or manually via workflow_dispatch)
 #
 # To manually combine PRs:
 #   gh workflow run combine-prs-npm.yaml
@@ -70,7 +70,7 @@ updates:
     # Schedule run every Monday, local time
     schedule:
       interval: weekly
-      time: '10:30'
+      time: '10:00'
       timezone: 'Europe/London'
 
     versioning-strategy: increase
@@ -86,5 +86,5 @@ updates:
     # Schedule run every Monday, local time
     schedule:
       interval: weekly
-      time: '10:30'
+      time: '10:00'
       timezone: 'Europe/London'
