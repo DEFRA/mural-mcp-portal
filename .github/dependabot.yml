@@ -1,16 +1,9 @@
 # Dependabot configuration for automated dependency updates
 #
-# This config creates grouped PRs for npm dependencies and separate PRs for
-# GitHub Actions. The combine-prs workflows (see .github/workflows/combine-prs-*.yaml)
-# automatically consolidate these into single PRs per package manager, reducing
-# management overhead while preserving the grouped update strategy.
+# This config uses Dependabot native groups to reduce PR volume while keeping
+# updates organised by ecosystem and purpose.
 #
 # Schedule: Dependabot runs weekly on Mondays at 10:00 Europe/London (UTC+1).
-# Combining: Happens Mondays at 11:00 UTC (or manually via workflow_dispatch)
-#
-# To manually combine PRs:
-#   gh workflow run combine-prs-npm.yaml
-#   gh workflow run combine-prs-github-actions.yaml
 
 version: 2
 
@@ -20,48 +13,11 @@ updates:
     directory: /
     open-pull-requests-limit: 10
 
-    # Group packages into shared PR
+    # Group all npm package updates into one PR per run
     groups:
-      build:
+      npm:
         patterns:
-          - '@babel/*'
-          - 'autoprefixer'
-          - 'babel-plugin-module-resolver'
-          - 'babel-loader'
-          - 'babel-plugin-transform-import-meta'
-          - 'tsx'
-          - 'webpack'
-          - 'webpack-*'
-          - 'terser-webpack-plugin'
-
-      lint:
-        patterns:
-          - 'prettier'
-          - 'stylelint'
-          - 'stylelint-*'
-
-      logging:
-        patterns:
-          - '*-pino'
-          - '*-pino-format'
-          - 'pino'
-          - 'pino-*'
-
-      tools:
-        patterns:
-          - 'husky'
-          - 'vitest'
-          - 'vitest-*'
-          - 'nodemon'
-          - 'npm-run-all'
-          - 'lodash'
-          - 'source-map-loader'
-          - 'sass-*'
-          - 'postcss-*'
-
-      types:
-        patterns:
-          - '@types/*'
+          - '*'
 
     ignore:
       - dependency-name: 'eslint-*'
@@ -82,6 +38,12 @@ updates:
   # Update GitHub Actions
   - package-ecosystem: github-actions
     directory: /
+
+    # Group all GitHub Actions updates into one PR per run
+    groups:
+      github-actions:
+        patterns:
+          - '*'
 
     # Schedule run every Monday, local time
     schedule:
