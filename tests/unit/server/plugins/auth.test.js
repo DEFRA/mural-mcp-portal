@@ -17,7 +17,7 @@ const ENTRA_TEST_FIXTURE_VALUE = 'not-a-real-value-used-only-in-tests'
  * do no I/O at registration time).
  */
 async function buildServer () {
-  const { auth } = await import('../../../../server/plugins/auth.js')
+  const { auth } = await import('../../../../src/server/plugins/auth.js')
 
   const server = Hapi.server()
 

@@ -19,9 +19,9 @@ const ENTRA_TEST_FIXTURE_VALUE = 'not-a-real-value-used-only-in-tests'
  * via `server.inject` rather than exported and unit tested directly.
  */
 async function buildServerWithSession () {
-  const { auth } = await import('../../../../server/plugins/auth.js')
-  const { getCacheEngine } = await import('../../../../server/plugins/session-cache/cache-engine.js')
-  const { config } = await import('../../../../config/config.js')
+  const { auth } = await import('../../../../src/server/plugins/auth.js')
+  const { getCacheEngine } = await import('../../../../src/server/plugins/session-cache/cache-engine.js')
+  const { config } = await import('../../../../src/config/config.js')
 
   const server = Hapi.server({
     cache: [
