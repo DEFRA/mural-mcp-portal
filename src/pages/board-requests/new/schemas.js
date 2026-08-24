@@ -1,5 +1,8 @@
 import Joi from 'joi'
 
+const MIN_REASON_LENGTH = 10
+const MAX_REASON_LENGTH = 255
+
 const boardRequestSchema = Joi.object({
   boardId: Joi.string().trim().required().messages({
     'string.empty': 'Enter a Board ID',
@@ -19,10 +22,10 @@ const boardRequestSchema = Joi.object({
       'string.email': 'Enter a valid email address for the Information Asset Owner',
       'iao.domain': 'Information Asset Owner must be a defra.gov.uk email address'
     }),
-  reason: Joi.string().trim().min(10).max(255).required().messages({
+  reason: Joi.string().trim().min(MIN_REASON_LENGTH).max(MAX_REASON_LENGTH).required().messages({
     'string.empty': 'Enter a reason for requesting this Mural board',
-    'string.min': 'Reason must be at least 10 characters',
-    'string.max': 'Reason must be at most 255 characters',
+    'string.min': `Reason must be at least ${MIN_REASON_LENGTH} characters`,
+    'string.max': `Reason must be at most ${MAX_REASON_LENGTH} characters`,
     'any.required': 'Enter a reason for requesting this Mural board'
   })
 })

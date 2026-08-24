@@ -2,6 +2,8 @@ import { statusCodes } from '../../../constants/status-codes.js'
 import { BoardRequestFormViewModel } from './view-models.js'
 import { submitBoardRequest } from '../../../services/board-requests.js'
 
+const NEW_BOARD_REQUEST_VIEW = 'board-requests/new/new.njk'
+
 /**
  * GET /board-requests/new - by the time this runs, the `muralConnection`
  * server plugin has already redirected away any request that isn't Mural
@@ -11,14 +13,14 @@ import { submitBoardRequest } from '../../../services/board-requests.js'
 async function getNewBoardRequest (_request, h) {
   const viewModel = BoardRequestFormViewModel.empty()
 
-  return h.view('board-requests/new/new.njk', { ...viewModel })
+  return h.view(NEW_BOARD_REQUEST_VIEW, { ...viewModel })
     .code(statusCodes.HTTP_STATUS_OK)
 }
 
 async function postBoardRequestFailAction (request, h, err) {
   const viewModel = BoardRequestFormViewModel.fromValidationError(request.payload, err)
 
-  return h.view('board-requests/new/new.njk', { ...viewModel })
+  return h.view(NEW_BOARD_REQUEST_VIEW, { ...viewModel })
     .code(statusCodes.HTTP_STATUS_BAD_REQUEST).takeover()
 }
 
@@ -63,7 +65,7 @@ async function postBoardRequest (request, h) {
     ]
   })
 
-  return h.view('board-requests/new/new.njk', viewModel)
+  return h.view(NEW_BOARD_REQUEST_VIEW, viewModel)
     .code(statusCodes.HTTP_STATUS_CONFLICT)
 }
 

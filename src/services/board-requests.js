@@ -21,6 +21,10 @@ async function submitBoardRequest (approvalRequest) {
       reason: 'conflict'
     }
   }
+
+  const error = new Error(`Unexpected status ${res.status} from approvals API`)
+  error.statusCode = res.status
+  throw error
 }
 
 /**
