@@ -6,11 +6,15 @@ import { loginAsDevUser } from '../../../helpers/login.js'
 // default is a bare '#'. Set a distinctive value - before the server (and so
 // config) is loaded - so the assertion below cannot pass on the default.
 const ACE_SLACK_CHANNEL = 'https://defra.slack.com/archives/C0ASKACE'
-process.env.ACE_SLACK_CHANNEL_URL = ACE_SLACK_CHANNEL
+vi.stubEnv('ACE_SLACK_CHANNEL_URL', ACE_SLACK_CHANNEL)
 
-const { createServer } = await import('../../../../server/server.js')
+const { createServer } = await import('../../../../src/server/server.js')
 
 describe('homepageController', () => {
+  afterAll(() => {
+    vi.unstubAllEnvs()
+  })
+
   describe('when authenticated', () => {
     let server
     let cookie
