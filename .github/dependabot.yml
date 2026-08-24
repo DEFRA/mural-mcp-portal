@@ -1,3 +1,17 @@
+# Dependabot configuration for automated dependency updates
+#
+# This config creates grouped PRs for npm dependencies and separate PRs for
+# GitHub Actions. The combine-prs workflows (see .github/workflows/combine-prs-*.yaml)
+# automatically consolidate these into single PRs per package manager, reducing
+# management overhead while preserving the grouped update strategy.
+#
+# Schedule: Dependabot runs weekly on Mondays at 10:30 UTC
+# Combining: Happens Tuesdays at 11:00 UTC (or manually via workflow_dispatch)
+#
+# To manually combine PRs:
+#   gh workflow run combine-prs-npm.yaml
+#   gh workflow run combine-prs-github-actions.yaml
+
 version: 2
 
 updates:

@@ -1,0 +1,51 @@
+# Combines multiple GitHub Actions dependabot PRs into a single PR to reduce management overhead.
+#
+# How it works:
+#   - Runs on a schedule (Tuesday mornings) after dependabot's Monday run has completed
+#   - Filters for GitHub Actions dependabot PRs (branch prefix: dependabot/github_actions/)
+#   - Groups all matching PRs into a single combined PR
+#   - Can be triggered manually via workflow_dispatch for immediate combining
+#
+# Rationale:
+#   - Separate from the npm workflow to keep package managers distinct
+#   - Consolidates all GitHub Actions updates into a single review
+#   - Reduces PR management overhead while preserving audit trail
+#
+# Manual trigger:
+#   gh workflow run combine-prs-github-actions.yaml
+#   Or via the GitHub UI: Actions > combine-prs-github-actions > Run workflow
+
+name: Combine GitHub Actions PRs
+
+on:
+  schedule:
+    # Tuesday 11:00 UTC - gives Monday's dependabot run time to complete
+    - cron: '0 11 * * 2'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  combine-github-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Combine GitHub Actions dependabot PRs
+        uses: github/combine-prs@v4
+        with:
+          github_token: ${{ github.token }}
+          branch_prefix: 'dependabot/github_actions/'
+          combine_branch_name: 'dependabot/github-actions-combined'
+          ignore_label: 'do-not-combine'
+          labels: 'dependencies,github-actions'
+          pull_request_title: 'chore(dependencies): combine GitHub Actions dependency updates'
+          pull_request_body: |
+            ## Summary
+            This PR combines multiple GitHub Actions dependency updates into a single review.
+
+            All workflow action updates are included. Review and merge when ready.
+
+            ---
+            _Automatically combined by [combine-prs](https://github.com/github/combine-prs)_
+          skip_experimental_rules: false
