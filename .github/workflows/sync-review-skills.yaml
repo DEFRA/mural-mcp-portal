@@ -23,8 +23,6 @@ name: Sync AICE team skills
 
 on:
   schedule:
-    # Weekly, Monday 06:00 UTC - matches Dependabot's default cadence.
-    # Tune to taste; DEFRA/aice-team skills won't change often.
     - cron: '0 6 * * 1'
   workflow_dispatch:
 

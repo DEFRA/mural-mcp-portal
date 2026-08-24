@@ -21,7 +21,6 @@ name: Combine npm PRs
 
 on:
   schedule:
-    # Tuesday 11:00 UTC - gives Monday's dependabot run time to complete
     - cron: '0 11 * * 1'
   workflow_dispatch:
 
