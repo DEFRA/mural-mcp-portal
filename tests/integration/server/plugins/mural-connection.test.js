@@ -2,11 +2,11 @@ import { vi } from 'vitest'
 
 import Hapi from '@hapi/hapi'
 
-vi.mock('../../../../services/mural-linking.js')
+vi.mock('../../../../src/services/mural-linking.js')
 
-import { DEFAULT_MURAL_LINK_REASON, MURAL_LINK_REQUIRED_SESSION_KEY } from '../../../../constants/mural-link-required.js'
-import { isMuralLinked } from '../../../../services/mural-linking.js'
-import { muralConnection } from '../../../../server/plugins/mural-connection.js'
+import { DEFAULT_MURAL_LINK_REASON, MURAL_LINK_REQUIRED_SESSION_KEY } from '../../../../src/constants/mural-link-required.js'
+import { isMuralLinked } from '../../../../src/services/mural-linking.js'
+import { muralConnection } from '../../../../src/server/plugins/mural-connection.js'
 
 /**
  * Boots a minimal Hapi server with the real `muralConnection` plugin

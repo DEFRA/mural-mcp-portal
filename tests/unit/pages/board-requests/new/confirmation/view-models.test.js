@@ -1,4 +1,4 @@
-import * as viewModels from '../../../../../../pages/board-requests/new/confirmation/view-models.js'
+import * as viewModels from '../../../../../../src/pages/board-requests/new/confirmation/view-models.js'
 
 describe('BoardRequestConfirmationViewModel', () => {
   const boardRequest = {

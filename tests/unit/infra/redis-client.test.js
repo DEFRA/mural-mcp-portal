@@ -2,8 +2,8 @@ import { vi } from 'vitest'
 
 import { Cluster, Redis } from 'ioredis'
 
-import { config } from '../../../config/config.js'
-import { buildRedisClient } from '../../../infra/redis-client.js'
+import { config } from '../../../../src/config/config.js'
+import { buildRedisClient } from '../../../../src/infra/redis-client.js'
 
 vi.mock('ioredis', () => ({
   ...vi.importActual('ioredis'),

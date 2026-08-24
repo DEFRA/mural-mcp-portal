@@ -2,8 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { constants as statusCodes } from 'node:http2'
 
-import { createServer } from '../../../../server/server.js'
-import { config } from '../../../../config/config.js'
+import { createServer } from '../../../../src/server/server.js'
+import { config } from '../../../../src/config/config.js'
 
 // The Vite manifest is build output (`.public/` is gitignored) and is required
 // for this test to run — see `npm test`, which gates on `run-s lint build test:js`.

@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { createServer } from '../../../../../server/server.js'
+import { createServer } from '../../../../../src/server/server.js'
 import { mergeCookies } from '../../../../helpers/cookies.js'
 import { loginAsDevUser } from '../../../../helpers/login.js'
 

@@ -1,6 +1,6 @@
 import nock from 'nock'
-import { MuralClient } from '../../../../infra/mural/client.js'
-import { config } from '../../../../config/config.js'
+import { MuralClient } from '../../../../src/infra/mural/client.js'
+import { config } from '../../../../src/config/config.js'
 
 const TEST_BASE_URL = 'http://test-mural.local'
 

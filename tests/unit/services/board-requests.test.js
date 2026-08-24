@@ -5,11 +5,11 @@ import { createdBoardRequest } from '../../fixtures/mural-mcp.js'
 import {
   submitBoardRequest,
   getBoardRequest
-} from '../../../services/board-requests.js'
+} from '../../../src/services/board-requests.js'
 
-vi.mock('../../../infra/mural/approvals.js')
+vi.mock('../../../src/infra/mural/approvals.js')
 
-import * as approvalsApi from '../../../infra/mural/approvals.js'
+import * as approvalsApi from '../../../src/infra/mural/approvals.js'
 
 describe('boardRequestsService', () => {
   describe('submitBoardRequest', () => {

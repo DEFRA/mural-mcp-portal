@@ -5,7 +5,7 @@ const { mockLoggerWarn, mockLoggerError } = vi.hoisted(() => ({
   mockLoggerError: vi.fn()
 }))
 
-vi.mock('../../../../infra/logging/logger.js', () => ({
+vi.mock('../../../../src/infra/logging/logger.js', () => ({
   createLogger: () => ({
     warn: mockLoggerWarn,
     error: mockLoggerError
@@ -24,7 +24,7 @@ const credentials = {
 
 async function getHandleLoginCallback () {
   const controller = await import(
-    '../../../../pages/login/controller.js'
+    '../../../../src/pages/login/controller.js'
   )
 
   return controller.handleLoginCallback

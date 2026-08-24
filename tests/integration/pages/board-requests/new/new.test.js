@@ -8,7 +8,7 @@ import { loginAsDevUser } from '../../../../helpers/login.js'
 import { get, post } from '../../../../helpers/server.js'
 import { form } from '../../../../helpers/forms.js'
 
-const { createServer } = await import('../../../../../server/server.js')
+const { createServer } = await import('../../../../../src/server/server.js')
 
 const MURAL_MCP_URL = 'http://localhost:8086'
 

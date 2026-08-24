@@ -1,6 +1,6 @@
 import { constants as statusCodes } from 'node:http2'
 
-import { createServer } from '../../../../server/server.js'
+import { createServer } from '../../../../src/server/server.js'
 import { loginAsDevUser } from '../../../helpers/login.js'
 
 describe('loginController', () => {

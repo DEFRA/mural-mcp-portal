@@ -3,7 +3,7 @@ import { constants as statusCodes } from 'node:http2'
 
 import { vi } from 'vitest'
 
-import { catchAll } from '../../../server/catch-all.js'
+import { catchAll } from '../../../src/server/catch-all.js'
 
 const mockErrorLogger = vi.fn()
 const mockStack = 'Mock error stack'

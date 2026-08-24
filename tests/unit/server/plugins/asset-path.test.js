@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, test, expect, afterEach, vi } from 'vitest'
 
-import { createAssetPathResolver } from '../../../../server/plugins/asset-path.js'
+import { createAssetPathResolver } from '../../../../src/server/plugins/asset-path.js'
 
 // A real manifest on disk, in the shape `vite build` writes, so nothing here
 // has to mock `node:fs`.

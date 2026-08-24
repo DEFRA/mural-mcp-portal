@@ -1,5 +1,5 @@
-import { linkingOutcomes } from '../../../../constants/linking-outcomes.js'
-import { LinkingStatusViewModel } from '../../../../pages/linking/view-model.js'
+import { linkingOutcomes } from '../../../../src/constants/linking-outcomes.js'
+import { LinkingStatusViewModel } from '../../../../src/pages/linking/view-model.js'
 
 describe('LinkingStatusViewModel', () => {
   describe('constructor', () => {

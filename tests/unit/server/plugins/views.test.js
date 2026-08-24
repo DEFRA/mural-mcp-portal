@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 
-import { viewPlugin } from '../../../../server/plugins/views.js'
+import { viewPlugin } from '../../../../src/server/plugins/views.js'
 
 /**
  * What every page renders from this context - service name, support channel,

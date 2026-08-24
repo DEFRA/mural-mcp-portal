@@ -3,7 +3,7 @@ import {
   getAuthorizationUrl,
   checkLinkingStatus,
   completeLinking
-} from '../../../../infra/mural/linking.js'
+} from '../../../../src/infra/mural/linking.js'
 
 const MURAL_MCP_URL = 'http://localhost:8086'
 

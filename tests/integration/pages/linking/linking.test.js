@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { createServer } from '../../../../server/server.js'
+import { createServer } from '../../../../src/server/server.js'
 import { loginAsDevUser } from '../../../helpers/login.js'
 
 const MURAL_MCP_URL = 'http://localhost:8086'

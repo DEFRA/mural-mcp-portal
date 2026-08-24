@@ -5,7 +5,7 @@ import nock from 'nock'
 import { mergeCookies } from '../../../../../helpers/cookies.js'
 import { loginAsDevUser } from '../../../../../helpers/login.js'
 
-const { createServer } = await import('../../../../../../server/server.js')
+const { createServer } = await import('../../../../../../src/server/server.js')
 
 const MURAL_MCP_URL = 'http://localhost:8086'
 const VALID_REASON = 'Need this board to run a team retrospective'

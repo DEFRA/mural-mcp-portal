@@ -1,15 +1,15 @@
 import { vi } from 'vitest'
 
-import { linkingOutcomes } from '../../../constants/linking-outcomes.js'
+import { linkingOutcomes } from '../../../src/constants/linking-outcomes.js'
 import {
   getLinkingStatus,
   isMuralLinked,
   completeLinking
-} from '../../../services/mural-linking.js'
+} from '../../../src/services/mural-linking.js'
 
-vi.mock('../../../infra/mural/linking.js')
+vi.mock('../../../src/infra/mural/linking.js')
 
-import * as linkingApi from '../../../infra/mural/linking.js'
+import * as linkingApi from '../../../src/infra/mural/linking.js'
 
 describe('muralLinkingService', () => {
   describe('getLinkingStatus', () => {

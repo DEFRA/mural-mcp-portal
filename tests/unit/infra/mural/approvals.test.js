@@ -5,7 +5,7 @@ import { createdBoardRequest, boardRequestConflict } from '../../../fixtures/mur
 import {
   submitBoardRequest,
   getBoardRequest
-} from '../../../../infra/mural/approvals.js'
+} from '../../../../src/infra/mural/approvals.js'
 
 const MURAL_MCP_URL = 'http://localhost:8086'
 
