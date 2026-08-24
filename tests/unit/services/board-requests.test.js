@@ -56,18 +56,16 @@ describe('#boardRequestsService', () => {
       const data = { id: 'req-1', boardId: 'board-abc', status: 'pending' }
       approvalsApi.getBoardRequest.mockResolvedValue({ ok: true, status: 200, data })
 
-      const approvalRequest = { boardId: 'board-abc' }
-      const result = await getBoardRequest(approvalRequest)
+      const result = await getBoardRequest('board-abc')
 
       expect(result).toEqual(data)
-      expect(approvalsApi.getBoardRequest).toHaveBeenCalledWith(approvalRequest)
+      expect(approvalsApi.getBoardRequest).toHaveBeenCalledWith('board-abc')
     })
 
     test('returns null on 404', async () => {
       approvalsApi.getBoardRequest.mockResolvedValue({ ok: false, status: 404, data: null })
 
-      const approvalRequest = { boardId: 'board-abc' }
-      const result = await getBoardRequest(approvalRequest)
+      const result = await getBoardRequest('board-abc')
 
       expect(result).toBeNull()
     })
@@ -77,17 +75,13 @@ describe('#boardRequestsService', () => {
       error.statusCode = 503
       approvalsApi.getBoardRequest.mockRejectedValue(error)
 
-      const approvalRequest = { boardId: 'board-abc' }
-
-      await expect(getBoardRequest(approvalRequest)).rejects.toThrow('Service unavailable')
+      await expect(getBoardRequest('board-abc')).rejects.toThrow('Service unavailable')
     })
 
     test('throws with statusCode on an unexpected status', async () => {
       approvalsApi.getBoardRequest.mockResolvedValue({ ok: false, status: 500, data: null })
 
-      const approvalRequest = { boardId: 'board-abc' }
-
-      await expect(getBoardRequest(approvalRequest))
+      await expect(getBoardRequest('board-abc'))
         .rejects.toMatchObject({ message: 'Unexpected status 500 from approvals API', statusCode: 500 })
     })
   })

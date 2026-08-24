@@ -46,7 +46,7 @@ describe('#approvalsApi', () => {
 
       expect(result.ok).toBe(false)
       expect(result.status).toBe(409)
-      expect(result.data).toBeNull()
+      expect(result.data).toEqual({ message: 'Board request already exists' })
     })
 
     test('returns ok:false with status 500 on unexpected error', async () => {
@@ -59,7 +59,7 @@ describe('#approvalsApi', () => {
 
       expect(result.ok).toBe(false)
       expect(result.status).toBe(500)
-      expect(result.data).toBeNull()
+      expect(result.data).toEqual({ message: 'Internal server error' })
     })
 
     test('throws on network error', async () => {
@@ -83,8 +83,7 @@ describe('#approvalsApi', () => {
         .get('/approvals/boards/board-abc')
         .reply(200, responseBody)
 
-      const approvalRequest = { boardId: 'board-abc' }
-      const result = await getBoardRequest(approvalRequest)
+      const result = await getBoardRequest('board-abc')
 
       expect(result.ok).toBe(true)
       expect(result.status).toBe(200)
@@ -96,12 +95,11 @@ describe('#approvalsApi', () => {
         .get('/approvals/boards/board-abc')
         .reply(404, { message: 'Not found' })
 
-      const approvalRequest = { boardId: 'board-abc' }
-      const result = await getBoardRequest(approvalRequest)
+      const result = await getBoardRequest('board-abc')
 
       expect(result.ok).toBe(false)
       expect(result.status).toBe(404)
-      expect(result.data).toBeNull()
+      expect(result.data).toEqual({ message: 'Not found' })
     })
 
     test('returns ok:false with status 500 on unexpected error', async () => {
@@ -109,12 +107,11 @@ describe('#approvalsApi', () => {
         .get('/approvals/boards/board-abc')
         .reply(500, { message: 'Internal server error' })
 
-      const approvalRequest = { boardId: 'board-abc' }
-      const result = await getBoardRequest(approvalRequest)
+      const result = await getBoardRequest('board-abc')
 
       expect(result.ok).toBe(false)
       expect(result.status).toBe(500)
-      expect(result.data).toBeNull()
+      expect(result.data).toEqual({ message: 'Internal server error' })
     })
 
     test('URL-encodes boardId in the path', async () => {
@@ -124,8 +121,7 @@ describe('#approvalsApi', () => {
         .get('/approvals/boards/board%2Fwith%20spaces')
         .reply(200, responseBody)
 
-      const approvalRequest = { boardId: 'board/with spaces' }
-      const result = await getBoardRequest(approvalRequest)
+      const result = await getBoardRequest('board/with spaces')
 
       expect(result.ok).toBe(true)
       expect(result.data).toEqual(responseBody)

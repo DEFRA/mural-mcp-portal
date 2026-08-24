@@ -1,6 +1,6 @@
 import { constants as statusCodes } from 'node:http2'
 
-import { createServer, startServer } from '../../../../src/server/server.js'
+import { createServer } from '../../../../src/server/server.js'
 
 describe('#serveStaticFiles', () => {
   let server
@@ -8,7 +8,7 @@ describe('#serveStaticFiles', () => {
   describe('When secure context is disabled', () => {
     beforeEach(async () => {
       server = await createServer()
-      await startServer(server)
+      await server.initialize()
     })
 
     afterEach(async () => {

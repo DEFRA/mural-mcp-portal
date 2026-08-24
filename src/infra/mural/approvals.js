@@ -1,6 +1,4 @@
-import { config } from '../../config/config.js'
-
-const baseUrl = config.get('muralMcp.url')
+import { muralClient } from './client.js'
 
 /**
  * ApprovalRequest - Domain type for board request approvals
@@ -20,21 +18,6 @@ const baseUrl = config.get('muralMcp.url')
  * @property {string} email - The email of the requester
  */
 
-async function request (path, { method = 'GET', body, token } = {}) {
-  const response = await fetch(`${baseUrl}${path}`, {
-    method,
-    headers: {
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    },
-    body: body ? JSON.stringify(body) : undefined
-  })
-
-  const data = response.ok ? await response.json() : null
-
-  return { ok: response.ok, status: response.status, data }
-}
-
 /**
  * Submit a board approval request
  * @param {ApprovalRequest} approvalRequest - The approval request
@@ -47,22 +30,20 @@ async function submitBoardRequest (approvalRequest) {
     email: approvalRequest.email
   }
 
-  return request('/approvals/boards', {
+  return muralClient.request('/approvals/boards', {
     method: 'POST',
     body,
-    token: approvalRequest.token
+    userId: approvalRequest.email
   })
 }
 
 /**
  * Get a board approval request
- * @param {ApprovalRequest} approvalRequest - The approval request (only boardId is used)
+ * @param {string} boardId - The ID of the board
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
  */
-async function getBoardRequest (approvalRequest) {
-  return request(`/approvals/boards/${encodeURIComponent(approvalRequest.boardId)}`, {
-    token: approvalRequest.token
-  })
+async function getBoardRequest (boardId) {
+  return muralClient.request(`/approvals/boards/${encodeURIComponent(boardId)}`)
 }
 
 export {

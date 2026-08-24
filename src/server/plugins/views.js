@@ -79,7 +79,8 @@ const viewPlugin = {
       cspNonce: request?.plugins?.blankie?.nonces,
       aceSlackChannel,
       isAuthenticated: Boolean(request?.auth?.isAuthenticated),
-      userDisplayName: request?.auth?.credentials?.profile?.displayName ?? null
+      userDisplayName: request?.auth?.credentials?.profile?.displayName ?? null,
+      userEmail: request?.auth?.credentials?.profile?.email ?? null
     })
   }
 }

@@ -44,10 +44,10 @@ describe('#BoardRequestFormViewModel', () => {
   test('empty() creates a blank form instance', () => {
     const viewModel = viewModels.BoardRequestFormViewModel.empty()
 
-    expect(viewModel.boardId).toBe('')
-    expect(viewModel.iao).toBe('')
-    expect(viewModel.errors).toEqual({})
-    expect(viewModel.errorList).toEqual([])
+    expect(viewModel.boardId).toBe(null)
+    expect(viewModel.iao).toBe(null)
+    expect(viewModel.errors).toBe(null)
+    expect(viewModel.errorList).toBe(null)
   })
 
   test('fromValidationError() extracts Joi errors into structured errors and errorList', () => {
