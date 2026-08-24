@@ -199,6 +199,14 @@ function _getCookieOptions () {
       password: config.get('session.cookie.password'),
       path: '/',
       isSecure: config.get('session.cookie.secure'),
+      // Mural linking (and Entra sign-in) return the browser to us via a
+      // top-level redirect from a third-party site. 'Strict' - hapi/cookie's
+      // default - withholds the cookie on that redirect, so a perfectly
+      // valid session looks unauthenticated on the way back and gets
+      // bounced to /login. 'Lax' still sends it for top-level GET
+      // navigations like this one, while still withholding it for
+      // cross-site subrequests/forms.
+      isSameSite: 'Lax',
       ttl: config.get('session.cookie.ttl')
     },
     redirectTo: '/login',

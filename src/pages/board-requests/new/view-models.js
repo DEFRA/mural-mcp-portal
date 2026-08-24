@@ -29,11 +29,12 @@ class ApprovalRequestViewModel {
  * Handles both initial state and validation error states
  */
 class BoardRequestFormViewModel {
-  constructor ({ boardId = '', iao = '', errors = {}, errorList = [] } = {}) {
-    this.boardId = boardId
-    this.iao = iao
-    this.errors = errors
-    this.errorList = errorList
+  constructor (data) {
+    this.boardId = data?.boardId || null
+    this.iao = data?.iao || null
+    this.reason = data?.reason || null
+    this.errors = data?.errors || null
+    this.errorList = data?.errorList || null
   }
 
   /**
@@ -60,6 +61,7 @@ class BoardRequestFormViewModel {
     return new BoardRequestFormViewModel({
       boardId: payload.boardId,
       iao: payload.iao,
+      reason: payload.reason,
       errors,
       errorList
     })

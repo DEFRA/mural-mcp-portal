@@ -1,0 +1,80 @@
+{% extends "common/layout.njk" %}
+
+{% set pageTitle = 'Connect your Mural account' %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Connect your Mural account</h1>
+
+    {% if message %}
+      <div class="govuk-notification-banner {% if message.type == 'success' %}govuk-notification-banner--success{% else %}govuk-notification-banner--with-icon{% endif %}" role="alert">
+        <div class="govuk-notification-banner__header">
+          <h2 class="govuk-notification-banner__title">
+            {% if message.type == 'success' %}Success{% else %}Important{% endif %}
+          </h2>
+        </div>
+        <div class="govuk-notification-banner__content">
+          <p class="govuk-body">{{ message.text }}</p>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if statusError %}
+      <div class="govuk-notification-banner govuk-notification-banner--with-icon" role="alert">
+        <div class="govuk-notification-banner__header">
+          <h2 class="govuk-notification-banner__title">
+            Unable to check connection status
+          </h2>
+        </div>
+        <div class="govuk-notification-banner__content">
+          <p class="govuk-body">We couldn't check your Mural connection status. Please try again later.</p>
+        </div>
+      </div>
+    {% else %}
+      {% if linked %}
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert">
+          <div class="govuk-notification-banner__header">
+            <h2 class="govuk-notification-banner__title">
+              Connected
+            </h2>
+          </div>
+          <div class="govuk-notification-banner__content">
+            <p class="govuk-body">Your Mural account is connected as <strong>{{ userEmail }}</strong></p>
+          </div>
+        </div>
+      {% else %}
+        <div class="govuk-notification-banner govuk-notification-banner--with-icon" role="alert">
+          <div class="govuk-notification-banner__header">
+            <h2 class="govuk-notification-banner__title">
+              Not connected
+            </h2>
+          </div>
+          <div class="govuk-notification-banner__content">
+            <p class="govuk-body">You haven't connected a Mural account yet. Click the button below to get started.</p>
+          </div>
+        </div>
+
+        <p class="govuk-body">
+          Connecting your Mural account lets this service request and manage
+          Mural boards on your behalf, using your own Mural sign-in.
+        </p>
+
+        <h2 class="govuk-heading-m">What happens when you connect</h2>
+        <ol class="govuk-list govuk-list--number">
+          <li>You'll be taken to Mural to sign in and approve access for this service.</li>
+          <li>You'll be brought straight back here once you've done that.</li>
+        </ol>
+      {% endif %}
+    {% endif %}
+
+    <div class="govuk-form-group" style="margin-top: 2em;">
+      {% if linkingUrl %}
+        <a href="{{ linkingUrl }}" class="govuk-button" role="button">
+            Connect Mural Account
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

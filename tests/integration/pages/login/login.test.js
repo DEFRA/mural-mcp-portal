@@ -1,9 +1,9 @@
 import { constants as statusCodes } from 'node:http2'
 
 import { createServer } from '../../../../src/server/server.js'
-import { loginAsDevUser } from '../../helpers/login.js'
+import { loginAsDevUser } from '../../../helpers/login.js'
 
-describe('#loginController', () => {
+describe('loginController', () => {
   let server
 
   beforeAll(async () => {
@@ -16,7 +16,7 @@ describe('#loginController', () => {
   })
 
   describe('When logged in as a dev user', () => {
-    test('Should respond with 302 and redirect to home page', async () => {
+    test('redirects to home page when already logged in', async () => {
       const cookie = await loginAsDevUser(server)
 
       const { headers, statusCode } = await server.inject({
@@ -31,7 +31,7 @@ describe('#loginController', () => {
   })
 
   describe('When not logged in', () => {
-    test('Should respond with 200 and render the login page', async () => {
+    test('returns 200 and renders the login page', async () => {
       const { statusCode, payload } = await server.inject({
         method: 'GET',
         url: '/login'
@@ -40,10 +40,32 @@ describe('#loginController', () => {
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
       expect(payload).toContain('Sign in to the Mural MCP Portal')
     })
+
+    // Regression test for a bug where `views.js` passed Blankie's whole
+    // `{ script, style }` nonce object as `cspNonce`, rendering a literal
+    // `nonce="[object Object]"` on every page. The inline script kept working
+    // only because the sha256 hash in content-security-policy.js separately
+    // allowlists it - the nonce itself was inert. Comparing the two nonces
+    // extracted from the same response is what makes this discriminating: a
+    // test that only checked the attribute was present would have passed
+    // against "[object Object]" all along, which is how the bug survived.
+    test('renders the same nonce in the inline script as the CSP header names for script-src', async () => {
+      const { headers, payload } = await server.inject({
+        method: 'GET',
+        url: '/login'
+      })
+
+      const [, headerNonce] = headers['content-security-policy'].match(
+        /script-src[^;]*'nonce-([a-f0-9]+)'/
+      )
+      const [, renderedNonce] = payload.match(/<script nonce="([^"]+)">/)
+
+      expect(renderedNonce).toBe(headerNonce)
+    })
   })
 
-  describe('#handleLoginCallback', () => {
-    test('Should establish a dev-session and redirect to / when hitting the callback under the local provider', async () => {
+  describe('handleLoginCallback', () => {
+    test('establishes a session and redirects to home when using the local provider', async () => {
       const callback = await server.inject({
         method: 'GET',
         url: '/login/callback'
@@ -71,8 +93,8 @@ describe('#loginController', () => {
     })
   })
 
-  describe('#logout', () => {
-    test('Should end the session and redirect to / when authenticated', async () => {
+  describe('logout', () => {
+    test('ends the session and redirects to home when authenticated', async () => {
       const cookie = await loginAsDevUser(server)
 
       const { statusCode, headers } = await server.inject({
@@ -97,7 +119,7 @@ describe('#loginController', () => {
       expect(reuse.headers.location).toBe('/login')
     })
 
-    test('Should redirect to / without requiring a session when not authenticated', async () => {
+    test('redirects to home without requiring a session when unauthenticated', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/logout'

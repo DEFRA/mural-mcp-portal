@@ -7,8 +7,8 @@
 {% set page = 'board-requests' %}
 
 {% block content %}
-  <div class="govuk-width-container">
-    <main class="govuk-main-wrapper" id="main-content">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
 
       {% if errorList %}
         {{ govukErrorSummary({
@@ -19,7 +19,7 @@
 
       <h1 class="govuk-heading-l">Request a Mural board</h1>
 
-      <form method="post" action="/board-requests" novalidate>
+      <form method="post" novalidate>
 
         {{ govukInput({
           label: { text: "Board ID", classes: "govuk-label--m" },
@@ -39,10 +39,16 @@
           errorMessage: errors.iao
         }) }}
 
+        {{ govukInput({
+          label: { text: "Reason for requesting this board", classes: "govuk-label--m" },
+          id: "reason",
+          name: "reason",
+          value: reason,
+          errorMessage: errors.reason
+        }) }}
+
         {{ govukButton({ text: "Submit request" }) }}
-
       </form>
-
-    </main>
+    </div>
   </div>
 {% endblock %}

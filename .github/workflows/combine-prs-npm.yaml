@@ -1,0 +1,56 @@
+# Combines multiple npm dependabot PRs into a single PR to reduce management overhead.
+#
+# How it works:
+#   - Runs on a schedule after dependabot's Monday run has completed
+#   - Filters for npm dependabot PRs (branch prefix: dependabot/npm_and_yarn/*)
+#   - Groups all matching PRs into a single combined PR
+#   - Can be triggered manually via workflow_dispatch for immediate combining
+#
+# Rationale:
+#   - Your dependabot.yml groups npm updates into logical categories (build, lint,
+#     logging, tools, types), but each group still creates a separate PR
+#   - combine-prs consolidates all those group PRs into a single review, reducing
+#     the overhead of multiple reviews/merges while preserving the grouped updates
+#   - Separate workflow from github-actions combines to keep package managers distinct
+#
+# Manual trigger:
+#   gh workflow run combine-prs-npm.yaml
+#   Or via the GitHub UI: Actions > combine-prs-npm > Run workflow
+
+name: Combine npm PRs
+
+on:
+  schedule:
+    - cron: '0 11 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  combine-npm:
+    permissions:
+      contents: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Combine npm dependabot PRs
+        uses: github/combine-prs@2909f404763c3177a456e052bdb7f2e85d3a7cb3
+        with:
+          github_token: ${{ github.token }}
+          branch_prefix: 'dependabot/npm_and_yarn/'
+          combine_branch_name: 'dependabot/npm-combined'
+          ignore_label: 'do-not-combine'
+          labels: 'dependencies,npm'
+          pull_request_title: 'chore(dependencies): combine npm dependency updates'
+          pull_request_body: |
+            ## Summary
+            This PR combines multiple npm dependency updates into a single review.
+
+            All grouped updates (build, lint, logging, tools, types) are included. Review and merge when ready.
+
+            ---
+            _Automatically combined by [combine-prs](https://github.com/github/combine-prs)_
+          skip_experimental_rules: false

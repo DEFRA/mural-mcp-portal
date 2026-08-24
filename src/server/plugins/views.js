@@ -74,12 +74,14 @@ const viewPlugin = {
         return `${assetPath}/${viteAsset ?? asset}`
       },
       serviceName,
-      // Blankie generates nonces when configured with generateNonces: true
-      // Returns { script, style } when enabled, undefined otherwise
-      cspNonce: request?.plugins?.blankie?.nonces,
+      // Blankie generates nonces when configured with generateNonces: true.
+      // `blankie.nonces` is an object like { script, style }, but the template
+      // expects the script nonce string itself.
+      cspNonce: request?.plugins?.blankie?.nonces?.script,
       aceSlackChannel,
       isAuthenticated: Boolean(request?.auth?.isAuthenticated),
-      userDisplayName: request?.auth?.credentials?.profile?.displayName ?? null
+      userDisplayName: request?.auth?.credentials?.profile?.displayName ?? null,
+      userEmail: request?.auth?.credentials?.profile?.email ?? null
     })
   }
 }

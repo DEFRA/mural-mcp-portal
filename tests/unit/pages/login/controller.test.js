@@ -77,7 +77,7 @@ function expectSessionNotCreated (request) {
   expect(request.cookieAuth.set).not.toHaveBeenCalled()
 }
 
-describe('#loginController', () => {
+describe('loginController', () => {
   beforeEach(() => {
     vi.stubEnv('AUTH_PROVIDER', 'entra')
     vi.resetModules()
@@ -88,7 +88,7 @@ describe('#loginController', () => {
     vi.clearAllMocks()
   })
 
-  describe('#handleLoginCallback with entra provider', () => {
+  describe('handleLoginCallback with entra provider', () => {
     test('throws when authentication has failed', async () => {
       const handleLoginCallback = await getHandleLoginCallback()
       const request = buildRequest()

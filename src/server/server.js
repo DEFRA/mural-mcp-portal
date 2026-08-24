@@ -15,7 +15,7 @@ import { options as loggerOptions } from '../infra/logging/options.js'
 
 import { auth } from './plugins/auth.js'
 import { contentSecurityPolicy } from './plugins/content-security-policy.js'
-import { devRoutes } from './plugins/dev-routes.js'
+import { muralConnection } from './plugins/mural-connection.js'
 import { requestTracing } from './plugins/request-tracing.js'
 import { router } from './plugins/router.js'
 import { serveStaticFiles } from './plugins/serve-static-files.js'
@@ -87,9 +87,7 @@ async function createServer () {
     serveStaticFiles,
     viewPlugin,
     auth,
-    // Only meaningful under the 'local' auth provider (see dev-routes.js) -
-    // never register these against a real Entra-authenticated environment.
-    ...(config.get('auth.provider') === 'local' ? [devRoutes] : []),
+    muralConnection,
     router
   ]
 

@@ -2,7 +2,7 @@ import { constants as statusCodes } from 'node:http2'
 
 import { createServer } from '../../../src/server/server.js'
 
-describe('#healthController', () => {
+describe('healthController', () => {
   let server
 
   beforeAll(async () => {
@@ -14,7 +14,7 @@ describe('#healthController', () => {
     await server.stop({ timeout: 0 })
   })
 
-  test('Should provide expected response', async () => {
+  test('returns 200 with a success message', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
       url: '/health'

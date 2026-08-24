@@ -1,10 +1,20 @@
 import { constants as statusCodes } from 'node:http2'
 
-import { loginAsDevUser } from '../../helpers/login.js'
+import { loginAsDevUser } from '../../../helpers/login.js'
+
+// The footer link is the only place `aceSlackChannel` surfaces, and its config
+// default is a bare '#'. Set a distinctive value - before the server (and so
+// config) is loaded - so the assertion below cannot pass on the default.
+const ACE_SLACK_CHANNEL = 'https://defra.slack.com/archives/C0ASKACE'
+vi.stubEnv('ACE_SLACK_CHANNEL_URL', ACE_SLACK_CHANNEL)
 
 const { createServer } = await import('../../../../src/server/server.js')
 
-describe('#homepageController', () => {
+describe('homepageController', () => {
+  afterAll(() => {
+    vi.unstubAllEnvs()
+  })
+
   describe('when authenticated', () => {
     let server
     let cookie
@@ -20,7 +30,7 @@ describe('#homepageController', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('Should respond with 200 and render the home page', async () => {
+    test('returns 200 and renders the home page', async () => {
       const { statusCode, payload } = await server.inject({
         method: 'GET',
         url: '/',
@@ -28,7 +38,35 @@ describe('#homepageController', () => {
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
-      expect(payload).toContain('Mural MCP Portal')
+      expect(payload).toContain('RPA Guidance AI Usecase PoC')
+    })
+
+    // The shared view context (`server/plugins/views.js`) is asserted here, as
+    // rendered HTML, rather than by inspecting the context object. `userEmail`
+    // is the one field no page in this layout renders - it is asserted where it
+    // does render, in `pages/linking/linking.test.js`.
+    test('renders the shared view context into the layout', async () => {
+      const { payload } = await server.inject({
+        method: 'GET',
+        url: '/',
+        headers: { Cookie: cookie }
+      })
+
+      // serviceName
+      expect(payload).toContain(
+        '<a href="/" class="defra-header__service-name">Mural MCP Portal</a>'
+      )
+
+      // aceSlackChannel
+      expect(payload).toContain(`href="${ACE_SLACK_CHANNEL}">#ask-ace</a>`)
+
+      // cspNonce, on the inline script GOV.UK Frontend's template emits
+      expect(payload).toContain('<script nonce=')
+
+      // getAssetPath, resolved through the Vite manifest
+      expect(payload).toMatch(
+        /href="\/public\/assets\/applicationCss-[\w-]+\.css" rel="stylesheet"/
+      )
     })
   })
 
@@ -44,7 +82,7 @@ describe('#homepageController', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('Should redirect to the login page', async () => {
+    test('redirects to the login page when unauthenticated', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/'
