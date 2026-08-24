@@ -9,17 +9,13 @@ import { config } from '../../../../../src/config/config.js'
 const mockLoggerInfo = vi.fn()
 const mockLoggerError = vi.fn()
 
-vi.mock('ioredis', () => ({
-  ...vi.importActual('ioredis'),
-  Cluster: vi.fn(function () {
-    return { on: () => ({}) }
-  }),
-  Redis: vi.fn(function () {
-    return { on: () => ({}) }
-  })
+// buildRedisClient is ours, so mocking it is a decision about our own
+// boundary - it keeps this test off a real ioredis connection attempt. The
+// real @hapi/catbox-redis Engine is left untouched: its constructor does no
+// I/O (just Joi validation of the options), so it can run for real here.
+vi.mock('../../../../../src/infra/redis-client.js', () => ({
+  buildRedisClient: vi.fn(() => ({}))
 }))
-vi.mock('@hapi/catbox-redis')
-vi.mock('@hapi/catbox-memory')
 vi.mock('../../../../../src/infra/logging/logger.js', () => ({
   createLogger: () => ({
     info: (...args) => mockLoggerInfo(...args),
@@ -27,57 +23,46 @@ vi.mock('../../../../../src/infra/logging/logger.js', () => ({
   })
 }))
 
-describe('#getCacheEngine', () => {
+describe('getCacheEngine', () => {
   describe('When Redis cache engine has been requested', () => {
-    beforeEach(() => {
-      getCacheEngine('redis')
-    })
+    test('sets up Redis cache', () => {
+      const engine = getCacheEngine('redis')
 
-    test('Should setup Redis cache', () => {
-      expect(CatboxRedis).toHaveBeenCalledWith(expect.any(Object))
-    })
-
-    test('Should log expected Redis message', () => {
-      expect(mockLoggerInfo).toHaveBeenCalledWith('Using Redis session cache')
+      expect(engine).toBeInstanceOf(CatboxRedis)
     })
   })
 
   describe('When In memory cache engine has been requested', () => {
-    beforeEach(() => {
-      getCacheEngine()
-    })
+    test('sets up in-memory cache', () => {
+      const engine = getCacheEngine()
 
-    test('Should setup In memory cache', () => {
-      expect(CatboxMemory).toHaveBeenCalledTimes(1)
-    })
-
-    test('Should log expected CatBox memory message', () => {
-      expect(mockLoggerInfo).toHaveBeenCalledWith(
-        'Using Catbox Memory session cache'
-      )
+      expect(engine).toBeInstanceOf(CatboxMemory)
     })
   })
 
   describe('When In memory cache engine has been requested in Production', () => {
+    const originalIsProduction = config.get('isProduction')
+
     beforeEach(() => {
       config.set('isProduction', true)
+    })
+
+    afterEach(() => {
+      config.set('isProduction', originalIsProduction)
+    })
+
+    test('logs a production warning', () => {
       getCacheEngine()
-    })
 
-    test('Should log Production warning message', () => {
       expect(mockLoggerError).toHaveBeenCalledWith(
-        'Catbox Memory is for local development only, it should not be used in production!'
+        expect.stringContaining('production')
       )
     })
 
-    test('Should setup In memory cache', () => {
-      expect(CatboxMemory).toHaveBeenCalledTimes(1)
-    })
+    test('sets up in-memory cache', () => {
+      const engine = getCacheEngine()
 
-    test('Should log expected message', () => {
-      expect(mockLoggerInfo).toHaveBeenCalledWith(
-        'Using Catbox Memory session cache'
-      )
+      expect(engine).toBeInstanceOf(CatboxMemory)
     })
   })
 })

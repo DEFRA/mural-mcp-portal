@@ -1,10 +1,10 @@
 import nock from 'nock'
 import { createServer } from '../../../../src/server/server.js'
-import { loginAsDevUser } from '../../helpers/login.js'
+import { loginAsDevUser } from '../../../helpers/login.js'
 
 const MURAL_MCP_URL = 'http://localhost:8086'
 
-describe('#linkingController', () => {
+describe('linkingController', () => {
   describe('when authenticated', () => {
     let server
     let authCookie
@@ -41,7 +41,7 @@ describe('#linkingController', () => {
         })
 
         expect(response.statusCode).toBe(200)
-        expect(response.result).toMatch(/error|try again|retry/i)
+        expect(response.result).toContain("We couldn't check your Mural connection status. Please try again later.")
       })
 
       test('renders the page with not-connected status', async () => {
@@ -60,7 +60,8 @@ describe('#linkingController', () => {
         })
 
         expect(response.statusCode).toBe(200)
-        expect(response.result).toMatch(/not connected|not\s+connected/i)
+        expect(response.result).toContain('Not connected')
+        expect(response.result).not.toContain('Your Mural account is connected as')
       })
 
       test('renders the page with connected status', async () => {
@@ -75,7 +76,10 @@ describe('#linkingController', () => {
         })
 
         expect(response.statusCode).toBe(200)
-        expect(response.result).toMatch(/connected|mural@example\.com/i)
+        expect(response.result).toContain('Your Mural account is connected as')
+        expect(response.result).toContain('dev@example.com')
+        expect(response.result).not.toContain('Not connected')
+        expect(response.result).not.toContain("You haven't connected a Mural account yet")
       })
 
       test('shows connect button when not connected', async () => {
@@ -94,7 +98,7 @@ describe('#linkingController', () => {
         })
 
         expect(response.statusCode).toBe(200)
-        expect(response.result).toMatch(/connect\s+mural|mural\s+account/i)
+        expect(response.result).toContain('Connect Mural Account')
         expect(response.result).toContain('https://mural.co/oauth/authorize?state=abc')
       })
 

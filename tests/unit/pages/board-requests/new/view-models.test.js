@@ -1,6 +1,6 @@
 import * as viewModels from '../../../../../src/pages/board-requests/new/view-models.js'
 
-describe('#ApprovalRequestViewModel', () => {
+describe('ApprovalRequestViewModel', () => {
   const data = {
     id: 'req-1',
     boardId: 'board-abc',
@@ -24,7 +24,7 @@ describe('#ApprovalRequestViewModel', () => {
   })
 })
 
-describe('#BoardRequestFormViewModel', () => {
+describe('BoardRequestFormViewModel', () => {
   test('constructor initializes with provided values', () => {
     const data = {
       boardId: 'board-123',

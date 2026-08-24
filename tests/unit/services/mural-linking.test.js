@@ -11,7 +11,7 @@ vi.mock('../../../src/infra/mural/linking.js')
 
 import * as linkingApi from '../../../src/infra/mural/linking.js'
 
-describe('#muralLinkingService', () => {
+describe('muralLinkingService', () => {
   describe('getLinkingStatus', () => {
     test('returns connected status without fetching auth URL', async () => {
       const statusData = { linked: true, expired: false }

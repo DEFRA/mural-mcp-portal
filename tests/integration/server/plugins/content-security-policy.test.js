@@ -1,6 +1,6 @@
 import { createServer } from '../../../../src/server/server.js'
 
-describe('#contentSecurityPolicy', () => {
+describe('contentSecurityPolicy', () => {
   let server
 
   beforeAll(async () => {
@@ -12,16 +12,20 @@ describe('#contentSecurityPolicy', () => {
     await server.stop({ timeout: 0 })
   })
 
-  test('Should set the CSP policy header', async () => {
+  test('sets the CSP policy header with the configured directives', async () => {
     const resp = await server.inject({
       method: 'GET',
       url: '/'
     })
 
-    expect(resp.headers['content-security-policy']).toBeDefined()
+    const csp = resp.headers['content-security-policy']
+
+    expect(csp).toContain("default-src 'self'")
+    expect(csp).toContain("object-src 'self'")
+    expect(csp).toContain("frame-ancestors 'none'")
   })
 
-  test('Should include nonces in CSP header when enabled', async () => {
+  test('includes nonces in CSP header when enabled', async () => {
     const resp = await server.inject({
       method: 'GET',
       url: '/'

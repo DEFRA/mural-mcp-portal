@@ -12,7 +12,10 @@ async function submitBoardRequest (approvalRequest) {
   const res = await approvalsApi.submitBoardRequest(approvalRequest)
 
   if (res.ok) {
-    return res.data
+    return {
+      success: true,
+      data: res.data
+    }
   }
 
   if (res.status === statusCodes.HTTP_STATUS_CONFLICT) {

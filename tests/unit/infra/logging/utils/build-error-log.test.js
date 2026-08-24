@@ -1,7 +1,7 @@
 import { buildErrorLog, buildEventLog } from '../../../../../src/infra/logging/utils/build-error-log.js'
 
-describe('#buildErrorLog', () => {
-  test('Should nest event fields under event and force outcome to failure', () => {
+describe('buildErrorLog', () => {
+  test('nests event fields under event and forces outcome to failure', () => {
     const error = new Error('boom')
 
     const payload = buildErrorLog(error, {
@@ -18,7 +18,7 @@ describe('#buildErrorLog', () => {
     })
   })
 
-  test('Should override a caller-supplied outcome with failure', () => {
+  test('overrides a caller-supplied outcome with failure', () => {
     const payload = buildErrorLog(new Error('x'), {
       type: 'demo_event',
       outcome: 'success'
@@ -27,7 +27,7 @@ describe('#buildErrorLog', () => {
     expect(payload.event.outcome).toBe('failure')
   })
 
-  test('Should populate error.* from an Error instance', () => {
+  test('populates error fields from an Error instance', () => {
     const error = new TypeError('something went wrong')
 
     const payload = buildErrorLog(error, { type: 'demo_event' })
@@ -40,7 +40,7 @@ describe('#buildErrorLog', () => {
     })
   })
 
-  test('Should prefer error.code, falling back to error.status', () => {
+  test('prefers error.code, falling back to error.status', () => {
     const codeError = { code: 'ENOENT', message: 'no file', stack: 's' }
     const statusError = { status: 503, message: 'unavailable', stack: 's' }
 
@@ -48,21 +48,21 @@ describe('#buildErrorLog', () => {
     expect(buildErrorLog(statusError, { type: 'x' }).error.code).toBe(503)
   })
 
-  test('Should default type to Error when name is missing', () => {
+  test('defaults type to Error when name is missing', () => {
     const payload = buildErrorLog({ message: 'no name' }, { type: 'x' })
 
     expect(payload.error.type).toBe('Error')
   })
 
-  test('Should produce only event and error top-level keys', () => {
+  test('produces only event and error top-level keys', () => {
     const payload = buildErrorLog(new Error('x'), { type: 'x' })
 
     expect(Object.keys(payload).sort()).toEqual(['error', 'event'])
   })
 })
 
-describe('#buildEventLog', () => {
-  test('Should default outcome to success', () => {
+describe('buildEventLog', () => {
+  test('defaults outcome to success', () => {
     const payload = buildEventLog({ type: 'demo_event', action: 'do_thing' })
 
     expect(payload).toEqual({
@@ -74,13 +74,13 @@ describe('#buildEventLog', () => {
     })
   })
 
-  test('Should allow caller to override outcome', () => {
+  test('allows caller to override outcome', () => {
     const payload = buildEventLog({ type: 'demo_event', outcome: 'unknown' })
 
     expect(payload.event.outcome).toBe('unknown')
   })
 
-  test('Should produce only an event top-level key', () => {
+  test('produces only an event top-level key', () => {
     const payload = buildEventLog({ type: 'x' })
 
     expect(Object.keys(payload)).toEqual(['event'])
