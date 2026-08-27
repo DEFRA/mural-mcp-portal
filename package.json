@@ -52,10 +52,10 @@
     "hapi-pino": "13.0.0",
     "hapi-pulse": "4.0.0",
     "ioredis": "6.0.0",
-    "joi": "18.2.3",
+    "joi": "18.2.5",
     "jwks-rsa": "4.1.0",
     "lodash": "4.18.1",
-    "marked": "18.0.9",
+    "marked": "18.0.10",
     "node-fetch": "3.3.2",
     "nunjucks": "3.2.4",
     "pino": "10.3.1",
@@ -64,7 +64,7 @@
     "validator": "13.15.35"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "4.1.10",
+    "@vitest/coverage-v8": "4.1.11",
     "autoprefixer": "10.5.4",
     "cssnano": "8.0.6",
     "cssnano-preset-default": "8.0.6",
@@ -82,8 +82,8 @@
     "source-map-loader": "5.0.0",
     "stylelint": "17.14.1",
     "stylelint-config-gds": "3.0.0",
-    "vite": "8.2.1",
-    "vitest": "4.1.10",
+    "vite": "8.2.2",
+    "vitest": "4.1.11",
     "vitest-fetch-mock": "0.4.5"
   },
   "overrides": {
@@ -91,7 +91,7 @@
     "fast-uri": "3.1.5",
     "immutable": "5.1.9",
     "js-yaml": "4.3.1",
-    "joi": "18.2.3",
+    "joi": "18.2.5",
     "nanoid": "3.3.18",
     "postcss": "8.5.26",
     "shell-quote": "1.10.0",
