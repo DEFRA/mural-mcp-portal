@@ -5,9 +5,9 @@ services:
       - '6379:6379'
     restart: always
     networks:
-      - ai-uc-mural-mcp-portal
+      - mural-mcp-portal
 
-  ai-uc-mural-mcp-portal:
+  mural-mcp-portal:
     build: ./
     ports:
       - '3000:3000'
@@ -22,8 +22,8 @@ services:
     volumes:
       - ./src:/home/node/src
     networks:
-      - ai-uc-mural-mcp-portal
+      - mural-mcp-portal
 
 networks:
-  ai-uc-mural-mcp-portal:
+  mural-mcp-portal:
     driver: bridge

@@ -137,14 +137,14 @@ describe('linkingController', () => {
     })
 
     describe('GET /account/mural-linking', () => {
-      test('redirects to login', async () => {
+      test('redirects to sign in', async () => {
         const response = await server.inject({
           method: 'GET',
           url: '/account/mural-linking'
         })
 
         expect(response.statusCode).toBe(302)
-        expect(response.headers.location).toContain('/login')
+        expect(response.headers.location).toBe('/')
       })
     })
   })

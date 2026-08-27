@@ -203,19 +203,19 @@ describe('when unauthenticated', () => {
     await server.stop({ timeout: 0 })
   })
 
-  test('GET /board-requests/new redirects to login', async () => {
+  test('GET /board-requests/new redirects to sign in', async () => {
     const { statusCode, headers } = await get(server, '/board-requests/new')
 
     expect(statusCode).toBe(302)
     expect(headers).toHaveProperty('location')
-    expect(headers.location).toContain('/login')
+    expect(headers.location).toBe('/')
   })
 
-  test('POST /board-requests/new redirects to login', async () => {
+  test('POST /board-requests/new redirects to sign in', async () => {
     const { statusCode, headers } = await post(server, '/board-requests/new', form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk' }))
 
     expect(statusCode).toBe(302)
     expect(headers).toHaveProperty('location')
-    expect(headers.location).toContain('/login')
+    expect(headers.location).toBe('/')
   })
 })

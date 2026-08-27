@@ -35,7 +35,7 @@ const muralConnection = {
         }
 
         if (!request.auth.isAuthenticated) {
-          return h.redirect('/login').takeover()
+          return h.redirect('/').takeover()
         }
 
         const userId = request.auth.credentials.profile.email
