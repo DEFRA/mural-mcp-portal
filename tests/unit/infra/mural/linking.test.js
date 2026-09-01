@@ -185,6 +185,16 @@ describe('linkingApi', () => {
       expect(result).toEqual({ ok: false, status: 401, data: null })
     })
 
+    test('treats a 502 as expected, so the portal can handle server errors gracefully', async () => {
+      nock(MURAL_MCP_URL)
+        .get('/linking/test-connection')
+        .reply(502, { detail: 'Bad Gateway' })
+
+      const result = await testConnection('dev@example.com')
+
+      expect(result).toEqual({ ok: false, status: 502, data: null })
+    })
+
     test('throws MuralMcpError on an unexpected status (500)', async () => {
       nock(MURAL_MCP_URL)
         .get('/linking/test-connection')

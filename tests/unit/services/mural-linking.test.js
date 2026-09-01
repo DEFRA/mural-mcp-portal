@@ -47,7 +47,7 @@ describe('muralLinkingService', () => {
 
     test('returns error state when status fetch throws', async () => {
       const error = new Error('Network error')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
       linkingApi.checkLinkingStatus.mockRejectedValue(error)
 
       const result = await getLinkingStatus('user-123')
@@ -61,7 +61,7 @@ describe('muralLinkingService', () => {
     test('returns error state when auth URL fetch throws', async () => {
       const statusData = { linked: false }
       const error = new Error('Network timeout')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
 
       linkingApi.checkLinkingStatus.mockResolvedValue({ ok: true, status: 200, data: statusData })
       linkingApi.getAuthorizationUrl.mockRejectedValue(error)
@@ -95,7 +95,7 @@ describe('muralLinkingService', () => {
 
     test('returns false (fails closed) when the status fetch throws', async () => {
       const error = new Error('Network error')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
       linkingApi.checkLinkingStatus.mockRejectedValue(error)
 
       const result = await isMuralLinked('user-123')
@@ -124,7 +124,7 @@ describe('muralLinkingService', () => {
 
     test('returns failed when infra throws (unexpected error)', async () => {
       const error = new Error('Network error')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
       linkingApi.completeLinking.mockRejectedValue(error)
 
       const result = await completeLinking('user-123', { code: 'code', state: 'state' })

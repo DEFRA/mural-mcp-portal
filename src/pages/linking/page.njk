@@ -3,6 +3,13 @@
 {% from "common/components/check-steps.njk" import defraCheckSteps %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 
+{% set linkingMessages = {
+  'success': { type: 'success', text: 'Connected successfully!' },
+  'validation_failed': { type: 'error', text: 'Security validation failed - please try again' },
+  'failed': { type: 'error', text: 'Connection failed - please try again' },
+  'cancelled': { type: 'warning', text: 'Connection cancelled - you can try again later' }
+} %}
+
 {% set title = 'Your Mural connection' %}
 {% set caption = 'Your account' %}
 {% set description = 'Connecting lets the MCP server read Mural boards using your own Mural sign-in. The portal itself never reads your boards.' %}
@@ -34,7 +41,7 @@
   {# The flash from a just-completed OAuth round-trip, and the reason a gated
      route sent the user here. Both are things that have just happened, which
      is what a notification banner is for. #}
-  {{ appNotification(message) }}
+  {{ appNotification(linkingMessages[message]) }}
 
   {% if requiredReason %}
     {{ appNotification({

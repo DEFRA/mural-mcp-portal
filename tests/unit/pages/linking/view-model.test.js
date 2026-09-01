@@ -27,36 +27,36 @@ describe('LinkingStatusViewModel', () => {
   })
 
   describe('fromLinkingStatus', () => {
-    test('reports the connected message for a successful callback outcome', () => {
+    test('reports the outcome code for a successful callback outcome', () => {
       const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
         outcome: linkingOutcomes.SUCCESS
       })
 
-      expect(viewModel.message).toEqual({ type: 'success', text: 'Connected successfully!' })
+      expect(viewModel.message).toBe(linkingOutcomes.SUCCESS)
     })
 
-    test('reports the validation-failed message for a validation-failed outcome', () => {
+    test('reports the outcome code for a validation-failed outcome', () => {
       const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
         outcome: linkingOutcomes.VALIDATION_FAILED
       })
 
-      expect(viewModel.message).toEqual({ type: 'error', text: 'Security validation failed - please try again' })
+      expect(viewModel.message).toBe(linkingOutcomes.VALIDATION_FAILED)
     })
 
-    test('reports the connection-failed message for a failed outcome', () => {
+    test('reports the outcome code for a failed outcome', () => {
       const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
         outcome: linkingOutcomes.FAILED
       })
 
-      expect(viewModel.message).toEqual({ type: 'error', text: 'Connection failed - please try again' })
+      expect(viewModel.message).toBe(linkingOutcomes.FAILED)
     })
 
-    test('reports the cancelled message for a cancelled outcome', () => {
+    test('reports the outcome code for a cancelled outcome', () => {
       const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
         outcome: linkingOutcomes.CANCELLED
       })
 
-      expect(viewModel.message).toEqual({ type: 'warning', text: 'Connection cancelled - you can try again later' })
+      expect(viewModel.message).toBe(linkingOutcomes.CANCELLED)
     })
 
     test('carries no message when there is no outcome code', () => {
