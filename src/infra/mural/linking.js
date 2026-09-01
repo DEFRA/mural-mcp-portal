@@ -46,8 +46,25 @@ async function completeLinking (userId, params) {
   })
 }
 
+/**
+ * Ask the Mural MCP server to prove the stored connection actually works, by
+ * loading the user's Mural profile through the Mural API.
+ *
+ * @param {string} userId - The user whose connection to verify
+ * @returns {Promise<{ok: boolean, status: number, data: any}>}
+ * @throws {MuralApiError} - When the response is not ok and not a 404
+ */
+async function testConnection (userId) {
+  return muralClient.request('/linking/test-connection', {
+    method: 'GET',
+    userId,
+    expected: [statusCodes.HTTP_STATUS_NOT_FOUND]
+  })
+}
+
 export {
   getAuthorizationUrl,
   checkLinkingStatus,
-  completeLinking
+  completeLinking,
+  testConnection
 }

@@ -161,7 +161,7 @@ describe('when authenticated', () => {
       headers: { Cookie: authCookie }
     })
 
-    expect(gatedResponse.headers.location).toBe('/account/mural-linking/required')
+    expect(gatedResponse.headers.location).toBe('/account/mural-linking')
     const sessionCookie = mergeCookies(authCookie, gatedResponse.headers['set-cookie'])
 
     nock(MURAL_MCP_URL)
@@ -202,7 +202,7 @@ describe('when authenticated', () => {
     })
 
     expect(linkingPageResponse.statusCode).toBe(200)
-    expect(linkingPageResponse.result).toContain('Your Mural account is connected as')
+    expect(linkingPageResponse.result).toContain('Your Mural account is connected as dev@example.com')
     expect(linkingPageResponse.result).not.toContain('Not connected')
   })
 })

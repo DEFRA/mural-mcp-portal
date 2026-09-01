@@ -45,14 +45,6 @@ describe('loginController', () => {
       expect(payload).toContain('Sign in to the Mural MCP Portal')
     })
 
-    // Regression test for a bug where `views.js` passed Blankie's whole
-    // `{ script, style }` nonce object as `cspNonce`, rendering a literal
-    // `nonce="[object Object]"` on every page. The inline script kept working
-    // only because the sha256 hash in content-security-policy.js separately
-    // allowlists it - the nonce itself was inert. Comparing the two nonces
-    // extracted from the same response is what makes this discriminating: a
-    // test that only checked the attribute was present would have passed
-    // against "[object Object]" all along, which is how the bug survived.
     test('renders the same nonce in the inline script as the CSP header names for script-src', async () => {
       const { headers, payload } = await server.inject({
         method: 'GET',

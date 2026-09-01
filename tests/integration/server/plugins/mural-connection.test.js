@@ -74,7 +74,7 @@ describe('muralConnectionPlugin', () => {
     const { statusCode, headers } = await server.inject({ method: 'GET', url: '/gated' })
 
     expect(statusCode).toBe(302)
-    expect(headers.location).toBe('/account/mural-linking/required')
+    expect(headers.location).toBe('/account/mural-linking')
     expect(set).toHaveBeenCalledWith(MURAL_LINK_REQUIRED_SESSION_KEY, {
       returnTo: '/gated',
       reason: 'do the gated thing'

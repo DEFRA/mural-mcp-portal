@@ -5,10 +5,10 @@ import { completeLinking } from '../../../services/mural-linking.js'
 /**
  * Handle Mural OAuth callback
  *
- * On success, if this linking flow was started from the "connect Mural"
- * gate page (see `pages/linking/required`), sends the user straight back
- * to whatever they originally tried to reach instead of the general
- * linking/status page - no message needed, they'll just see the page they
+ * On success, if this linking flow was started by a gated route (the
+ * `muralConnection` plugin stashes where the user was headed), sends them
+ * straight back to whatever they originally tried to reach rather than to
+ * the linking page - no message needed, they'll just see the page they
  * asked for. Otherwise flashes the outcome code into the session - the
  * linking page controller owns turning that code into a displayable
  * message.

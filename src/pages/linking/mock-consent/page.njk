@@ -1,0 +1,30 @@
+{% extends "common/layouts/content.njk" %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set title = 'Simulated Mural consent' %}
+{% set caption = 'Local development' %}
+{% set breadcrumbItems = [
+  { text: "Home", href: "/dashboard" },
+  { text: "Connect your Mural account", href: "/account/mural-linking" },
+  { text: "Simulated Mural consent" }
+] %}
+
+{% block pageBody %}
+  {{ govukWarningText({
+    text: "This is not a real Mural page. It stands in for Mural's sign-in and consent screen while linking is being simulated for local development.",
+    iconFallbackText: "Warning"
+  }) }}
+
+  <p class="govuk-body">Approving will link this account without contacting Mural.</p>
+
+  <div class="govuk-button-group">
+    {{ govukButton({
+      text: "Approve",
+      href: "/account/mural-linking/callback?code=mock-code&state=mock-state"
+    }) }}
+    <a class="govuk-link" href="/account/mural-linking/callback?error=access_denied">
+      Deny
+    </a>
+  </div>
+{% endblock %}
