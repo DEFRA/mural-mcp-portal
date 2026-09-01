@@ -52,13 +52,16 @@ async function completeLinking (userId, params) {
  *
  * @param {string} userId - The user whose connection to verify
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
- * @throws {MuralApiError} - When the response is not ok and not a 404
+ * @throws {MuralMcpError} - when the response is not ok and not 401 or 502
  */
 async function testConnection (userId) {
   return muralClient.request('/linking/test-connection', {
     method: 'GET',
     userId,
-    expected: [statusCodes.HTTP_STATUS_NOT_FOUND]
+    expected: [
+      statusCodes.HTTP_STATUS_UNAUTHORIZED,
+      statusCodes.HTTP_STATUS_BAD_GATEWAY
+    ]
   })
 }
 

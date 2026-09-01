@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 
 import { connectionChecks } from '../../../src/constants/connection-checks.js'
+import { connectionFailureReasons } from '../../../src/constants/connection-failure-reasons.js'
 import { linkingOutcomes } from '../../../src/constants/linking-outcomes.js'
 import {
   getLinkingStatus,
@@ -46,7 +47,7 @@ describe('muralLinkingService', () => {
 
     test('returns error state when status fetch throws', async () => {
       const error = new Error('Network error')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
       linkingApi.checkLinkingStatus.mockRejectedValue(error)
 
       const result = await getLinkingStatus('user-123')
@@ -60,7 +61,7 @@ describe('muralLinkingService', () => {
     test('returns error state when auth URL fetch throws', async () => {
       const statusData = { linked: false }
       const error = new Error('Network timeout')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
 
       linkingApi.checkLinkingStatus.mockResolvedValue({ ok: true, status: 200, data: statusData })
       linkingApi.getAuthorizationUrl.mockRejectedValue(error)
@@ -94,7 +95,7 @@ describe('muralLinkingService', () => {
 
     test('returns false (fails closed) when the status fetch throws', async () => {
       const error = new Error('Network error')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
       linkingApi.checkLinkingStatus.mockRejectedValue(error)
 
       const result = await isMuralLinked('user-123')
@@ -123,7 +124,7 @@ describe('muralLinkingService', () => {
 
     test('returns failed when infra throws (unexpected error)', async () => {
       const error = new Error('Network error')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
       linkingApi.completeLinking.mockRejectedValue(error)
 
       const result = await completeLinking('user-123', { code: 'code', state: 'state' })
@@ -137,7 +138,7 @@ describe('muralLinkingService', () => {
       linkingApi.testConnection.mockResolvedValue({
         ok: true,
         status: 200,
-        data: { ok: true, profile: { email: 'dev@example.com' } }
+        data: { status: 'success', profile: { email: 'dev@example.com' } }
       })
 
       const result = await verifyConnection('dev@example.com')
@@ -149,22 +150,33 @@ describe('muralLinkingService', () => {
       })
     })
 
-    test('reports a refusal with the reason Mural gave', async () => {
-      linkingApi.testConnection.mockResolvedValue({
-        ok: true,
-        status: 200,
-        data: { ok: false, reason: 'Token expired.' }
-      })
+    test('reports a refusal as unauthorized when Mural rejects the token', async () => {
+      linkingApi.testConnection.mockResolvedValue({ ok: false, status: 401, data: null })
 
       const result = await verifyConnection('dev@example.com')
 
-      expect(result).toMatchObject({ state: connectionChecks.FAILED, reason: 'Token expired.' })
+      expect(result).toMatchObject({
+        state: connectionChecks.FAILED,
+        reason: connectionFailureReasons.UNAUTHORIZED
+      })
+    })
+
+    test('reports a refusal as a Mural API error on a bad gateway', async () => {
+      linkingApi.testConnection.mockResolvedValue({ ok: false, status: 502, data: null })
+
+      const result = await verifyConnection('dev@example.com')
+
+      expect(result).toMatchObject({
+        state: connectionChecks.FAILED,
+        reason: connectionFailureReasons.MURAL_API_ERROR
+      })
     })
 
     test('reports unavailable, not failed, when the server has no such endpoint', async () => {
-      // A 404 means the portal is ahead of mural-mcp. That says nothing about
-      // the connection, so it must never surface as a broken one.
-      linkingApi.testConnection.mockResolvedValue({ ok: false, status: 404, data: null })
+      // A 404 is not in the infra layer's expected list, so it throws rather
+      // than coming back as a response - that says nothing about the
+      // connection, so it must never surface as a broken one.
+      linkingApi.testConnection.mockRejectedValue(new Error('Unexpected status 404'))
 
       const result = await verifyConnection('dev@example.com')
 

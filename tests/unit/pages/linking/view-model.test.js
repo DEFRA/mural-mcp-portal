@@ -1,4 +1,5 @@
 import { connectionChecks } from '../../../../src/constants/connection-checks.js'
+import { connectionFailureReasons } from '../../../../src/constants/connection-failure-reasons.js'
 import { linkingOutcomes } from '../../../../src/constants/linking-outcomes.js'
 import { LinkingStatusViewModel } from '../../../../src/pages/linking/view-model.js'
 
@@ -26,36 +27,36 @@ describe('LinkingStatusViewModel', () => {
   })
 
   describe('fromLinkingStatus', () => {
-    test('reports the connected message for a successful callback outcome', () => {
+    test('reports the outcome code for a successful callback outcome', () => {
       const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
         outcome: linkingOutcomes.SUCCESS
       })
 
-      expect(viewModel.message).toEqual({ type: 'success', text: 'Connected successfully!' })
+      expect(viewModel.message).toBe(linkingOutcomes.SUCCESS)
     })
 
-    test('reports the validation-failed message for a validation-failed outcome', () => {
+    test('reports the outcome code for a validation-failed outcome', () => {
       const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
         outcome: linkingOutcomes.VALIDATION_FAILED
       })
 
-      expect(viewModel.message).toEqual({ type: 'error', text: 'Security validation failed - please try again' })
+      expect(viewModel.message).toBe(linkingOutcomes.VALIDATION_FAILED)
     })
 
-    test('reports the connection-failed message for a failed outcome', () => {
+    test('reports the outcome code for a failed outcome', () => {
       const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
         outcome: linkingOutcomes.FAILED
       })
 
-      expect(viewModel.message).toEqual({ type: 'error', text: 'Connection failed - please try again' })
+      expect(viewModel.message).toBe(linkingOutcomes.FAILED)
     })
 
-    test('reports the cancelled message for a cancelled outcome', () => {
+    test('reports the outcome code for a cancelled outcome', () => {
       const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
         outcome: linkingOutcomes.CANCELLED
       })
 
-      expect(viewModel.message).toEqual({ type: 'warning', text: 'Connection cancelled - you can try again later' })
+      expect(viewModel.message).toBe(linkingOutcomes.CANCELLED)
     })
 
     test('carries no message when there is no outcome code', () => {
@@ -189,25 +190,46 @@ describe('LinkingStatusViewModel', () => {
         })
       })
 
-      test('goes red and says how to fix it when Mural refuses the token', () => {
+      test('goes red and stores the failure reason for unauthorized refusals', () => {
         const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
-          check: { state: connectionChecks.FAILED, profile: null, reason: 'Token expired.' }
+          check: { state: connectionChecks.FAILED, profile: null, reason: connectionFailureReasons.UNAUTHORIZED }
         })
 
         expect(stepFor(viewModel, 3)).toMatchObject({
           status: 'issue',
           statusText: 'Not working',
-          detail: 'Mural MCP could not use your connection: Token expired. Reconnect your account to fix it.'
+          checkFailureReason: connectionFailureReasons.UNAUTHORIZED
         })
       })
 
-      test('still says how to fix it when Mural gives no reason', () => {
+      test('goes red and stores the failure reason for Mural API errors', () => {
+        const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
+          check: { state: connectionChecks.FAILED, profile: null, reason: connectionFailureReasons.MURAL_API_ERROR }
+        })
+
+        expect(stepFor(viewModel, 3)).toMatchObject({
+          status: 'issue',
+          statusText: 'Not working',
+          checkFailureReason: connectionFailureReasons.MURAL_API_ERROR
+        })
+      })
+
+      test('stores the failure reason even for unknown reason codes', () => {
+        const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
+          check: { state: connectionChecks.FAILED, profile: null, reason: 'some_future_code_nobody_wrote_copy_for' }
+        })
+
+        expect(stepFor(viewModel, 3).checkFailureReason)
+          .toBe('some_future_code_nobody_wrote_copy_for')
+      })
+
+      test('stores null reason when Mural gives no reason', () => {
         const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
           check: { state: connectionChecks.FAILED, profile: null, reason: null }
         })
 
-        expect(stepFor(viewModel, 3).detail)
-          .toBe('Mural MCP could not use your connection. Reconnect your account to fix it.')
+        expect(stepFor(viewModel, 3).checkFailureReason)
+          .toBe(null)
       })
 
       test('stays neutral when the check could not be run, rather than inventing a problem', () => {

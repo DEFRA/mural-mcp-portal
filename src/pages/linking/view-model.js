@@ -1,12 +1,4 @@
 import { connectionChecks } from '../../constants/connection-checks.js'
-import { linkingOutcomes } from '../../constants/linking-outcomes.js'
-
-const LINKING_MESSAGES = {
-  [linkingOutcomes.SUCCESS]: { type: 'success', text: 'Connected successfully!' },
-  [linkingOutcomes.VALIDATION_FAILED]: { type: 'error', text: 'Security validation failed - please try again' },
-  [linkingOutcomes.FAILED]: { type: 'error', text: 'Connection failed - please try again' },
-  [linkingOutcomes.CANCELLED]: { type: 'warning', text: 'Connection cancelled - you can try again later' }
-}
 
 const stepStatuses = {
   CONFIRMED: 'confirmed',
@@ -43,14 +35,13 @@ class LinkingStatusViewModel {
    * @returns {LinkingStatusViewModel}
    */
   static fromLinkingStatus (status, options = {}) {
-    const message = LINKING_MESSAGES[options.outcome] ?? null
     const linked = Boolean(!status.statusError && status.linkingStatus?.linked)
 
     return new LinkingStatusViewModel({
       statusError: status.statusError,
       linked,
       linkingUrl: status.statusError ? null : status.authorizationUrl,
-      message,
+      message: options.outcome ?? null,
       requiredReason: options.requiredReason ?? null,
       needsReconnect: linked && options.check?.state === connectionChecks.FAILED,
       reconnectUrl: options.reconnectUrl ?? null,
@@ -123,9 +114,7 @@ function _checkStep ({ linked, statusError, check }) {
       ...step,
       status: stepStatuses.ISSUE,
       statusText: 'Not working',
-      detail: check.reason
-        ? `Mural MCP could not use your connection: ${check.reason} Reconnect your account to fix it.`
-        : 'Mural MCP could not use your connection. Reconnect your account to fix it.'
+      checkFailureReason: check.reason
     }
   }
 
