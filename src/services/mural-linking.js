@@ -1,4 +1,5 @@
 import { connectionChecks } from '../constants/connection-checks.js'
+import { connectionFailureReasons } from '../constants/connection-failure-reasons.js'
 import { linkingOutcomes } from '../constants/linking-outcomes.js'
 import { statusCodes } from '../constants/status-codes.js'
 import { createLogger } from '../infra/logging/logger.js'
@@ -71,15 +72,15 @@ async function verifyConnection (userId) {
   try {
     const response = await linkingApi.testConnection(userId)
 
-    if (!response.ok || !response.data) {
-      return _checkResult(connectionChecks.UNAVAILABLE)
+    if (response.ok && response.data.status === 'success') {
+      return _checkResult(connectionChecks.VERIFIED, {
+        profile: response.data.profile ?? null
+      })
     }
 
-    if (response.data.ok) {
-      return _checkResult(connectionChecks.VERIFIED, { profile: response.data.profile ?? null })
-    }
-
-    return _checkResult(connectionChecks.FAILED, { reason: response.data.reason ?? null })
+    return _checkResult(connectionChecks.FAILED, {
+      reason: _mapTestFailureReason(response.status)
+    })
   } catch (error) {
     logger.warn(buildErrorLog(error, { type: 'mural_connection_test_failed' }))
 
@@ -140,7 +141,6 @@ async function completeLinking (userId, params) {
       return { outcome: linkingOutcomes.VALIDATION_FAILED }
     }
 
-    // Should never reach here — client.js throws on unexpected statuses
     logger.error(buildErrorLog(new Error(`Unexpected status ${response.status}`), {
       type: 'mural_linking_completion_failed'
     }))
@@ -185,6 +185,27 @@ async function _fetchAuthorizationUrl (userId) {
   const response = await linkingApi.getAuthorizationUrl(userId)
 
   return response.data.authorizationUrl
+}
+
+/**
+ * Map an HTTP status code from a test connection response to a failure reason.
+ *
+ * Returns a `connectionFailureReasons` code, not user-facing text - it's the
+ * linking page view model's job to turn that into something to show.
+ *
+ * @param {number} status - The HTTP status code
+ * @returns {string|null} A `connectionFailureReasons` code, or null if unknown
+ */
+function _mapTestFailureReason (status) {
+  if (status === statusCodes.HTTP_STATUS_UNAUTHORIZED) {
+    return connectionFailureReasons.UNAUTHORIZED
+  }
+
+  if (status === statusCodes.HTTP_STATUS_BAD_GATEWAY) {
+    return connectionFailureReasons.MURAL_API_ERROR
+  }
+
+  return null
 }
 
 export {

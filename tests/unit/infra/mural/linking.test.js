@@ -175,14 +175,14 @@ describe('linkingApi', () => {
       expect(result.data).toEqual({ ok: false, reason: 'Token expired.' })
     })
 
-    test('treats a 404 as expected, so the portal can ship ahead of the server', async () => {
+    test('treats a 401 as expected, so the portal can handle unauthorized access gracefully', async () => {
       nock(MURAL_MCP_URL)
         .get('/linking/test-connection')
-        .reply(404, { detail: 'Not Found' })
+        .reply(401, { detail: 'Unauthorized' })
 
       const result = await testConnection('dev@example.com')
 
-      expect(result).toEqual({ ok: false, status: 404, data: null })
+      expect(result).toEqual({ ok: false, status: 401, data: null })
     })
 
     test('throws MuralMcpError on an unexpected status (500)', async () => {

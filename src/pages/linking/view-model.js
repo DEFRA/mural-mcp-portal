@@ -1,4 +1,5 @@
 import { connectionChecks } from '../../constants/connection-checks.js'
+import { connectionFailureReasons } from '../../constants/connection-failure-reasons.js'
 import { linkingOutcomes } from '../../constants/linking-outcomes.js'
 
 const LINKING_MESSAGES = {
@@ -7,6 +8,14 @@ const LINKING_MESSAGES = {
   [linkingOutcomes.FAILED]: { type: 'error', text: 'Connection failed - please try again' },
   [linkingOutcomes.CANCELLED]: { type: 'warning', text: 'Connection cancelled - you can try again later' }
 }
+
+const CHECK_FAILURE_DETAILS = {
+  [connectionFailureReasons.UNAUTHORIZED]:
+    'Your Mural connection has either expired or been revoked. Reconnect your account to fix it.',
+  [connectionFailureReasons.MURAL_API_ERROR]:
+    'Mural is not responding right now. This is likely a problem on Mural\'s side rather than with your connection - reconnecting probably will not help, but you can try if it keeps happening.'
+}
+const DEFAULT_CHECK_FAILURE_DETAIL = 'Mural MCP could not use your connection. Reconnect your account to fix it.'
 
 const stepStatuses = {
   CONFIRMED: 'confirmed',
@@ -123,9 +132,7 @@ function _checkStep ({ linked, statusError, check }) {
       ...step,
       status: stepStatuses.ISSUE,
       statusText: 'Not working',
-      detail: check.reason
-        ? `Mural MCP could not use your connection: ${check.reason} Reconnect your account to fix it.`
-        : 'Mural MCP could not use your connection. Reconnect your account to fix it.'
+      detail: CHECK_FAILURE_DETAILS[check.reason] ?? DEFAULT_CHECK_FAILURE_DETAIL
     }
   }
 

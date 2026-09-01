@@ -58,7 +58,10 @@ async function testConnection (userId) {
   return muralClient.request('/linking/test-connection', {
     method: 'GET',
     userId,
-    expected: [statusCodes.HTTP_STATUS_NOT_FOUND]
+    expected: [
+      statusCodes.HTTP_STATUS_UNAUTHORIZED,
+      statusCodes.HTTP_STATUS_BAD_GATEWAY
+    ]
   })
 }
 
