@@ -1,11 +1,6 @@
 import { connectionChecks } from '../../constants/connection-checks.js'
 import { linkingOutcomes } from '../../constants/linking-outcomes.js'
 
-/**
- * Display text for each linking outcome code the OAuth callback may have
- * flashed into the session. Owned here, not by the callback controller,
- * since the view model is what decides how a code is actually presented.
- */
 const LINKING_MESSAGES = {
   [linkingOutcomes.SUCCESS]: { type: 'success', text: 'Connected successfully!' },
   [linkingOutcomes.VALIDATION_FAILED]: { type: 'error', text: 'Security validation failed - please try again' },
@@ -13,11 +8,6 @@ const LINKING_MESSAGES = {
   [linkingOutcomes.CANCELLED]: { type: 'warning', text: 'Connection cancelled - you can try again later' }
 }
 
-/**
- * Step statuses understood by `common/components/check-steps.njk`. Only the three
- * this page needs are named; the macro treats anything it does not recognise
- * as grey.
- */
 const stepStatuses = {
   CONFIRMED: 'confirmed',
   LINKED: 'linked',
@@ -26,14 +16,6 @@ const stepStatuses = {
   NOT_CHECKED: 'not-checked'
 }
 
-/**
- * LinkingStatusViewModel - Display model for the Mural account linking page.
- *
- * Builds the readiness list the page leads with. Every state renders the same
- * three steps, which is the point: the page used to hide all of its content
- * behind "not connected", leaving a connected user with a heading and a
- * button, and an errored one with a tag and a sentence.
- */
 class LinkingStatusViewModel {
   constructor (data = {}) {
     this.statusError = data.statusError ?? false

@@ -1,10 +1,13 @@
 import { vi } from 'vitest'
 
+import { connectionChecks } from '../../../src/constants/connection-checks.js'
 import { linkingOutcomes } from '../../../src/constants/linking-outcomes.js'
 import {
   getLinkingStatus,
   isMuralLinked,
-  completeLinking
+  completeLinking,
+  verifyConnection,
+  getAuthorizationUrl
 } from '../../../src/services/mural-linking.js'
 
 vi.mock('../../../src/infra/mural/linking.js')
@@ -126,6 +129,80 @@ describe('muralLinkingService', () => {
       const result = await completeLinking('user-123', { code: 'code', state: 'state' })
 
       expect(result).toEqual({ outcome: linkingOutcomes.FAILED })
+    })
+  })
+
+  describe('verifyConnection', () => {
+    test('reports a working connection and carries the profile through', async () => {
+      linkingApi.testConnection.mockResolvedValue({
+        ok: true,
+        status: 200,
+        data: { ok: true, profile: { email: 'dev@example.com' } }
+      })
+
+      const result = await verifyConnection('dev@example.com')
+
+      expect(result).toEqual({
+        state: connectionChecks.VERIFIED,
+        profile: { email: 'dev@example.com' },
+        reason: null
+      })
+    })
+
+    test('reports a refusal with the reason Mural gave', async () => {
+      linkingApi.testConnection.mockResolvedValue({
+        ok: true,
+        status: 200,
+        data: { ok: false, reason: 'Token expired.' }
+      })
+
+      const result = await verifyConnection('dev@example.com')
+
+      expect(result).toMatchObject({ state: connectionChecks.FAILED, reason: 'Token expired.' })
+    })
+
+    test('reports unavailable, not failed, when the server has no such endpoint', async () => {
+      // A 404 means the portal is ahead of mural-mcp. That says nothing about
+      // the connection, so it must never surface as a broken one.
+      linkingApi.testConnection.mockResolvedValue({ ok: false, status: 404, data: null })
+
+      const result = await verifyConnection('dev@example.com')
+
+      expect(result.state).toBe(connectionChecks.UNAVAILABLE)
+    })
+
+    test('reports unavailable when the call throws', async () => {
+      linkingApi.testConnection.mockRejectedValue(new Error('ECONNREFUSED'))
+
+      const result = await verifyConnection('dev@example.com')
+
+      expect(result.state).toBe(connectionChecks.UNAVAILABLE)
+    })
+
+    test('reports unavailable when the body is missing', async () => {
+      linkingApi.testConnection.mockResolvedValue({ ok: true, status: 200, data: null })
+
+      const result = await verifyConnection('dev@example.com')
+
+      expect(result.state).toBe(connectionChecks.UNAVAILABLE)
+    })
+  })
+
+  describe('getAuthorizationUrl', () => {
+    test('returns the url the API gave', async () => {
+      linkingApi.getAuthorizationUrl.mockResolvedValue({
+        ok: true,
+        status: 200,
+        data: { authorizationUrl: 'https://mural.example/authorize' }
+      })
+
+      expect(await getAuthorizationUrl('dev@example.com')).toBe('https://mural.example/authorize')
+    })
+
+    test('returns null rather than throwing, so a failed reconnect link cannot break the page', async () => {
+      linkingApi.getAuthorizationUrl.mockRejectedValue(new Error('ECONNREFUSED'))
+
+      expect(await getAuthorizationUrl('dev@example.com')).toBeNull()
     })
   })
 })

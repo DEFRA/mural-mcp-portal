@@ -2,7 +2,8 @@ import nock from 'nock'
 import {
   getAuthorizationUrl,
   checkLinkingStatus,
-  completeLinking
+  completeLinking,
+  testConnection
 } from '../../../../src/infra/mural/linking.js'
 
 const MURAL_MCP_URL = 'http://localhost:8086'
@@ -43,6 +44,16 @@ describe('linkingApi', () => {
         .reply(200, { authorizationUrl: 'https://mural.co/oauth/authorize' })
 
       await getAuthorizationUrl('user-xyz-456')
+    })
+
+    test('passes a stub:true field through unmodified, no longer special-cased', async () => {
+      nock(MURAL_MCP_URL)
+        .get('/linking/authorization-url')
+        .reply(200, { authorizationUrl: 'https://real-consent.example', stub: true })
+
+      const result = await getAuthorizationUrl('user-123')
+
+      expect(result.data).toEqual({ authorizationUrl: 'https://real-consent.example', stub: true })
     })
   })
 
@@ -128,6 +139,59 @@ describe('linkingApi', () => {
         .reply(200, { status: 'success' })
 
       await completeLinking('user-xyz', { code: 'code', state: 'state' })
+    })
+  })
+
+  describe('testConnection', () => {
+    test('reports a working connection with the profile Mural returned', async () => {
+      nock(MURAL_MCP_URL)
+        .get('/linking/test-connection')
+        .reply(200, { ok: true, profile: { id: 'u1', email: 'dev@example.com' } })
+
+      const result = await testConnection('dev@example.com')
+
+      expect(result.ok).toBe(true)
+      expect(result.data).toEqual({ ok: true, profile: { id: 'u1', email: 'dev@example.com' } })
+    })
+
+    test('sends the caller email as the X-User-Id header', async () => {
+      const scope = nock(MURAL_MCP_URL)
+        .matchHeader('X-User-Id', 'dev@example.com')
+        .get('/linking/test-connection')
+        .reply(200, { ok: true })
+
+      await testConnection('dev@example.com')
+
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('passes through a refusal without throwing, so the page can explain it', async () => {
+      nock(MURAL_MCP_URL)
+        .get('/linking/test-connection')
+        .reply(200, { ok: false, reason: 'Token expired.' })
+
+      const result = await testConnection('dev@example.com')
+
+      expect(result.data).toEqual({ ok: false, reason: 'Token expired.' })
+    })
+
+    test('treats a 404 as expected, so the portal can ship ahead of the server', async () => {
+      nock(MURAL_MCP_URL)
+        .get('/linking/test-connection')
+        .reply(404, { detail: 'Not Found' })
+
+      const result = await testConnection('dev@example.com')
+
+      expect(result).toEqual({ ok: false, status: 404, data: null })
+    })
+
+    test('throws MuralApiError on an unexpected status (500)', async () => {
+      nock(MURAL_MCP_URL)
+        .get('/linking/test-connection')
+        .reply(500, { message: 'Internal server error' })
+
+      await expect(testConnection('dev@example.com'))
+        .rejects.toMatchObject({ name: 'MuralApiError', statusCode: 500 })
     })
   })
 })
