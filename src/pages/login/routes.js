@@ -9,14 +9,14 @@ const callbackAuth = config.get('auth.provider') === 'entra'
 const routes = [
   {
     method: 'GET',
-    path: '/login',
+    path: '/',
     options: {
       auth: {
         mode: 'try',
         strategy: 'session'
       }
     },
-    handler: loginController.getLogin
+    handler: loginController.getSignIn
   },
   {
     method: 'GET',

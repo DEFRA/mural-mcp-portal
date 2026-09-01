@@ -31,20 +31,36 @@
         {% endif %}
         <a href="/logout" class="defra-header__account-link">Sign out</a>
       {% else %}
-        <a href="/login" class="defra-header__account-link">Sign in</a>
+        <a href="/" class="defra-header__account-link">Sign in</a>
       {% endif %}
     </div>
     </div>
   </header>
-  <nav class="defra-service-navigation" aria-label="Service navigation">
-    <div class="defra-service-navigation__inner">
-      <ul class="defra-service-navigation__list">
-        <li class="defra-service-navigation__item">
-          <a class="defra-service-navigation__link" href="/" {% if page == 'home' %}aria-current="page"{% endif %}>Home</a>
-        </li>
-      </ul>
-    </div>
-  </nav>
+
+  {% if isAuthenticated %}
+    <nav class="defra-service-navigation" aria-label="Site navigation" data-module="defra-service-navigation">
+      <div class="defra-service-navigation__inner">
+        <button
+          type="button"
+          class="defra-service-navigation__toggle js-service-navigation-toggle"
+          aria-controls="site-navigation-list"
+          aria-expanded="false"
+          hidden
+        >Menu</button>
+        <ul class="defra-service-navigation__list" id="site-navigation-list">
+          <li class="defra-service-navigation__item">
+            <a class="defra-service-navigation__link" href="/dashboard" {% if currentUrl == '/dashboard' %}aria-current="page"{% endif %}>Dashboard</a>
+          </li>
+          <li class="defra-service-navigation__item">
+            <a class="defra-service-navigation__link" href="/approvals" {% if currentUrl and currentUrl.startsWith('/approvals') %}aria-current="page"{% endif %}>My approvals</a>
+          </li>
+          <li class="defra-service-navigation__item">
+            <a class="defra-service-navigation__link" href="/board-requests/new" {% if currentUrl and currentUrl.startsWith('/board-requests') %}aria-current="page"{% endif %}>Request a board</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  {% endif %}
 {% endblock %}
 
 {% block pageTitle %}

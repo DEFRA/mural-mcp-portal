@@ -51,10 +51,10 @@ All AICE projects must have at minimum the following workflows:
 `scan.yml` is a **reusable workflow** that is called by `check-pull-request.yml`, `publish.yml` and `publish-hotfix.yml`. It also runs on a nightly schedule as a standalone scan. This pattern ensures security scanning runs consistently at every stage of the delivery pipeline.
 
 See the following for reference implementations:
-- [scan.yml](https://github.com/DEFRA/ai-uc-rag-evaluation-runtime/blob/main/.github/workflows/scan.yml)
-- [check-pull-request.yml](https://github.com/DEFRA/ai-uc-rag-evaluation-runtime/blob/main/.github/workflows/check-pull-request.yml)
-- [publish.yml](https://github.com/DEFRA/ai-uc-rag-evaluation-runtime/blob/main/.github/workflows/publish.yml)
-- [publish-hotfix.yml](https://github.com/DEFRA/ai-uc-rag-evaluation-runtime/blob/main/.github/workflows/publish-hotfix.yml)
+- [scan.yml](https://github.com/DEFRA/rag-evaluation-runtime/blob/main/.github/workflows/scan.yml)
+- [check-pull-request.yml](https://github.com/DEFRA/rag-evaluation-runtime/blob/main/.github/workflows/check-pull-request.yml)
+- [publish.yml](https://github.com/DEFRA/rag-evaluation-runtime/blob/main/.github/workflows/publish.yml)
+- [publish-hotfix.yml](https://github.com/DEFRA/rag-evaluation-runtime/blob/main/.github/workflows/publish-hotfix.yml)
 
 ### 1.2 Security
 

@@ -1,20 +1,28 @@
+@use 'govuk-frontend' as *;
 @use '../variables/colours' as *;
 
 .defra-header {
-  background-color: $govuk-white;
+  background-color: govuk-colour("white");
 }
 
+// `govuk-width-container` rather than a hand-rolled `max-width` + `padding`
+// pair. The two are not equivalent: the mixin applies the gutter as a *margin*,
+// so its content box is the full 960px, where `max-width: 960px` with 15px of
+// padding gives 930px. The header used the padding form, which left the logo
+// and service name sitting 15px inboard of the page content below on wide
+// screens - and 15px outboard of it between tablet and 1020px, where the
+// mixin's gutter grows to 30px and the padding did not. Nothing in the service
+// shared a left edge. Same fix in `_defra-service-navigation.scss` and
+// `.defra-width-container`.
 .defra-header__inner {
+  @include govuk-width-container;
+
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 24px;
-  padding-top: 12px;
-  padding-bottom: 12px;
-  max-width: 960px;
-  margin: 0 auto;
-  padding-left: 15px;
-  padding-right: 15px;
+  gap: govuk-spacing(5);
+  padding-top: govuk-spacing(2);
+  padding-bottom: govuk-spacing(2);
 }
 
 .defra-header__brand-group {
@@ -27,38 +35,32 @@
 }
 
 .defra-header__service-name {
+  @include govuk-font($size: 24, $weight: bold);
+
   justify-self: center;
-  font-family: Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-size: 22px;
-  font-weight: 700;
-  color: $defra-green-aa;
   line-height: 1.2;
   text-decoration: none;
 
-  // Explicit link states to override govuk-frontend global `a{color:#1d70b8}`
-  &:link {
-    color: $defra-green-aa;
-  }
-
+  // `$defra-green`, not `$defra-green-light`. The light green is 3.33:1 on
+  // white: it cleared AA's 3:1 large-text threshold at the desktop size and
+  // failed it at both mobile sizes, where the text drops below the 18.66px
+  // bold cutoff. Explicit link states because govuk-frontend sets `a { color }`
+  // globally.
+  &,
+  &:link,
   &:visited {
-    color: $defra-green-aa;
+    color: $defra-green;
   }
 
   &:hover {
-    color: $defra-green-aa;
+    color: $defra-green;
     text-decoration: underline;
-    text-decoration-thickness: 3px;
+    text-decoration-thickness: max(3px, 0.1875rem, 0.12em);
     text-underline-offset: 0.15em;
   }
 
   &:focus {
-    outline: 3px solid $govuk-yellow;
-    outline-offset: 2px;
-    background-color: $govuk-yellow;
-    box-shadow: none;
-    text-decoration: none;
+    @include govuk-focused-text;
   }
 }
 
@@ -68,7 +70,7 @@
   justify-self: end;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: govuk-spacing(1);
 }
 
 .defra-header__account-icon {
@@ -76,153 +78,71 @@
   color: $defra-green;
 }
 
+// A link, but styled as the name it is. It reads as the label on the account
+// it belongs to rather than as a call to action, so it takes the text colour
+// and shows its underline only on hover and focus.
 .defra-header__account-name {
-  font-family: Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-size: 16px;
-  font-weight: 400;
-  color: $govuk-black;
+  @include govuk-font($size: 16);
+
   white-space: nowrap;
+  text-decoration: none;
+
+  &,
+  &:link,
+  &:visited {
+    color: $govuk-text-colour;
+  }
+
+  &:hover {
+    color: $govuk-text-colour;
+    text-decoration: underline;
+    text-decoration-thickness: max(3px, 0.1875rem, 0.12em);
+    text-underline-offset: 0.15em;
+  }
+
+  &:focus {
+    @include govuk-focused-text;
+  }
 }
 
 .defra-header__account-divider {
   width: 1px;
   height: 20px;
-  background-color: $govuk-mid-grey;
+  background-color: $govuk-border-colour;
 }
 
 .defra-header__account-link {
-  font-family: Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-size: 16px;
-  font-weight: 400;
+  @include govuk-font($size: 16);
+
   white-space: nowrap;
 
   &,
   &:link,
   &:visited {
-    color: $defra-green-aa;
+    color: $defra-green;
   }
 
   &:hover {
-    color: $defra-green-aa;
-    text-decoration-thickness: 3px;
+    color: $defra-green;
+    text-decoration-thickness: max(3px, 0.1875rem, 0.12em);
     text-underline-offset: 0.15em;
   }
 
   &:focus {
-    outline: 3px solid $govuk-yellow;
-    outline-offset: 2px;
-    background-color: $govuk-yellow;
-    color: $govuk-black;
-    box-shadow: none;
-    text-decoration: none;
+    @include govuk-focused-text;
   }
 }
 
-// ===== Header search =====
-
-.defra-header-search {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin: 0;
-}
-
-.defra-header-search--nhs {
-  display: inline-flex;
-  align-items: stretch;
-  border: 1px solid $govuk-black;
-  background-color: $govuk-white;
-}
-
-// Search input wrapper - ensures consistent dimensions during JS initialisation
-// The wrapper has fixed dimensions so the container doesn't resize when
-// accessible-autocomplete replaces the input element
-.defra-header-search__wrapper {
-  width: 220px;
-  height: 40px;
-  position: relative;
-}
-
-.defra-header-search__label {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px;
-  font-family: Arial, sans-serif;
-  color: #0b0c0c; // GOV.UK black for better contrast
-  pointer-events: none;
-  z-index: 1;
-}
-
-// Hide label when input has focus or contains text
-.defra-header-search__wrapper:focus-within .defra-header-search__label,
-.defra-header-search__label--hidden {
-  // Use clip-path to hide but keep accessible
-  clip-path: inset(50%);
-  height: 1px;
-  overflow: hidden;
-  position: absolute;
-  white-space: nowrap;
-  width: 1px;
-}
-
-.defra-header-search__input {
-  border: 0;
-  box-shadow: none;
-  width: 100%;
-  height: 100%;
-  padding: 8px 10px;
-  font-size: 16px;
-  box-sizing: border-box;
-}
-
-.defra-header-search__button {
-  border: 0;
-  border-left: 1px solid $defra-green;
-  background-color: $defra-green;
-  padding: 0;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  &:hover {
-    background-color: $defra-green;
-  }
-}
-
-.defra-header-search__icon {
-  width: 16px;
-  height: 16px;
-  stroke: $govuk-white;
-  fill: none;
-}
-
-.defra-header-search--nhs:focus-within {
-  outline: 3px solid #ffbf47;
-  outline-offset: 1px;
-}
-
-// Responsive header styles
-@media (max-width: 768px) {
+// The type in here now comes from the GOV.UK scale, which already steps down
+// on small screens - so the only thing left for a breakpoint to do is reflow
+// the grid and shrink the logo.
+@include govuk-media-query($until: desktop) {
   .defra-header__inner {
     grid-template-columns: auto 1fr;
-    gap: 12px;
-  }
-
-  .defra-header-search,
-  .defra-header-search--nhs {
-    display: none;
+    gap: govuk-spacing(2);
   }
 
   .defra-header__service-name {
-    font-size: 18px;
     justify-self: start;
   }
 
@@ -233,21 +153,12 @@
   .defra-header__account {
     grid-column: 1 / -1;
     justify-self: start;
-    margin-top: 4px;
+    margin-top: govuk-spacing(1);
   }
 }
 
-@media (max-width: 480px) {
-  .defra-header__service-name {
-    font-size: 16px;
-  }
-
+@include govuk-media-query($until: 30em) {
   .defra-header__logo {
     height: 40px;
-  }
-
-  .defra-header__account-name,
-  .defra-header__account-link {
-    font-size: 14px;
   }
 }

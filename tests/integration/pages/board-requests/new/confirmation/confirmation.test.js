@@ -81,7 +81,7 @@ describe('confirmationPage', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('GET /board-requests/new/confirmation redirects to login', async () => {
+    test('GET /board-requests/new/confirmation redirects to sign in', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/board-requests/new/confirmation'
@@ -89,7 +89,7 @@ describe('confirmationPage', () => {
 
       expect(statusCode).toBe(302)
       expect(headers).toHaveProperty('location')
-      expect(headers.location).toContain('/login')
+      expect(headers.location).toBe('/')
     })
   })
 })

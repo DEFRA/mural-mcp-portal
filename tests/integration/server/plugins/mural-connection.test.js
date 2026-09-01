@@ -104,13 +104,13 @@ describe('muralConnectionPlugin', () => {
     expect(set).not.toHaveBeenCalled()
   })
 
-  test('redirects to login when there is no authenticated user', async () => {
+  test('redirects to sign in when there is no authenticated user', async () => {
     const { server, set } = await buildServer({ authenticated: false })
 
     const { statusCode, headers } = await server.inject({ method: 'GET', url: '/gated' })
 
     expect(statusCode).toBe(302)
-    expect(headers.location).toBe('/login')
+    expect(headers.location).toBe('/')
     expect(isMuralLinked).not.toHaveBeenCalled()
     expect(set).not.toHaveBeenCalled()
   })

@@ -13,15 +13,15 @@ const logger = createLogger()
 const AUTH_FAIL_MESSAGE = 'Authentication failed. Please try again.'
 
 /**
- * GET /login — renders the sign-in page.
+ * GET / — renders the sign-in page.
  *
  * @param {Hapi.Request} request
  * @param {Hapi.ResponseToolkit} h
  * @returns {Promise<any>}
  */
-async function getLogin (request, h) {
+async function getSignIn (request, h) {
   if (request.auth.isAuthenticated) {
-    return h.redirect('/')
+    return h.redirect('/dashboard')
   }
 
   return h.view('login/login.njk', {
@@ -55,7 +55,7 @@ async function handleLoginCallback (request, h) {
 
   request.cookieAuth.set({ sessionId })
 
-  return h.redirect('/')
+  return h.redirect('/dashboard')
 }
 
 /**
@@ -134,7 +134,7 @@ function _getDevSession () {
 }
 
 export {
-  getLogin,
+  getSignIn,
   handleLoginCallback,
   logout
 }

@@ -1,3 +1,4 @@
+@use 'govuk-frontend' as *;
 @use '../variables/colours' as *;
 
 // ===== Tiles =====
@@ -9,20 +10,12 @@
 .defra-tile-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
-  margin: 16px -15px 24px;
+  gap: govuk-spacing(6);
+  margin: 0 0 govuk-spacing(5);
   padding: 0;
   list-style: none;
 
-  @media (max-width: 48.0525em) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.defra-tile-grid--half {
-  grid-template-columns: repeat(2, 1fr);
-
-  @media (max-width: 48.0525em) {
+  @include govuk-media-query($until: desktop) {
     grid-template-columns: 1fr;
   }
 }
@@ -30,46 +23,32 @@
 .defra-tile {
   display: block;
   position: relative;
-  border: 1px solid $govuk-mid-grey;
-  padding: 18px 18px 22px;
-  color: $govuk-black;
-  background-color: $govuk-white;
-  min-height: 140px;
-  transform: translateY(0);
+  border: 1px solid $govuk-border-colour;
+  padding: govuk-spacing(4);
+  color: $govuk-text-colour;
+  background-color: govuk-colour("white");
+  height: 100%;
+  box-sizing: border-box;
   transition:
     border-color 0.1s ease-out,
-    box-shadow 0.1s ease-out,
-    background-color 0.1s ease-out,
-    transform 0.1s ease-out;
+    background-color 0.1s ease-out;
 }
 
-// Hover effect on the card (triggered by :has() when the link inside is hovered)
+// Hover effect on the card. Deliberately restrained - a border-colour and
+// background change only. A lift/shadow reads as an app affordance rather
+// than a GOV.UK one, and the movement is distracting on a grid of tiles.
 .defra-tile:hover {
   border-color: $defra-green;
-  background-color: $govuk-light-grey;
-  box-shadow: 0 2px 0 $govuk-black;
-  transform: translateY(-1px);
-}
-
-// Focus-visible on the card when the link inside is focused
-.defra-tile:has(.defra-tile__link:focus-visible) {
-  border-color: $govuk-black;
-  outline: 3px solid $govuk-focus-colour;
-  outline-offset: 0;
-  box-shadow: 0 0 0 1px $govuk-black;
-  background-color: $govuk-white;
+  background-color: govuk-colour("black", $variant: "tint-95");
 }
 
 .defra-tile__title {
-  margin-bottom: 8px;
+  margin-bottom: govuk-spacing(1);
 }
 
-// The heading link — only the heading text is the accessible link
+// The heading link - only the heading text is the accessible link.
 .defra-tile__link {
-  color: $govuk-blue;
-  text-decoration: underline;
-
-  // Stretch the click target across the entire card
+  // Stretch the click target across the entire card.
   &::after {
     content: '';
     position: absolute;
@@ -79,22 +58,25 @@
     left: 0;
   }
 
+  // The GOV.UK focus highlight, on the link itself. It used to be suppressed
+  // here and redrawn on the card via `:has()`, which left anything without
+  // `:has()` support with no visible focus at all. The card treatment below is
+  // now an enhancement on top of a working base, not a replacement for one.
   &:focus {
-    outline: none;
-  }
-
-  &:focus-visible {
-    outline: none;
+    @include govuk-focused-text;
   }
 }
 
-.defra-tile__link:visited {
-  color: $govuk-blue;
+// Extend the highlight to the card outline where `:has()` is available, so the
+// thing that will actually be activated is the thing that looks focused.
+.defra-tile:has(.defra-tile__link:focus-visible) {
+  border-color: $govuk-focus-text-colour;
+  box-shadow: 0 0 0 1px $govuk-focus-text-colour;
+  background-color: govuk-colour("white");
 }
 
-.defra-tile:hover .defra-tile__link {
-  color: $govuk-blue;
-  text-decoration: underline;
+.defra-tile__count {
+  margin: 0 0 govuk-spacing(2);
 }
 
 .defra-tile__body {

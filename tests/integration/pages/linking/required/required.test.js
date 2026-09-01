@@ -109,6 +109,25 @@ describe('muralLinkRequiredController', () => {
 
         expect(payload).toContain('href="/account/mural-linking"')
       })
+
+      test('links back to the dashboard for a user who does not want to connect', async () => {
+        mockLinkingStatus(false)
+
+        const gatedResponse = await server.inject({
+          method: 'GET',
+          url: '/board-requests/new',
+          headers: { Cookie: cookie }
+        })
+        const sessionCookie = mergeCookies(cookie, gatedResponse.headers['set-cookie'])
+
+        const { payload } = await server.inject({
+          method: 'GET',
+          url: '/account/mural-linking/required',
+          headers: { Cookie: sessionCookie }
+        })
+
+        expect(payload).toContain('href="/dashboard"')
+      })
     })
   })
 
@@ -124,14 +143,14 @@ describe('muralLinkRequiredController', () => {
       await server.stop({ timeout: 0 })
     })
 
-    test('GET /account/mural-linking/required redirects to login', async () => {
+    test('GET /account/mural-linking/required redirects to sign in', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'GET',
         url: '/account/mural-linking/required'
       })
 
       expect(statusCode).toBe(302)
-      expect(headers.location).toContain('/login')
+      expect(headers.location).toBe('/')
     })
   })
 })

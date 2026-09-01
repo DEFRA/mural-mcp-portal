@@ -221,13 +221,13 @@ describe('when unauthenticated', () => {
     await server.stop({ timeout: 0 })
   })
 
-  test('GET /account/mural-linking/callback redirects to login', async () => {
+  test('GET /account/mural-linking/callback redirects to sign in', async () => {
     const response = await server.inject({
       method: 'GET',
       url: '/account/mural-linking/callback?code=auth_code_123&state=state_xyz'
     })
 
     expect(response.statusCode).toBe(302)
-    expect(response.headers.location).toContain('/login')
+    expect(response.headers.location).toBe('/')
   })
 })

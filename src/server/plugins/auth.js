@@ -209,7 +209,7 @@ function _getCookieOptions () {
       isSameSite: 'Lax',
       ttl: config.get('session.cookie.ttl')
     },
-    redirectTo: '/login',
+    redirectTo: '/',
     validate: _validateSessionToken
   }
 }

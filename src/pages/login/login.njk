@@ -1,27 +1,49 @@
-{% extends "common/layout.njk" %}
+{% extends "common/layouts/hub.njk" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set title = 'Sign in to the Mural MCP Portal' %}
+{% set description = 'Use the portal to manage the Mural connection the MCP server uses, and to request boards.' %}
+
+{% block heroActions %}
+  {#
+    `govukButton` rather than a hand-written <a class="govuk-button">. A link
+    styled as a button needs `role="button"` and `data-module="govuk-button"`
+    for the space bar to activate it, which the component adds and the markup
+    here did not - so this button, and every other one in the service, was
+    keyboard-operable by Enter only.
+  #}
+  {{ govukButton({
+    text: "Sign in with your Defra account",
+    href: "/login/callback",
+    isStartButton: true,
+    classes: "defra-hero__button"
+  }) }}
+
+  <p class="govuk-body">
+    This is an internal service. You need a Defra account to sign in.
+  </p>
+{% endblock %}
+
+{% block heroAside %}
+  <aside class="defra-hero__whats-new">
+    <h2 class="govuk-heading-s">What you can do</h2>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Connect your Mural account for the MCP server to use</li>
+      <li>Request new Mural boards</li>
+      <li>Track the status of your board requests</li>
+    </ul>
+  </aside>
+{% endblock %}
 
 {% block content %}
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-      <h1 class="govuk-heading-l">Sign in to the Mural MCP Portal</h1>
-
-      <p class="govuk-body">
-        Use the portal to manage your connection to the Mural MCP, and to request new boards. You need a Defra account to sign in.
-      </p>
-
-      <a href="/login/callback" class="govuk-button govuk-button--start">
-        Sign in with your Defra account
-        <svg class="govuk-button__start-icon" xmlns="http://www.w3.org/2000/svg" width="17.5" height="19" viewBox="0 0 33 40" aria-hidden="true" focusable="false">
-          <path fill="currentColor" d="M0 0h13l20 20-20 20H0l20-20z" />
-        </svg>
-      </a>
-
       <h2 class="govuk-heading-m">If you cannot sign in</h2>
 
-    <p class="govuk-body">
-      Email the AI Capability and Enablement team at
-      <a class="govuk-link" href="mailto:AICapabilityAndEnablement@defra.gov.uk">AICapabilityAndEnablement@defra.gov.uk</a>.
-    </p>
+      <p class="govuk-body">
+        Email the AI Capability and Enablement team at
+        <a class="govuk-link" href="mailto:AICapabilityAndEnablement@defra.gov.uk">AICapabilityAndEnablement@defra.gov.uk</a>.
+      </p>
     </div>
   </div>
 {% endblock %}

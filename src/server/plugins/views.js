@@ -81,7 +81,8 @@ const viewPlugin = {
       aceSlackChannel,
       isAuthenticated: Boolean(request?.auth?.isAuthenticated),
       userDisplayName: request?.auth?.credentials?.profile?.displayName ?? null,
-      userEmail: request?.auth?.credentials?.profile?.email ?? null
+      userEmail: request?.auth?.credentials?.profile?.email ?? null,
+      currentUrl: request?.path ?? null
     })
   }
 }
