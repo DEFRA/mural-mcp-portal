@@ -1,8 +1,8 @@
 # mural-mcp-portal
 
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_ai-uc-mural-mcp-portal&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=DEFRA_ai-uc-mural-mcp-portal)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_ai-uc-mural-mcp-portal&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DEFRA_ai-uc-mural-mcp-portal)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_ai-uc-mural-mcp-portal&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DEFRA_ai-uc-mural-mcp-portal)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_mural-mcp-portal&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=DEFRA_mural-mcp-portal)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_mural-mcp-portal&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DEFRA_mural-mcp-portal)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_mural-mcp-portal&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DEFRA_mural-mcp-portal)
 
 Core delivery platform Node.js Frontend Template.
 
