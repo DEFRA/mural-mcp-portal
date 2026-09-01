@@ -8,12 +8,12 @@ import { statusCodes } from '../../../constants/status-codes.js'
  * `getAuthorizationUrl` pointed the user here instead of at a real Mural
  * URL. Approve/Deny both link straight to the real callback route.
  *
- * @param {import('@hapi/hapi').Request} request - Hapi request object
+ * @param {import('@hapi/hapi').Request} _request - Hapi request object
  * @param {import('@hapi/hapi').ResponseToolkit} h - Hapi response toolkit
  *
  * @returns {import('@hapi/hapi').ResponseObject} The response object for the mock consent page
  */
-async function getMockConsentPage (request, h) {
+async function getMockConsentPage (_request, h) {
   return h.view('linking/mock-consent/page.njk').code(statusCodes.HTTP_STATUS_OK)
 }
 

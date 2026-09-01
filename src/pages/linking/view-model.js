@@ -96,14 +96,6 @@ function _steps ({ linked, statusError, check, userEmail }) {
 /**
  * @private
  * Whether Mural MCP can actually use the stored connection.
- *
- * The check is on the MCP server, not the portal: it asks Mural MCP to load
- * the user's Mural profile through the API, so a green step means the thing
- * that will really read boards can reach Mural as them.
- *
- * Nothing to check until there is a connection, and nothing worth saying if we
- * could not reach the server to ask - "Not checked" is honest in both cases,
- * where an error tag would invent a problem.
  */
 function _checkStep ({ linked, statusError, check }) {
   const step = { number: 3, title: 'Check Mural MCP' }
@@ -161,10 +153,12 @@ function _verifiedDetail (profile) {
  * @private
  */
 function _connectionStep ({ linked, statusError, userEmail }) {
+  const title = 'Connect your Mural account'
+
   if (statusError) {
     return {
       number: 2,
-      title: 'Connect your Mural account',
+      title,
       status: stepStatuses.ISSUE,
       statusText: 'Unavailable',
       detail: 'We could not check your connection. Try again in a few minutes.'
@@ -174,7 +168,7 @@ function _connectionStep ({ linked, statusError, userEmail }) {
   if (linked) {
     return {
       number: 2,
-      title: 'Connect your Mural account',
+      title,
       status: stepStatuses.LINKED,
       statusText: 'Connected',
       detail: userEmail ? `Your Mural account is connected as ${userEmail}` : null
@@ -183,7 +177,7 @@ function _connectionStep ({ linked, statusError, userEmail }) {
 
   return {
     number: 2,
-    title: 'Connect your Mural account',
+    title,
     status: stepStatuses.NOT_CHECKED,
     statusText: 'Not connected',
     detail: 'Gives the MCP server permission to read Mural boards as you.'
