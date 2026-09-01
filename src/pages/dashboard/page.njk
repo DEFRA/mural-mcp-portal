@@ -1,65 +1,62 @@
-{% extends "common/layout.njk" %}
+{% extends "common/layouts/hub.njk" %}
+{% from "govuk/components/tag/macro.njk" import govukTag %}
+{% from "common/components/tile-grid.njk" import appTileGrid %}
 
-{% set pageTitle = 'Dashboard' %}
+{#
+  The <h1> says what you can do here, not what the service is called. The
+  service name is already in the header and in the browser tab; setting it as
+  the heading too put the same three words on screen three times and left the
+  page without a heading of its own.
+#}
+{% set pageTitle = 'Home' %}
+{% set title = 'Manage your Mural board access' %}
+{% set description = 'Request governed access to Mural boards, and review the requests waiting on you.' %}
 
 {% block content %}
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-full">
-      {% if muralStatusError %}
-        <div class="govuk-notification-banner govuk-notification-banner--with-icon" role="alert">
-          <div class="govuk-notification-banner__header">
-            <h2 class="govuk-notification-banner__title">
-              Unable to check connection status
-            </h2>
-          </div>
-          <div class="govuk-notification-banner__content">
-            <p class="govuk-body">We couldn't check your Mural connection status. Please try again later.</p>
-          </div>
-        </div>
-      {% elif muralLinked %}
-        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert">
-          <div class="govuk-notification-banner__header">
-            <h2 class="govuk-notification-banner__title">
-              Connected
-            </h2>
-          </div>
-          <div class="govuk-notification-banner__content">
-            <p class="govuk-body">Your Mural account is connected.</p>
-          </div>
-        </div>
-      {% else %}
-        <div class="govuk-notification-banner govuk-notification-banner--with-icon" role="alert">
-          <div class="govuk-notification-banner__header">
-            <h2 class="govuk-notification-banner__title">
-              Mural account not connected
-            </h2>
-          </div>
-          <div class="govuk-notification-banner__content">
-            <p class="govuk-body">
-              <a class="govuk-link" href="/account/mural-linking">Connect your Mural account</a> to request and manage boards.
-            </p>
-          </div>
-        </div>
-      {% endif %}
-
-      <ul class="defra-tile-grid defra-tile-grid--half">
-        <li>
-          <div class="defra-tile">
-            <h3 class="govuk-heading-s defra-tile__title">
-              <a class="defra-tile__link" href="/approvals">My approvals</a>
-            </h3>
-            <p class="govuk-body-s defra-tile__body">View the status of your Mural board approval requests.</p>
-          </div>
-        </li>
-        <li>
-          <div class="defra-tile">
-            <h3 class="govuk-heading-s defra-tile__title">
-              <a class="defra-tile__link" href="/board-requests/new">Request a board</a>
-            </h3>
-            <p class="govuk-body-s defra-tile__body">Ask for a new Mural board to be set up.</p>
-          </div>
-        </li>
-      </ul>
+    <div class="govuk-grid-column-two-thirds">
+      <div class="govuk-inset-text app-status-panel">
+        <h2 class="govuk-heading-s">Your Mural connection</h2>
+        <p class="govuk-body">
+          {{ govukTag({ text: connection.tagText, classes: connection.tagClasses }) }}
+        </p>
+        {% if connection.hint %}
+          <p class="govuk-body">{{ connection.hint }}</p>
+        {% endif %}
+        {% if connection.actionHref %}
+          <p class="govuk-body">
+            <a class="govuk-link" href="{{ connection.actionHref }}">{{ connection.actionText }}</a>
+          </p>
+        {% endif %}
+      </div>
     </div>
   </div>
+
+  <h2 class="govuk-heading-m">What you can do</h2>
+
+  {%- set tiles = [
+    {
+      text: 'Boards',
+      href: '/boards',
+      description: 'Search governed Mural boards and check the status of requests you have made.'
+    },
+    {
+      text: 'Approvals to review',
+      href: '/approvals',
+      description: 'Board requests waiting for your decision as Information Asset Owner.',
+      count: reviewCount
+    },
+    {
+      text: 'Request a board',
+      href: '/board-requests/new',
+      description: 'Ask for a Mural board to be approved for use with the MCP server.'
+    },
+    {
+      text: 'Access tokens',
+      href: '/account/tokens',
+      description: 'Create and manage the tokens your MCP client uses to sign in as you.'
+    }
+  ] -%}
+
+  {{ appTileGrid(tiles) }}
 {% endblock %}

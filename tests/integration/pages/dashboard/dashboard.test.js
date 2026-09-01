@@ -1,6 +1,7 @@
 import nock from 'nock'
 
 import { createServer } from '../../../../src/server/server.js'
+import { get } from '../../../helpers/server.js'
 import { loginAsDevUser } from '../../../helpers/login.js'
 
 const MURAL_MCP_URL = 'http://localhost:8086'
@@ -30,31 +31,46 @@ describe('dashboardController', () => {
     })
 
     describe('GET /dashboard', () => {
-      test('renders tile links to My approvals and Request a board', async () => {
+      test('renders tile links to each onward journey', async () => {
         nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked: true })
 
-        const response = await server.inject({
-          method: 'GET',
-          url: '/dashboard',
-          headers: { Cookie: authCookie }
-        })
+        const response = await get(server, '/dashboard', authCookie)
 
         expect(response.statusCode).toBe(200)
+        expect(response.result).toContain('href="/boards"')
         expect(response.result).toContain('href="/approvals"')
         expect(response.result).toContain('href="/board-requests/new"')
+        expect(response.result).toContain('href="/account/tokens"')
+      })
+
+      test('leads with a heading rather than a notification banner', async () => {
+        nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked: true })
+
+        const response = await get(server, '/dashboard', authCookie)
+
+        expect(response.result).toContain('<h1 class="govuk-heading-xl">Manage your Mural board access</h1>')
+        expect(response.result).not.toContain('govuk-notification-banner')
+      })
+
+      test('does not render a count tag when reviewCount defaults to 0', async () => {
+        nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked: true })
+
+        const response = await get(server, '/dashboard', authCookie)
+
+        // When reviewCount is not provided, it defaults to 0 and should not show a tag
+        expect(response.statusCode).toBe(200)
+        expect(response.result).toContain('Approvals to review')
+        // The tag should not render with a 0 count since `if tile.count` is falsy
+        expect(response.result).not.toContain('govuk-tag--red')
       })
 
       test('shows the connected status when Mural is linked', async () => {
         nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked: true })
 
-        const response = await server.inject({
-          method: 'GET',
-          url: '/dashboard',
-          headers: { Cookie: authCookie }
-        })
+        const response = await get(server, '/dashboard', authCookie)
 
-        expect(response.result).toContain('Connected')
-        expect(response.result).not.toContain('Mural account not connected')
+        expect(response.result).toContain('govuk-tag--green">\n  Connected')
+        expect(response.result).not.toContain('Not connected')
       })
 
       test('shows the not-connected status with a link to connect when Mural is not linked', async () => {
@@ -63,27 +79,22 @@ describe('dashboardController', () => {
           .get('/linking/authorization-url')
           .reply(200, { authorizationUrl: 'https://mural.co/oauth/authorize?state=abc' })
 
-        const response = await server.inject({
-          method: 'GET',
-          url: '/dashboard',
-          headers: { Cookie: authCookie }
-        })
+        const response = await get(server, '/dashboard', authCookie)
 
-        expect(response.result).toContain('Mural account not connected')
+        expect(response.result).toContain('Not connected')
+        expect(response.result).toContain('Connect your Mural account')
         expect(response.result).toContain('href="/account/mural-linking"')
       })
 
       test('degrades gracefully when the Mural status check fails', async () => {
         nock(MURAL_MCP_URL).get('/linking/status').reply(500, { error: 'Internal server error' })
 
-        const response = await server.inject({
-          method: 'GET',
-          url: '/dashboard',
-          headers: { Cookie: authCookie }
-        })
+        const response = await get(server, '/dashboard', authCookie)
 
         expect(response.statusCode).toBe(200)
-        expect(response.result).toContain("We couldn't check your Mural connection status. Please try again later.")
+        expect(response.result).toContain('Unavailable')
+        expect(response.result).toContain('connection status')
+        expect(response.result).not.toContain('Not connected')
       })
     })
   })
@@ -101,10 +112,7 @@ describe('dashboardController', () => {
     })
 
     test('GET /dashboard redirects to sign in', async () => {
-      const response = await server.inject({
-        method: 'GET',
-        url: '/dashboard'
-      })
+      const response = await get(server, '/dashboard')
 
       expect(response.statusCode).toBe(302)
       expect(response.headers.location).toBe('/')
