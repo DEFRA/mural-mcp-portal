@@ -1,72 +1,52 @@
+@use 'sass:color';
+@use 'govuk-frontend' as *;
 @use '../variables/colours' as *;
 
+// The hero needs a width container that is not `.govuk-width-container`,
+// because it sits inside a full-bleed green band. It must measure the same,
+// though - so it is the same mixin, not a re-derivation of it.
 .defra-width-container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding-left: 15px;
-  padding-right: 15px;
+  @include govuk-width-container;
 }
 
-.defra-main-inner {
-  max-width: 960px;
-  margin: 0 auto;
-  padding-left: 15px;
-  padding-right: 15px;
-  margin-bottom: 60px;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.govuk-main-wrapper {
-  display: block;
-  overflow-x: visible;
-}
-
-.govuk-main-wrapper > .defra-hero:first-child {
-  margin-top: -40px;
-}
-
-html,
-body {
-  overflow-x: hidden;
-  max-width: 100%;
-}
-
+// Full-bleed brand bands are rendered *outside* `govuk-width-container` by
+// `common/layouts/base.njk`'s `container` block override, so they span the
+// viewport without needing the `width: 100vw` / `translateX(-50%)` trick -
+// which in turn means no `overflow-x: hidden` on `html`/`body`, so
+// `position: sticky` still works.
 .defra-hero {
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100vw;
   background-color: $defra-green;
-  color: $govuk-white;
-  padding: 40px 15px;
-  margin-top: 0;
-  margin-bottom: 0;
-  box-sizing: border-box;
+  color: govuk-colour("white");
+  padding: govuk-spacing(7) 0;
 }
 
 .defra-hero .govuk-heading-xl,
+.defra-hero .govuk-caption-xl,
 .defra-hero .govuk-body-l,
 .defra-hero .govuk-body {
-  color: $govuk-white;
-  margin-left: 0;
-  padding-left: 0;
+  color: govuk-colour("white");
+}
+
+.defra-hero .govuk-heading-xl:last-child,
+.defra-hero .govuk-body-l:last-child,
+.defra-hero .govuk-body:last-child {
+  margin-bottom: 0;
 }
 
 .defra-hero__whats-new {
   border: 1px solid rgb(255, 255, 255, 0.6);
-  padding: 16px 20px;
+  padding: govuk-spacing(4);
   background-color: transparent;
 }
 
 .defra-hero__whats-new,
 .defra-hero__whats-new * {
-  color: $govuk-white;
+  color: govuk-colour("white");
 }
 
 .defra-hero__button {
-  background-color: $govuk-white;
-  box-shadow: 0 2px 0 darken($govuk-white, 15%);
+  background-color: govuk-colour("white");
+  box-shadow: 0 2px 0 color.adjust(govuk-colour("white"), $lightness: -15%);
 }
 
 // GOV.UK Frontend's button styles set colour on `.govuk-button:link`,
@@ -81,133 +61,26 @@ body {
 }
 
 .defra-hero__button:hover {
-  background-color: darken($govuk-white, 5%);
+  background-color: color.adjust(govuk-colour("white"), $lightness: -5%);
 }
 
-// ===== Version banner =====
+// ===== Notes =====
+// Explanatory copy about how a page works, below the content it explains.
+// Rendered as a stack of insets when there are one or two, and as an accordion
+// once there are three or more - see `common/macros/notes.njk`.
 
-.defra-version-banner {
-  margin: 20px -15px 32px;
-  padding: 15px 20px;
-  border: 1px solid $govuk-mid-grey;
-  background-color: $govuk-light-grey;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  box-sizing: border-box;
-  font-family: Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.app-notes {
+  margin-top: govuk-spacing(7);
 }
 
-.defra-version-banner__label {
-  display: inline-block;
-  padding: 4px 10px;
-  background-color: $defra-green;
-  color: $govuk-white;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1.25;
-  text-transform: none;
+.app-notes__note + .app-notes__note {
+  margin-top: govuk-spacing(4);
 }
 
-.defra-version-banner__text {
-  font-size: 16px;
-  line-height: 1.5;
-  color: $govuk-black;
-
-  a {
-    color: $govuk-blue;
-    text-decoration: underline;
-
-    &:hover {
-      color: #003078;
-      text-decoration-thickness: max(3px, 0.1875rem, 0.12em);
-    }
-
-    &:focus {
-      outline: 3px solid transparent;
-      color: $govuk-black;
-      background-color: $govuk-yellow;
-      box-shadow:
-        0 -2px $govuk-yellow,
-        0 4px $govuk-black;
-      text-decoration: none;
-    }
-  }
+.app-notes__note .govuk-heading-s {
+  margin-bottom: govuk-spacing(2);
 }
 
-// ===== Sections =====
-
-.defra-section {
-  margin-top: 40px;
-
-  // Align headings and body with the tiles and version banner
-  .govuk-heading-l,
-  .govuk-heading-m:not(.defra-tile__title),
-  .govuk-body {
-    margin-left: -15px;
-  }
-}
-
-.defra-section:first-of-type {
-  margin-top: 0;
-}
-
-.defra-section > .govuk-body {
-  margin-bottom: 12px;
-}
-
-// ===== Breadcrumbs =====
-
-.govuk-breadcrumbs {
-  padding-top: 15px;
-  padding-bottom: 10px;
-}
-
-// stylelint-disable declaration-no-important
-.defra-breadcrumbs--inverse {
-  margin-top: -30px;
-  margin-bottom: 20px;
-  padding-top: 0;
-
-  &.govuk-breadcrumbs {
-    color: $govuk-white !important;
-  }
-
-  .govuk-breadcrumbs__list-item {
-    &::before {
-      border-color: $govuk-white !important;
-      color: $govuk-white !important;
-    }
-  }
-
-  .govuk-breadcrumbs__link {
-    color: $govuk-white !important;
-    text-decoration: none;
-    padding-block: 2px;
-
-    &:hover,
-    &:focus {
-      color: $govuk-white !important;
-      text-decoration: underline;
-    }
-
-    &:focus {
-      background-color: $govuk-yellow !important;
-      color: $govuk-black !important;
-      box-shadow:
-        0 -2px $govuk-yellow,
-        0 4px $govuk-black;
-      text-decoration: none;
-    }
-  }
-}
-
-.defra-support-box {
-  margin-top: 40px;
-  padding: 20px;
-  background-color: $govuk-light-grey;
-  border-left: 5px solid $defra-green;
+.app-notes__note > :last-child {
+  margin-bottom: 0;
 }
