@@ -1,12 +1,12 @@
 import { config } from '../../config/config.js'
 
 /**
- * MuralApiError - Error class for unexpected Mural API responses
+ * MuralMcpError - Error class for unexpected Mural API responses
  */
-class MuralApiError extends Error {
+class MuralMcpError extends Error {
   constructor (message, statusCode) {
     super(message)
-    this.name = 'MuralApiError'
+    this.name = 'MuralMcpError'
     this.statusCode = statusCode
   }
 
@@ -15,7 +15,7 @@ class MuralApiError extends Error {
       `Mural API ${method} ${path} ` +
       `failed: ${response.status} ${response.statusText}`
 
-    return new MuralApiError(message, response.status)
+    return new MuralMcpError(message, response.status)
   }
 }
 
@@ -44,7 +44,7 @@ class MuralClient {
    * @param {string} path - The API endpoint path
    * @param {RequestOptions} [options] - The request options
    * @returns {Promise<{ok: boolean, status: number, data: any}>} - The response object
-   * @throws {MuralApiError} - When response is not ok and status is not in expected list
+   * @throws {MuralMcpError} - When response is not ok and status is not in expected list
    */
   async request (path, options = {}) {
     const method = options.method || 'GET'
@@ -75,10 +75,14 @@ class MuralClient {
       return { ok: false, status: response.status, data: null }
     }
 
-    throw MuralApiError.fromResponse(method, path, response)
+    throw MuralMcpError.fromResponse(method, path, response)
   }
 }
 
 const muralClient = new MuralClient()
 
-export { MuralClient, MuralApiError, muralClient }
+export {
+  MuralClient,
+  MuralMcpError,
+  muralClient
+}

@@ -185,13 +185,13 @@ describe('linkingApi', () => {
       expect(result).toEqual({ ok: false, status: 404, data: null })
     })
 
-    test('throws MuralApiError on an unexpected status (500)', async () => {
+    test('throws MuralMcpError on an unexpected status (500)', async () => {
       nock(MURAL_MCP_URL)
         .get('/linking/test-connection')
         .reply(500, { message: 'Internal server error' })
 
       await expect(testConnection('dev@example.com'))
-        .rejects.toMatchObject({ name: 'MuralApiError', statusCode: 500 })
+        .rejects.toMatchObject({ name: 'MuralMcpError', statusCode: 500 })
     })
   })
 })

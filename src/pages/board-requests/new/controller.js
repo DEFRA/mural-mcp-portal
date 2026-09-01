@@ -9,9 +9,13 @@ const NEW_BOARD_REQUEST_VIEW = 'board-requests/new/new.njk'
  * server plugin has already redirected away any request that isn't Mural
  * linked (see `routes.js`'s `requiresMuralLink` option), so no guard is
  * needed here.
+ *
+ * `?boardId=` prefills the form. The board page links here that way when a
+ * board has never been requested, or was rejected and can be requested again,
+ * so the user doesn't have to copy the id across by hand.
  */
-async function getNewBoardRequest (_request, h) {
-  const viewModel = BoardRequestFormViewModel.empty()
+async function getNewBoardRequest (request, h) {
+  const viewModel = BoardRequestFormViewModel.empty(request.query.boardId)
 
   return h.view(NEW_BOARD_REQUEST_VIEW, { ...viewModel })
     .code(statusCodes.HTTP_STATUS_OK)
@@ -30,6 +34,7 @@ async function postBoardRequestFailAction (request, h, err) {
  */
 async function postBoardRequest (request, h) {
   const { boardId, iao, reason } = request.payload
+
   const userId = request.auth.credentials.profile.email
 
   const boardRequest = {
@@ -53,19 +58,21 @@ async function postBoardRequest (request, h) {
     return h.redirect('/board-requests/new/confirmation').code(statusCodes.HTTP_STATUS_FOUND)
   }
 
+  const conflictMessage = 'A request for this board already exists'
+
   const viewModel = new BoardRequestFormViewModel({
     boardId,
     iao,
     reason,
     errors: {
-      boardId: { text: 'A request for this board already exists' },
+      boardId: { text: conflictMessage }
     },
     errorList: [
-      { text: 'A request for this board already exists', href: '#boardId' }
+      { text: conflictMessage, href: '#boardId' }
     ]
   })
 
-  return h.view(NEW_BOARD_REQUEST_VIEW, viewModel)
+  return h.view(NEW_BOARD_REQUEST_VIEW, { ...viewModel })
     .code(statusCodes.HTTP_STATUS_CONFLICT)
 }
 

@@ -81,7 +81,7 @@ describe('muralClient', () => {
       expect(nock.isDone()).toBe(true)
     })
 
-    test('throws MuralApiError with preserved status code and message on unexpected 400', async () => {
+    test('throws MuralMcpError with preserved status code and message on unexpected 400', async () => {
       const client = new MuralClient(TEST_BASE_URL)
       const errorBody = { detail: 'OAuth state mismatch' }
 
@@ -90,7 +90,7 @@ describe('muralClient', () => {
         .reply(400, errorBody)
 
       await expect(client.request('/test-endpoint')).rejects.toMatchObject({
-        name: 'MuralApiError',
+        name: 'MuralMcpError',
         statusCode: 400,
         message: expect.stringMatching(/GET \/test-endpoint failed: 400/)
       })
@@ -140,7 +140,7 @@ describe('muralClient', () => {
       expect(response.data).toBeNull()
     })
 
-    test('throws MuralApiError with statusCode and method preserved on POST failure', async () => {
+    test('throws MuralMcpError with statusCode and method preserved on POST failure', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -148,13 +148,13 @@ describe('muralClient', () => {
         .reply(503, { error: 'unavailable' })
 
       await expect(client.request('/test-endpoint', { method: 'POST' })).rejects.toMatchObject({
-        name: 'MuralApiError',
+        name: 'MuralMcpError',
         statusCode: 503,
         message: expect.stringMatching(/POST \/test-endpoint/)
       })
     })
 
-    test('throws MuralApiError even when expected array is empty', async () => {
+    test('throws MuralMcpError even when expected array is empty', async () => {
       const client = new MuralClient(TEST_BASE_URL)
 
       nock(TEST_BASE_URL)
@@ -163,7 +163,7 @@ describe('muralClient', () => {
 
       await expect(client.request('/test-endpoint', { expected: [] }))
         .rejects.toMatchObject({
-          name: 'MuralApiError',
+          name: 'MuralMcpError',
           statusCode: 400
         })
     })

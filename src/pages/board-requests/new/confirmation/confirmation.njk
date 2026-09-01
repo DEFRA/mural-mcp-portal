@@ -1,43 +1,65 @@
-{% extends "common/layout.njk" %}
+{% extends "common/layouts/content.njk" %}
 {% from "govuk/components/panel/macro.njk" import govukPanel %}
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "common/components/status-tag.njk" import appStatusTag %}
 
-{% set pageTitle = 'Board request submitted' %}
+{% set title = 'Board request submitted' %}
 
-{% block content %}
-  <div class="govuk-width-container">
-    <main class="govuk-main-wrapper" id="main-content">
+{#
+  No breadcrumbs. This is the end of the journey - GOV.UK confirmation pages
+  drop the navigation that got you here, because the next step is one of the
+  links below, not back up the tree you just came down.
 
-      {{ govukPanel({
-        titleText: "Board request submitted",
-        html: "Your request is <strong>pending review</strong>"
-      }) }}
+  The panel is this page's heading, so it replaces the standard caption/h1.
+  The status word comes from `boardStatusDisplay`, not from a literal: that
+  constant exists precisely so no template writes a status out by hand, and
+  this page was the one place still doing it.
+#}
+{% block heading %}
+  {{ govukPanel({
+    titleText: "Board request submitted",
+    html: "Your request is <strong>" + (boardStatusDisplay[boardRequest.status].label | lower) + "</strong>"
+  }) }}
+{% endblock %}
 
-      <h2 class="govuk-heading-m govuk-!-margin-top-6">Request details</h2>
+{% block pageBody %}
+  <h2 class="govuk-heading-m govuk-!-margin-top-6">Request details</h2>
 
-      {{ govukSummaryList({
-        rows: [
-          {
-            key: { text: "Board ID" },
-            value: { text: boardRequest.boardId }
-          },
-          {
-            key: { text: "Information Asset Owner" },
-            value: { text: boardRequest.iao }
-          },
-          {
-            key: { text: "Status" },
-            value: {
-              html: '<strong class="govuk-tag govuk-tag--yellow">Pending</strong>'
-            }
-          }
-        ]
-      }) }}
+  {{ govukSummaryList({
+    rows: [
+      {
+        key: { text: "Board ID" },
+        value: { text: boardRequest.boardId }
+      },
+      {
+        key: { text: "Information Asset Owner" },
+        value: { text: boardRequest.iao }
+      },
+      {
+        key: { text: "Status" },
+        value: { html: appStatusTag(boardRequest.status) }
+      }
+    ]
+  }) }}
 
-      <p class="govuk-body">
-        <a href="/board-requests/new" class="govuk-link">Submit another board request</a>
-      </p>
+  <h2 class="govuk-heading-m">What happens next</h2>
 
-    </main>
-  </div>
+  <p class="govuk-body">
+    We have sent your request to {{ boardRequest.iao }} to review as the
+    Information Asset Owner for this board.
+  </p>
+
+  <p class="govuk-body">
+    You do not need to do anything else. Once the request is approved, the
+    board can be used with the MCP server by anyone who already has access to it in
+    Mural.
+  </p>
+
+  <p class="govuk-body">
+    <a class="govuk-link" href="/boards/{{ boardRequest.boardId | urlencode }}">Check the status of this request</a>
+  </p>
+
+  <p class="govuk-body">
+    <a class="govuk-link" href="/board-requests/new">Submit another board request</a>
+  </p>
 {% endblock %}
