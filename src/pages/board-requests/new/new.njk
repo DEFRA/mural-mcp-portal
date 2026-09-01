@@ -1,53 +1,83 @@
-{% extends "common/layout.njk" %}
+{% extends "common/layouts/content.njk" %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 {% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/character-count/macro.njk" import govukCharacterCount %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 
-{% set pageTitle = 'Request a Mural board' %}
+{% set title = 'Request a Mural board' %}
+{% set caption = 'Board requests' %}
+{% set hasErrors = errorList and errorList.length %}
+{% set breadcrumbItems = [
+  { text: "Home", href: "/dashboard" },
+  { text: "Boards", href: "/boards" },
+  { text: "Request a board" }
+] %}
+{% set notesHeading = 'About requesting a board' %}
+{% set notes = [
+  {
+    title: "Who decides?",
+    html: 'The Information Asset Owner you name reviews the request. Name the person accountable for the information on the board, not your line manager.'
+  },
+  {
+    title: "What happens if it is approved?",
+    html: 'The board can be used with the MCP server by anyone who already has access to it in Mural. Approval does not give anyone access to Mural itself.'
+  },
+  {
+    title: "How long does it take?",
+    html: 'There is no fixed turnaround. You can check where a request has got to at any time on the <a class="govuk-link" href="/boards">Boards</a> page.'
+  }
+] %}
 
-{% block content %}
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
+{#
+  Breadcrumbs only, so no back link. It read `backLink if backLink else "/boards"`
+  and nothing ever set `backLink`, so arriving here from a board page via
+  `?boardId=` still sent the reader back to the full directory.
+#}
+{% block beforeHeading %}
+  {% if hasErrors %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: errorList
+    }) }}
+  {% endif %}
+{% endblock %}
 
-      {% if errorList %}
-        {{ govukErrorSummary({
-          titleText: "There is a problem",
-          errorList: errorList
-        }) }}
-      {% endif %}
+{% block pageBody %}
+  <form method="post" novalidate>
 
-      <h1 class="govuk-heading-l">Request a Mural board</h1>
+    {{ govukInput({
+      label: { text: "Board ID", classes: "govuk-label--m" },
+      hint: { text: "The unique identifier for the Mural board. You can copy this from the board's URL in Mural." },
+      id: "boardId",
+      name: "boardId",
+      value: boardId,
+      errorMessage: errors.boardId
+    }) }}
 
-      <form method="post" novalidate>
+    {{ govukInput({
+      label: { text: "Information Asset Owner", classes: "govuk-label--m" },
+      hint: { text: "The person who will review this request. Must be a defra.gov.uk email address." },
+      id: "iao",
+      name: "iao",
+      type: "email",
+      spellcheck: false,
+      autocomplete: "off",
+      value: iao,
+      errorMessage: errors.iao
+    }) }}
 
-        {{ govukInput({
-          label: { text: "Board ID", classes: "govuk-label--m" },
-          hint: { text: "The unique identifier for the Mural board." },
-          id: "boardId",
-          name: "boardId",
-          value: boardId,
-          errorMessage: errors.boardId
-        }) }}
+    {# `maxlength` mirrors MAX_REASON_LENGTH in `schemas.js`, so the counter and
+       the server-side rule agree. #}
+    {{ govukCharacterCount({
+      label: { text: "Reason for requesting this board", classes: "govuk-label--m" },
+      hint: { text: "Explain what you plan to use the board for, in at least 10 characters. The Information Asset Owner will read this." },
+      id: "reason",
+      name: "reason",
+      maxlength: 255,
+      value: reason,
+      errorMessage: errors.reason
+    }) }}
 
-        {{ govukInput({
-          label: { text: "Information Asset Owner", classes: "govuk-label--m" },
-          hint: { text: "Must be a defra.gov.uk email address." },
-          id: "iao",
-          name: "iao",
-          value: iao,
-          errorMessage: errors.iao
-        }) }}
-
-        {{ govukInput({
-          label: { text: "Reason for requesting this board", classes: "govuk-label--m" },
-          id: "reason",
-          name: "reason",
-          value: reason,
-          errorMessage: errors.reason
-        }) }}
-
-        {{ govukButton({ text: "Submit request" }) }}
-      </form>
-    </div>
-  </div>
+    {{ govukButton({ text: "Submit request" }) }}
+  </form>
 {% endblock %}

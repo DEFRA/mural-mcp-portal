@@ -206,7 +206,7 @@ describe('when unauthenticated', () => {
   test('GET /board-requests/new redirects to sign in', async () => {
     const { statusCode, headers } = await get(server, '/board-requests/new')
 
-    expect(statusCode).toBe(302)
+    expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
     expect(headers).toHaveProperty('location')
     expect(headers.location).toBe('/')
   })
@@ -214,7 +214,7 @@ describe('when unauthenticated', () => {
   test('POST /board-requests/new redirects to sign in', async () => {
     const { statusCode, headers } = await post(server, '/board-requests/new', form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk' }))
 
-    expect(statusCode).toBe(302)
+    expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
     expect(headers).toHaveProperty('location')
     expect(headers.location).toBe('/')
   })

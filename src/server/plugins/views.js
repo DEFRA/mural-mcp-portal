@@ -5,6 +5,7 @@ import hapiVision from '@hapi/vision'
 import nunjucks from 'nunjucks'
 
 import { config } from '../../config/config.js'
+import { boardStatusDisplay, unknownBoardStatusDisplay } from '../../constants/board-statuses.js'
 
 const nunjucksEnvironment = nunjucks.configure(
   [
@@ -18,6 +19,12 @@ const nunjucksEnvironment = nunjucks.configure(
     lstripBlocks: true
   }
 )
+
+// Register common display constants as Nunjucks globals so templates and
+// component macros (e.g. status-tag.njk) can access consistent labels and
+// classes without importing JS in every template.
+nunjucksEnvironment.addGlobal('boardStatusDisplay', boardStatusDisplay)
+nunjucksEnvironment.addGlobal('unknownBoardStatusDisplay', unknownBoardStatusDisplay)
 
 function loadManifest () {
   const manifestPath = path.join(

@@ -38,10 +38,13 @@ class BoardRequestFormViewModel {
   }
 
   /**
-   * Create an empty form view model for initial GET
+   * Create a form view model for the initial GET, optionally prefilled with a
+   * board id carried over from the board page's "Request access" link.
+   *
+   * @param {string} [boardId]
    */
-  static empty () {
-    return new BoardRequestFormViewModel()
+  static empty (boardId) {
+    return new BoardRequestFormViewModel({ boardId })
   }
 
   /**
