@@ -190,7 +190,7 @@ describe('LinkingStatusViewModel', () => {
         })
       })
 
-      test('goes red and explains an unauthorized refusal in plain terms', () => {
+      test('goes red and stores the failure reason for unauthorized refusals', () => {
         const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
           check: { state: connectionChecks.FAILED, profile: null, reason: connectionFailureReasons.UNAUTHORIZED }
         })
@@ -198,11 +198,11 @@ describe('LinkingStatusViewModel', () => {
         expect(stepFor(viewModel, 3)).toMatchObject({
           status: 'issue',
           statusText: 'Not working',
-          detail: 'Your Mural connection has either expired or been revoked. Reconnect your account to fix it.'
+          checkFailureReason: connectionFailureReasons.UNAUTHORIZED
         })
       })
 
-      test('goes red and makes clear a Mural API error is unlikely to be the user\'s fault', () => {
+      test('goes red and stores the failure reason for Mural API errors', () => {
         const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
           check: { state: connectionChecks.FAILED, profile: null, reason: connectionFailureReasons.MURAL_API_ERROR }
         })
@@ -210,27 +210,26 @@ describe('LinkingStatusViewModel', () => {
         expect(stepFor(viewModel, 3)).toMatchObject({
           status: 'issue',
           statusText: 'Not working',
-          detail: 'Mural is not responding right now. This is likely a problem on Mural\'s side rather than with ' +
-            'your connection - reconnecting probably will not help, but you can try if it keeps happening.'
+          checkFailureReason: connectionFailureReasons.MURAL_API_ERROR
         })
       })
 
-      test('never leaks an internal reason code onto the page', () => {
+      test('stores the failure reason even for unknown reason codes', () => {
         const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
           check: { state: connectionChecks.FAILED, profile: null, reason: 'some_future_code_nobody_wrote_copy_for' }
         })
 
-        expect(stepFor(viewModel, 3).detail)
-          .toBe('Mural MCP could not use your connection. Reconnect your account to fix it.')
+        expect(stepFor(viewModel, 3).checkFailureReason)
+          .toBe('some_future_code_nobody_wrote_copy_for')
       })
 
-      test('still says how to fix it when Mural gives no reason', () => {
+      test('stores null reason when Mural gives no reason', () => {
         const viewModel = LinkingStatusViewModel.fromLinkingStatus(connectedStatus, {
           check: { state: connectionChecks.FAILED, profile: null, reason: null }
         })
 
-        expect(stepFor(viewModel, 3).detail)
-          .toBe('Mural MCP could not use your connection. Reconnect your account to fix it.')
+        expect(stepFor(viewModel, 3).checkFailureReason)
+          .toBe(null)
       })
 
       test('stays neutral when the check could not be run, rather than inventing a problem', () => {
