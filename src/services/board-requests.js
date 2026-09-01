@@ -38,12 +38,7 @@ async function submitBoardRequest (approvalRequest) {
  * @throws {MuralApiError} - If an unexpected error occurs
  */
 async function getBoardRequest (boardId, userId) {
-  // Only pass userId through when it is explicitly provided so the infra
-  // layer doesn't receive an extra undefined argument (tests assert a
-  // single-argument call in the common case).
-  const res = (typeof userId === 'undefined')
-    ? await approvalsApi.getBoardRequest(boardId)
-    : await approvalsApi.getBoardRequest(boardId, userId)
+  const res = await approvalsApi.getBoardRequest(boardId, userId)
 
   if (res.ok) {
     return res.data

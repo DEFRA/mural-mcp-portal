@@ -27,10 +27,10 @@ describe('approvalsApi', () => {
       const responseBody = createdBoardRequest()
 
       nock(MURAL_MCP_URL)
-        .post('/approvals/boards', { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop' })
+        .post('/approvals/boards', { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', userId: 'test@example.com' })
         .reply(201, responseBody)
 
-      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', email: 'test@example.com' }
+      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', userId: 'test@example.com' }
       const result = await submitBoardRequest(approvalRequest)
 
       expect(result.ok).toBe(true)
@@ -44,7 +44,7 @@ describe('approvalsApi', () => {
         .post('/approvals/boards')
         .reply(201, {})
 
-      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', email: 'test@example.com' }
+      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', userId: 'test@example.com' }
       const result = await submitBoardRequest(approvalRequest)
 
       expect(result.ok).toBe(true)
@@ -55,7 +55,7 @@ describe('approvalsApi', () => {
         .post('/approvals/boards')
         .reply(409, boardRequestConflict())
 
-      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', email: 'test@example.com' }
+      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', userId: 'test@example.com' }
       const result = await submitBoardRequest(approvalRequest)
 
       expect(result.ok).toBe(false)
@@ -68,7 +68,7 @@ describe('approvalsApi', () => {
         .post('/approvals/boards')
         .replyWithError('ECONNREFUSED')
 
-      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', email: 'test@example.com' }
+      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', userId: 'test@example.com' }
 
       await expect(
         submitBoardRequest(approvalRequest)
@@ -84,7 +84,7 @@ describe('approvalsApi', () => {
         .get('/approvals/boards/board-abc')
         .reply(200, responseBody)
 
-      const result = await getBoardRequest('board-abc')
+      const result = await getBoardRequest('board-abc', 'test@example.com')
 
       expect(result.ok).toBe(true)
       expect(result.status).toBe(200)
@@ -96,7 +96,7 @@ describe('approvalsApi', () => {
         .get('/approvals/boards/board-abc')
         .reply(404, { message: 'Not found' })
 
-      const result = await getBoardRequest('board-abc')
+      const result = await getBoardRequest('board-abc', 'test@example.com')
 
       expect(result.ok).toBe(false)
       expect(result.status).toBe(404)
@@ -108,7 +108,7 @@ describe('approvalsApi', () => {
         .get('/approvals/boards/board-abc')
         .reply(500, { message: 'Internal server error' })
 
-      await expect(getBoardRequest('board-abc'))
+      await expect(getBoardRequest('board-abc', 'test@example.com'))
         .rejects.toMatchObject({
           name: 'MuralApiError',
           statusCode: 500

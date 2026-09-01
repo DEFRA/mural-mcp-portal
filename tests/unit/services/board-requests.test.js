@@ -17,7 +17,13 @@ describe('boardRequestsService', () => {
       const data = createdBoardRequest()
       approvalsApi.submitBoardRequest.mockResolvedValue({ ok: true, status: 201, data })
 
-      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
+      const approvalRequest = {
+        boardId: 'board-abc',
+        iao: 'Jane Smith',
+        email: 'test@example.com',
+        userId: 'test@example.com'
+      }
+
       const result = await submitBoardRequest(approvalRequest)
 
       expect(result).toEqual({ success: true, data })
@@ -27,7 +33,12 @@ describe('boardRequestsService', () => {
     test('returns success:false with reason:conflict on 409', async () => {
       approvalsApi.submitBoardRequest.mockResolvedValue({ ok: false, status: 409, data: null })
 
-      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
+      const approvalRequest = {
+        boardId: 'board-abc',
+        iao: 'Jane Smith',
+        email: 'test@example.com',
+        userId: 'test@example.com'
+      }
       const result = await submitBoardRequest(approvalRequest)
 
       expect(result).toEqual({ success: false, reason: 'conflict' })
@@ -36,7 +47,12 @@ describe('boardRequestsService', () => {
     test('throws with statusCode on an unexpected status', async () => {
       approvalsApi.submitBoardRequest.mockResolvedValue({ ok: false, status: 500, data: null })
 
-      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
+      const approvalRequest = {
+        boardId: 'board-abc',
+        iao: 'Jane Smith',
+        email: 'test@example.com',
+        userId: 'test@example.com'
+      }
 
       await expect(submitBoardRequest(approvalRequest))
         .rejects.toMatchObject({ message: 'Unexpected status 500 from approvals API', statusCode: 500 })
@@ -48,7 +64,12 @@ describe('boardRequestsService', () => {
       error.statusCode = 500
       approvalsApi.submitBoardRequest.mockRejectedValue(error)
 
-      const approvalRequest = { boardId: 'board-abc', iao: 'Jane Smith', email: 'test@example.com' }
+      const approvalRequest = {
+        boardId: 'board-abc',
+        iao: 'Jane Smith',
+        email: 'test@example.com',
+        userId: 'test@example.com'
+      }
 
       await expect(submitBoardRequest(approvalRequest))
         .rejects.toThrow('Network error')
@@ -58,18 +79,19 @@ describe('boardRequestsService', () => {
   describe('getBoardRequest', () => {
     test('returns data on 200', async () => {
       const data = { id: 'req-1', boardId: 'board-abc', status: 'pending' }
+
       approvalsApi.getBoardRequest.mockResolvedValue({ ok: true, status: 200, data })
 
-      const result = await getBoardRequest('board-abc')
+      const result = await getBoardRequest('board-abc', 'test@example.com')
 
       expect(result).toEqual(data)
-      expect(approvalsApi.getBoardRequest).toHaveBeenCalledWith('board-abc')
+      expect(approvalsApi.getBoardRequest).toHaveBeenCalledWith('board-abc', 'test@example.com')
     })
 
     test('returns null on 404', async () => {
       approvalsApi.getBoardRequest.mockResolvedValue({ ok: false, status: 404, data: null })
 
-      const result = await getBoardRequest('board-abc')
+      const result = await getBoardRequest('board-abc', 'test@example.com')
 
       expect(result).toBeNull()
     })
@@ -80,13 +102,13 @@ describe('boardRequestsService', () => {
       error.statusCode = 503
       approvalsApi.getBoardRequest.mockRejectedValue(error)
 
-      await expect(getBoardRequest('board-abc')).rejects.toThrow('Service unavailable')
+      await expect(getBoardRequest('board-abc', 'test@example.com')).rejects.toThrow('Service unavailable')
     })
 
     test('throws with statusCode on an unexpected status', async () => {
       approvalsApi.getBoardRequest.mockResolvedValue({ ok: false, status: 500, data: null })
 
-      await expect(getBoardRequest('board-abc'))
+      await expect(getBoardRequest('board-abc', 'test@example.com'))
         .rejects.toMatchObject({ message: 'Unexpected status 500 from approvals API', statusCode: 500 })
     })
   })

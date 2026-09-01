@@ -34,7 +34,21 @@ async function postBoardRequestFailAction (request, h, err) {
  */
 async function postBoardRequest (request, h) {
   const { boardId, iao, reason } = request.payload
-  const userId = request.auth.credentials.profile.email
+  const userId = request.auth.credentials?.profile?.email
+
+  // Require userId to be present and fail with a user-facing error if missing
+  if (!userId) {
+    const viewModel = new BoardRequestFormViewModel({
+      boardId,
+      iao,
+      reason,
+      errors: { _error: { text: 'Your user identity is missing. Please sign in.' } },
+      errorList: [{ text: 'Your user identity is missing. Please sign in.' }]
+    })
+
+    return h.view(NEW_BOARD_REQUEST_VIEW, { ...viewModel })
+      .code(statusCodes.HTTP_STATUS_BAD_REQUEST)
+  }
 
   const boardRequest = {
     boardId,
