@@ -1,7 +1,294 @@
 import nock from 'nock'
 
+import {
+  createdBoardRequest,
+  boardRequestConflict,
+  accessRequest,
+  accessRequestList
+} from '../../../fixtures/mural-mcp.js'
+
+import {
+  submitBoardRequest,
+  getBoardRequest,
+  listAccessRequests,
+  decideAccessRequest
+} from '../../../../src/infra/mural/approvals.js'
+
 import { createServer } from '../../../../src/server/server.js'
 import { loginAsDevUser } from '../../../helpers/login.js'
+
+const MURAL_MCP_URL = 'http://localhost:8086'
+
+const approvalRequest = (overrides = {}) => ({
+  boardId: 'board-abc',
+  iao: 'Jane Smith',
+  reason: 'Need this board for a workshop',
+  userId: 'test@example.com',
+  ...overrides
+})
+
+beforeAll(() => {
+  nock.disableNetConnect()
+})
+
+afterAll(() => {
+  nock.enableNetConnect()
+})
+
+afterEach(() => {
+  nock.cleanAll()
+})
+
+describe('approvalsApi', () => {
+  describe('submitBoardRequest', () => {
+    test('returns ok:true with data on 201', async () => {
+      const responseBody = createdBoardRequest()
+
+      nock(MURAL_MCP_URL)
+        .post('/approvals/boards', { boardId: 'board-abc', iao: 'Jane Smith', reason: 'Need this board for a workshop', userId: 'test@example.com' })
+        .reply(201, responseBody)
+
+      const result = await submitBoardRequest(approvalRequest())
+
+      expect(result.ok).toBe(true)
+      expect(result.status).toBe(201)
+      expect(result.data).toEqual(responseBody)
+    })
+
+    test('sends the requester email as the X-User-Id header', async () => {
+      const scope = nock(MURAL_MCP_URL)
+        .matchHeader('X-User-Id', 'test@example.com')
+        .post('/approvals/boards')
+        .reply(201, createdBoardRequest())
+
+      await submitBoardRequest(approvalRequest())
+
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('returns ok:false with status 409 on conflict', async () => {
+      nock(MURAL_MCP_URL)
+        .post('/approvals/boards')
+        .reply(409, boardRequestConflict())
+
+      const result = await submitBoardRequest(approvalRequest())
+
+      expect(result.ok).toBe(false)
+      expect(result.status).toBe(409)
+      expect(result.data).toBeNull()
+    })
+
+    test('throws on network error', async () => {
+      nock(MURAL_MCP_URL)
+        .post('/approvals/boards')
+        .replyWithError('ECONNREFUSED')
+
+      await expect(
+        submitBoardRequest(approvalRequest())
+      ).rejects.toThrow()
+    })
+  })
+
+  describe('getBoardRequest', () => {
+    test('returns ok:true with data on 200', async () => {
+      const responseBody = accessRequest()
+
+      nock(MURAL_MCP_URL)
+        .get('/approvals/boards/board-abc')
+        .reply(200, responseBody)
+
+      const result = await getBoardRequest('board-abc', 'test@example.com')
+
+      expect(result.ok).toBe(true)
+      expect(result.status).toBe(200)
+      expect(result.data).toEqual(responseBody)
+    })
+
+    test('sends the caller email as the X-User-Id header', async () => {
+      const scope = nock(MURAL_MCP_URL)
+        .matchHeader('X-User-Id', 'test@example.com')
+        .get('/approvals/boards/board-abc')
+        .reply(200, accessRequest())
+
+      await getBoardRequest('board-abc', 'test@example.com')
+
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('returns ok:false with status 404 when not found', async () => {
+      nock(MURAL_MCP_URL)
+        .get('/approvals/boards/board-abc')
+        .reply(404, { message: 'Not found' })
+
+      const result = await getBoardRequest('board-abc', 'test@example.com')
+
+      expect(result.ok).toBe(false)
+      expect(result.status).toBe(404)
+      expect(result.data).toBeNull()
+    })
+
+    test('throws MuralApiError on unexpected status (500)', async () => {
+      nock(MURAL_MCP_URL)
+        .get('/approvals/boards/board-abc')
+        .reply(500, { message: 'Internal server error' })
+
+      await expect(getBoardRequest('board-abc', 'test@example.com'))
+        .rejects.toMatchObject({
+          name: 'MuralApiError',
+          statusCode: 500
+        })
+    })
+
+    test('URL-encodes boardId in the path', async () => {
+      const responseBody = accessRequest({ boardId: 'board/with spaces' })
+
+      nock(MURAL_MCP_URL)
+        .get('/approvals/boards/board%2Fwith%20spaces')
+        .reply(200, responseBody)
+
+      const result = await getBoardRequest('board/with spaces', 'test@example.com')
+
+      expect(result.ok).toBe(true)
+      expect(result.data).toEqual(responseBody)
+    })
+  })
+
+  describe('listAccessRequests', () => {
+    test('returns ok:true with the request list on 200', async () => {
+      const responseBody = accessRequestList([
+        accessRequest({ id: 'req-1' }),
+        accessRequest({ id: 'req-2', boardId: 'board-def' })
+      ])
+
+      nock(MURAL_MCP_URL)
+        .get('/admin/access-requests')
+        .reply(200, responseBody)
+
+      const result = await listAccessRequests('test@example.com')
+
+      expect(result.ok).toBe(true)
+      expect(result.data).toEqual(responseBody)
+    })
+
+    test('sends the caller email as the X-User-Id header', async () => {
+      const scope = nock(MURAL_MCP_URL)
+        .matchHeader('X-User-Id', 'test@example.com')
+        .get('/admin/access-requests')
+        .reply(200, accessRequestList())
+
+      await listAccessRequests('test@example.com')
+
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('does not send the status option upstream, which takes no filters', async () => {
+      const unfiltered = nock(MURAL_MCP_URL)
+        .get('/admin/access-requests')
+        .reply(200, accessRequestList())
+
+      const filtered = nock(MURAL_MCP_URL)
+        .get('/admin/access-requests')
+        .query({ status: 'pending' })
+        .reply(200, accessRequestList())
+
+      await listAccessRequests('test@example.com', { status: 'pending' })
+
+      expect(unfiltered.isDone()).toBe(true)
+      expect(filtered.isDone()).toBe(false)
+    })
+
+    test('throws MuralApiError on unexpected status (500)', async () => {
+      nock(MURAL_MCP_URL)
+        .get('/admin/access-requests')
+        .reply(500, { message: 'Internal server error' })
+
+      await expect(listAccessRequests('test@example.com'))
+        .rejects.toMatchObject({
+          name: 'MuralApiError',
+          statusCode: 500
+        })
+    })
+  })
+
+  describe('decideAccessRequest', () => {
+    test('posts the approval body to the approve endpoint', async () => {
+      const body = {
+        decisionReason: 'No personal data on the board',
+        dataHandlingFormRef: 'form.pdf',
+        riskAssessmentRef: 'RA-2026-018'
+      }
+
+      nock(MURAL_MCP_URL)
+        .post('/admin/access-requests/req-1/approve', body)
+        .reply(200, accessRequest({ status: 'approved' }))
+
+      const result = await decideAccessRequest('req-1', 'approve', body, 'iao@defra.gov.uk')
+
+      expect(result.ok).toBe(true)
+      expect(result.data).toMatchObject({ status: 'approved' })
+    })
+
+    test('posts to the reject endpoint, whose body carries only a reason', async () => {
+      const scope = nock(MURAL_MCP_URL)
+        .post('/admin/access-requests/req-1/reject', { decisionReason: 'Unredacted contact details' })
+        .reply(200, accessRequest({ status: 'rejected' }))
+
+      await decideAccessRequest('req-1', 'reject', { decisionReason: 'Unredacted contact details' }, 'iao@defra.gov.uk')
+
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('sends the reviewer email as the X-User-Id header', async () => {
+      const scope = nock(MURAL_MCP_URL)
+        .matchHeader('X-User-Id', 'iao@defra.gov.uk')
+        .post('/admin/access-requests/req-1/reject')
+        .reply(200, accessRequest())
+
+      await decideAccessRequest('req-1', 'reject', { decisionReason: 'No' }, 'iao@defra.gov.uk')
+
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('URL-encodes the request id in the path', async () => {
+      const scope = nock(MURAL_MCP_URL)
+        .post('/admin/access-requests/req%2F1/reject')
+        .reply(200, accessRequest())
+
+      await decideAccessRequest('req/1', 'reject', { decisionReason: 'No' }, 'iao@defra.gov.uk')
+
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('reports a request decided by somebody else as a 409 rather than throwing', async () => {
+      nock(MURAL_MCP_URL)
+        .post('/admin/access-requests/req-1/approve')
+        .reply(409, { detail: 'Access request req-1 already approved' })
+
+      const result = await decideAccessRequest('req-1', 'approve', {}, 'iao@defra.gov.uk')
+
+      expect(result).toEqual({ ok: false, status: 409, data: null })
+    })
+
+    test('reports a withdrawn request as a 404 rather than throwing', async () => {
+      nock(MURAL_MCP_URL)
+        .post('/admin/access-requests/req-1/approve')
+        .reply(404, { detail: 'No access request req-1' })
+
+      const result = await decideAccessRequest('req-1', 'approve', {}, 'iao@defra.gov.uk')
+
+      expect(result).toEqual({ ok: false, status: 404, data: null })
+    })
+
+    test('throws MuralApiError on unexpected status (500)', async () => {
+      nock(MURAL_MCP_URL)
+        .post('/admin/access-requests/req-1/approve')
+        .reply(500, { message: 'Internal server error' })
+
+      await expect(decideAccessRequest('req-1', 'approve', {}, 'iao@defra.gov.uk'))
+        .rejects.toMatchObject({ name: 'MuralApiError', statusCode: 500 })
+    })
+  })
+})
 
 describe('approvalsController', () => {
   describe('when authenticated', () => {
