@@ -15,7 +15,7 @@ import { muralClient } from './client.js'
  * Submit a board approval request
  * @param {ApprovalRequest} approvalRequest - The approval request
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
- * @throws {MuralApiError} - When response is not ok and not a 409 conflict
+ * @throws {MuralMcpError} - When response is not ok and not a 409 conflict
  */
 async function submitBoardRequest (approvalRequest) {
   const body = {
@@ -37,7 +37,7 @@ async function submitBoardRequest (approvalRequest) {
  * Get a board approval request
  * @param {string} boardId - The ID of the board
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
- * @throws {MuralApiError} - When response is not ok and not a 404 not found
+ * @throws {MuralMcpError} - When response is not ok and not a 404 not found
  */
 async function getBoardRequest (boardId, userId) {
   return muralClient.request(`/approvals/boards/${encodeURIComponent(boardId)}`, {

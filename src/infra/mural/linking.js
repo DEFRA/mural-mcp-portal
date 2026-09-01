@@ -34,7 +34,7 @@ async function checkLinkingStatus (userId) {
  * @param {string} params.code - The authorization code from OAuth provider
  * @param {string} params.state - The state parameter for CSRF validation
  * @returns {Promise<{ok: boolean, status: number, data: any}>}
- * @throws {MuralApiError} - When response is not ok and not a 400 bad request
+ * @throws {MuralMcpError} - When response is not ok and not a 400 bad request
  */
 async function completeLinking (userId, params) {
   const query = new URLSearchParams({ code: params.code, state: params.state })

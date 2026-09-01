@@ -60,7 +60,7 @@ describe('boardRequestsService', () => {
 
     test('throws when the infra layer throws', async () => {
       const error = new Error('Network error')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
       error.statusCode = 500
       approvalsApi.submitBoardRequest.mockRejectedValue(error)
 
@@ -98,7 +98,7 @@ describe('boardRequestsService', () => {
 
     test('throws when the infra layer throws', async () => {
       const error = new Error('Service unavailable')
-      error.name = 'MuralApiError'
+      error.name = 'MuralMcpError'
       error.statusCode = 503
       approvalsApi.getBoardRequest.mockRejectedValue(error)
 

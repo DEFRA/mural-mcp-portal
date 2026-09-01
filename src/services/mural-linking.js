@@ -157,11 +157,11 @@ async function completeLinking (userId, params) {
  * @private
  * Fetch a user's linking status from the Mural MCP API.
  *
- * Throws on a non-ok response from the infra layer (MuralApiError).
+ * Throws on a non-ok response from the infra layer (MuralMcpError).
  *
  * @param {string} userId - The user ID for which to check linking status
  * @returns {Promise<object>} The linking status data
- * @throws {MuralApiError} - On any non-ok response
+ * @throws {MuralMcpError} - On any non-ok response
  */
 async function _fetchLinkingStatus (userId) {
   const response = await linkingApi.checkLinkingStatus(userId)
@@ -173,13 +173,13 @@ async function _fetchLinkingStatus (userId) {
  * @private
  * Fetch an authorization URL from the Mural MCP API.
  *
- * Throws on a non-ok response from the infra layer (MuralApiError) —
+ * Throws on a non-ok response from the infra layer (MuralMcpError) —
  * `getLinkingStatus` only calls this when the user needs to link, so
  * failing to get them a link is handled by the caller's try/catch.
  *
  * @param {string} userId - The user ID for which to get the authorization URL
  * @returns {Promise<string>} The authorization URL
- * @throws {MuralApiError} - On any non-ok response
+ * @throws {MuralMcpError} - On any non-ok response
  */
 async function _fetchAuthorizationUrl (userId) {
   const response = await linkingApi.getAuthorizationUrl(userId)

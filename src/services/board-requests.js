@@ -6,7 +6,7 @@ import * as approvalsApi from '../infra/mural/approvals.js'
  * Submit a board approval request
  * @param {Object} approvalRequest - The approval request
  * @returns {Promise<Object>} The approval request response data or {success:false, reason:'conflict'} for 409
- * @throws {MuralApiError} - If submission fails with unexpected status
+ * @throws {MuralMcpError} - If submission fails with unexpected status
  */
 async function submitBoardRequest (approvalRequest) {
   const res = await approvalsApi.submitBoardRequest(approvalRequest)
@@ -35,7 +35,7 @@ async function submitBoardRequest (approvalRequest) {
  * @param {string} userId - The signed-in user
  * @returns {Promise<Object|null>} The approval request data, or null if the
  *   board has never been requested
- * @throws {MuralApiError} - If an unexpected error occurs
+ * @throws {MuralMcpError} - If an unexpected error occurs
  */
 async function getBoardRequest (boardId, userId) {
   const res = await approvalsApi.getBoardRequest(boardId, userId)
@@ -65,7 +65,7 @@ async function getBoardRequest (boardId, userId) {
  * @param {string} userId - The signed-in user
  * @param {{q?: string, statuses?: string[], requestedByMe?: boolean}} [filters]
  * @returns {Promise<Object[]>} Matching boards
- * @throws {MuralApiError} - If an unexpected error occurs
+ * @throws {MuralMcpError} - If an unexpected error occurs
  */
 async function listBoards (userId, filters = {}) {
   const res = await approvalsApi.listAccessRequests(userId)
@@ -103,7 +103,7 @@ async function listBoards (userId, filters = {}) {
  *
  * @param {string} userId - The signed-in user's email, matched against `iao`
  * @returns {Promise<Object[]>} Requests this user must review, oldest first
- * @throws {MuralApiError} - If an unexpected error occurs
+ * @throws {MuralMcpError} - If an unexpected error occurs
  */
 async function listApprovalsForIao (userId) {
   const res = await approvalsApi.listAccessRequests(userId, { status: boardStatuses.PENDING })
@@ -130,7 +130,7 @@ async function listApprovalsForIao (userId) {
  * @param {string} userId - The signed-in user's email, matched against `iao`
  * @returns {Promise<Object|null>} The request, or null if it is absent,
  *   already decided, or addressed to another Information Asset Owner
- * @throws {MuralApiError} - If an unexpected error occurs
+ * @throws {MuralMcpError} - If an unexpected error occurs
  */
 async function getApprovalForIao (requestId, userId) {
   const approvals = await listApprovalsForIao(userId)
