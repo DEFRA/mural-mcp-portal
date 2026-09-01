@@ -1,3 +1,4 @@
+import { connectionChecks } from '../constants/connection-checks.js'
 import { linkingOutcomes } from '../constants/linking-outcomes.js'
 import { statusCodes } from '../constants/status-codes.js'
 import { createLogger } from '../infra/logging/logger.js'
@@ -50,6 +51,66 @@ async function isMuralLinked (userId) {
     logger.error(buildErrorLog(error, { type: 'mural_connection_check_failed' }))
     return false
   }
+}
+
+/**
+ * Verify that a stored Mural connection actually works.
+ *
+ * Fails soft to `UNAVAILABLE`, never to `FAILED`: a 404 (the Mural MCP server
+ * has not shipped the endpoint yet), a network error or a malformed body all
+ * mean "we could not check", which is not the same as "your connection is
+ * broken" and must not be shown to the user as though it were.
+ *
+ * @param {string} userId - The user whose connection to verify
+ * @returns {Promise<{state: string, profile: object|null, reason: string|null}>}
+ *   state is one of `connectionChecks`
+ */
+async function verifyConnection (userId) {
+  try {
+    const response = await linkingApi.testConnection(userId)
+
+    if (!response.ok || !response.data) {
+      return _checkResult(connectionChecks.UNAVAILABLE)
+    }
+
+    if (response.data.ok) {
+      return _checkResult(connectionChecks.VERIFIED, { profile: response.data.profile ?? null })
+    }
+
+    return _checkResult(connectionChecks.FAILED, { reason: response.data.reason ?? null })
+  } catch (error) {
+    logger.warn(buildErrorLog(error, { type: 'mural_connection_test_failed' }))
+
+    return _checkResult(connectionChecks.UNAVAILABLE)
+  }
+}
+
+/**
+ * Get an authorization URL on its own.
+ *
+ * `getLinkingStatus` only fetches one when the user is not linked. A
+ * connection that is stored but no longer works needs one too, so the page can
+ * offer a reconnect - hence a separate, fail-soft call made only in that case
+ * rather than an extra round trip on every load.
+ *
+ * @param {string} userId
+ * @returns {Promise<string|null>} The URL, or null if one could not be fetched
+ */
+async function getAuthorizationUrl (userId) {
+  try {
+    return await _fetchAuthorizationUrl(userId)
+  } catch (error) {
+    logger.warn(buildErrorLog(error, { type: 'mural_authorization_url_failed' }))
+
+    return null
+  }
+}
+
+/**
+ * @private
+ */
+function _checkResult (state, { profile = null, reason = null } = {}) {
+  return { state, profile, reason }
 }
 
 /**
@@ -123,5 +184,7 @@ async function _fetchAuthorizationUrl (userId) {
 export {
   getLinkingStatus,
   isMuralLinked,
+  verifyConnection,
+  getAuthorizationUrl,
   completeLinking
 }

@@ -9,16 +9,15 @@ import { isMuralLinked } from '../../services/mural-linking.js'
  * outbound call to the Mural MCP API, so it isn't made unconditionally. A
  * gated route can also set `options.app.muralLinkReason` - a short phrase
  * describing what the user was trying to do (e.g. "request a new Mural
- * board") - for the gate page to explain why they landed there.
+ * board") - for the linking page to explain why they landed there.
  *
  * A connected request is decorated with `request.app.muralConnected` (true)
  * and allowed through. A request that isn't connected - including one with
  * no authenticated user - has its path and reason stashed in the session,
- * and is redirected to the dedicated "connect Mural" gate page instead of
- * the general linking/status page, so the two don't end up showing
- * overlapping panels. The route handler never runs. Doing this here, once,
- * rather than in every gated controller, keeps it in one place as more
- * routes opt in.
+ * and is redirected to the linking page, which reads the stash back to
+ * explain why they landed there. The route handler never runs. Doing this
+ * here, once, rather than in every gated controller, keeps it in one place
+ * as more routes opt in.
  *
  * Registered as `onPreHandler`, which runs after authentication, so
  * `request.auth.credentials` is already populated where present.
@@ -52,7 +51,7 @@ const muralConnection = {
           reason: muralLinkReason ?? DEFAULT_MURAL_LINK_REASON
         })
 
-        return h.redirect('/account/mural-linking/required').takeover()
+        return h.redirect('/account/mural-linking').takeover()
       })
     }
   }

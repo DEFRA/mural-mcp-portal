@@ -1,8 +1,35 @@
 import nock from 'nock'
+
 import { createServer } from '../../../../src/server/server.js'
+import { get } from '../../../helpers/server.js'
+import { mergeCookies } from '../../../helpers/cookies.js'
 import { loginAsDevUser } from '../../../helpers/login.js'
 
 const MURAL_MCP_URL = 'http://localhost:8086'
+const AUTHORIZE_URL = 'https://mural.co/oauth/authorize?state=abc'
+
+/**
+ * The linking page reads the connection and nothing else - the steps describe
+ * the connection itself, so no board lookup is involved.
+ *
+ * A linked user also has their connection tested, so that interceptor is only
+ * registered when there is a connection to test. Pass `check: null` to leave it
+ * off and let the call fail, which is what an older mural-mcp without the
+ * endpoint looks like.
+ */
+function mockLinkingStatus ({ linked, check = { ok: true, profile: { firstName: 'Dev', lastName: 'User' } } }) {
+  nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked })
+
+  if (!linked) {
+    nock(MURAL_MCP_URL)
+      .get('/linking/authorization-url')
+      .reply(200, { authorizationUrl: AUTHORIZE_URL })
+  }
+
+  if (linked && check) {
+    nock(MURAL_MCP_URL).get('/linking/test-connection').reply(200, check)
+  }
+}
 
 describe('linkingController', () => {
   describe('when authenticated', () => {
@@ -29,95 +56,152 @@ describe('linkingController', () => {
     })
 
     describe('GET /account/mural-linking', () => {
-      test('renders the page with status unavailable on API error', async () => {
-        nock(MURAL_MCP_URL)
-          .get('/linking/status')
-          .reply(500, { error: 'Internal server error' })
+      test('titles the page for the connection rather than instructing the user to make one', async () => {
+        mockLinkingStatus({ linked: true })
 
-        const response = await server.inject({
-          method: 'GET',
-          url: '/account/mural-linking',
-          headers: { Cookie: authCookie }
-        })
+        const response = await get(server, '/account/mural-linking', authCookie)
 
         expect(response.statusCode).toBe(200)
-        expect(response.result).toContain("We couldn't check your Mural connection status. Please try again later.")
+        expect(response.result).toContain('<h1 class="govuk-heading-l">Your Mural connection</h1>')
+        expect(response.result).not.toContain('<h1 class="govuk-heading-xl">Connect your Mural account</h1>')
       })
 
-      test('renders the page with not-connected status', async () => {
-        nock(MURAL_MCP_URL)
-          .get('/linking/status')
-          .reply(200, { linked: false })
+      test('shows the connection steps whatever the connection state', async () => {
+        mockLinkingStatus({ linked: true })
 
-        nock(MURAL_MCP_URL)
-          .get('/linking/authorization-url')
-          .reply(200, { authorizationUrl: 'https://mural.co/oauth/authorize?state=abc' })
+        const response = await get(server, '/account/mural-linking', authCookie)
 
-        const response = await server.inject({
-          method: 'GET',
-          url: '/account/mural-linking',
-          headers: { Cookie: authCookie }
-        })
+        expect(response.result).toContain('defra-check-steps')
+        expect(response.result).toContain('Sign in to the portal')
+        expect(response.result).toContain('Connect your Mural account')
+      })
+
+      test('does not test a connection that does not exist', async () => {
+        const check = nock(MURAL_MCP_URL).get('/linking/test-connection').reply(200, { ok: true })
+        mockLinkingStatus({ linked: false })
+
+        const response = await get(server, '/account/mural-linking', authCookie)
+
+        expect(response.result).toContain('Runs once your Mural account is connected.')
+        expect(check.isDone()).toBe(false)
+      })
+
+      test('offers the connect action once, as a button rather than also as a step link', async () => {
+        mockLinkingStatus({ linked: false })
+
+        const response = await get(server, '/account/mural-linking', authCookie)
+
+        expect(response.result).toContain('class="govuk-button')
+        expect(response.result).not.toContain('defra-check-steps__link')
+      })
+
+      test('explains the connection in every state, not only when disconnected', async () => {
+        mockLinkingStatus({ linked: true })
+
+        const response = await get(server, '/account/mural-linking', authCookie)
+
+        expect(response.result).toContain('What happens when I connect?')
+        expect(response.result).toContain('What is this connection for?')
+      })
+    })
+
+    describe('when the account is connected', () => {
+      test('marks the connection step green and drops the connect button', async () => {
+        mockLinkingStatus({ linked: true })
+
+        const response = await get(server, '/account/mural-linking', authCookie)
+
+        expect(response.result).toContain('defra-check-steps__circle--linked')
+        expect(response.result).not.toContain('Connect Mural account')
+      })
+
+      test.skip('confirms Mural MCP can reach Mural, naming the profile it loaded', async () => {
+        mockLinkingStatus({ linked: true })
+
+        const response = await get(server, '/account/mural-linking', authCookie)
+
+        expect(response.result).toContain('defra-check-steps__circle--working')
+        expect(response.result).toContain('Mural MCP can reach Mural as Dev User.')
+      })
+    })
+
+    describe('when the Mural MCP server has no test-connection endpoint yet', () => {
+      test('leaves the check unrun rather than reporting a broken connection', async () => {
+        nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked: true })
+        nock(MURAL_MCP_URL).get('/linking/test-connection').reply(404, { detail: 'Not Found' })
+
+        const response = await get(server, '/account/mural-linking', authCookie)
 
         expect(response.statusCode).toBe(200)
+        expect(response.result).toContain('Your connection may still be fine.')
+        expect(response.result).not.toContain('defra-check-steps__circle--issue')
+        expect(response.result).not.toContain('Reconnect Mural account')
+      })
+    })
+
+    describe('when the account is not connected', () => {
+      test('offers the connect button, pointing at the authorization url', async () => {
+        mockLinkingStatus({ linked: false })
+
+        const response = await get(server, '/account/mural-linking', authCookie)
+
+        expect(response.statusCode).toBe(200)
+        expect(response.result).toContain('Connect Mural account')
+        expect(response.result).toContain(AUTHORIZE_URL)
         expect(response.result).toContain('Not connected')
-        expect(response.result).not.toContain('Your Mural account is connected as')
       })
+    })
 
-      test('renders the page with connected status', async () => {
-        nock(MURAL_MCP_URL)
-          .get('/linking/status')
-          .reply(200, { linked: true })
+    describe('when the connection status cannot be checked', () => {
+      test('flags the connection step as an issue and offers a retry', async () => {
+        nock(MURAL_MCP_URL).get('/linking/status').reply(500, { error: 'Internal server error' })
 
-        const response = await server.inject({
-          method: 'GET',
-          url: '/account/mural-linking',
-          headers: { Cookie: authCookie }
-        })
+        const response = await get(server, '/account/mural-linking', authCookie)
 
         expect(response.statusCode).toBe(200)
-        expect(response.result).toContain('Your Mural account is connected as')
-        expect(response.result).toContain('dev@example.com')
-        expect(response.result).not.toContain('Not connected')
-        expect(response.result).not.toContain("You haven't connected a Mural account yet")
+        expect(response.result).toContain('defra-check-steps__circle--issue')
+        expect(response.result).toContain('Check your connection again')
+        expect(response.result).not.toContain('Connect Mural account')
       })
+    })
 
-      test('shows connect button when not connected', async () => {
-        nock(MURAL_MCP_URL)
-          .get('/linking/status')
-          .reply(200, { linked: false })
+    describe('when a gated route sent the user here', () => {
+      test('says what they were trying to do', async () => {
+        // Being stopped by the gate is what stashes the reason.
+        nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked: false })
+        const gated = await get(server, '/board-requests/new', authCookie)
+        const cookie = mergeCookies(authCookie, gated.headers['set-cookie'])
 
-        nock(MURAL_MCP_URL)
-          .get('/linking/authorization-url')
-          .reply(200, { authorizationUrl: 'https://mural.co/oauth/authorize?state=abc' })
+        expect(gated.headers.location).toBe('/account/mural-linking')
 
-        const response = await server.inject({
-          method: 'GET',
-          url: '/account/mural-linking',
-          headers: { Cookie: authCookie }
-        })
+        mockLinkingStatus({ linked: false })
+        const response = await get(server, '/account/mural-linking', cookie)
 
         expect(response.statusCode).toBe(200)
-        expect(response.result).toContain('Connect Mural Account')
-        expect(response.result).toContain('https://mural.co/oauth/authorize?state=abc')
+        expect(response.result).toContain('You need to connect your Mural account to request a new Mural board.')
       })
 
-      test('explains what happens when you connect when not connected', async () => {
-        nock(MURAL_MCP_URL)
-          .get('/linking/status')
-          .reply(200, { linked: false })
+      test('sends them straight on if they connected in the meantime', async () => {
+        nock(MURAL_MCP_URL).get('/linking/status').reply(200, { linked: false })
+        const gated = await get(server, '/board-requests/new', authCookie)
+        const cookie = mergeCookies(authCookie, gated.headers['set-cookie'])
 
-        nock(MURAL_MCP_URL)
-          .get('/linking/authorization-url')
-          .reply(200, { authorizationUrl: 'https://mural.co/oauth/authorize?state=abc' })
+        // Connected since being stopped - in another tab, or by going back.
+        mockLinkingStatus({ linked: true })
+        const response = await get(server, '/account/mural-linking', cookie)
 
-        const response = await server.inject({
-          method: 'GET',
-          url: '/account/mural-linking',
-          headers: { Cookie: authCookie }
-        })
+        expect(response.statusCode).toBe(302)
+        expect(response.headers.location).toBe('/board-requests/new')
+      })
+    })
 
-        expect(response.result).toContain('What happens when you connect')
+    describe('when the user came here of their own accord', () => {
+      test('shows no interrupted-action banner', async () => {
+        mockLinkingStatus({ linked: false })
+
+        const response = await get(server, '/account/mural-linking', authCookie)
+
+        expect(response.result).not.toContain('You need to connect your Mural account to')
       })
     })
   })
@@ -136,16 +220,11 @@ describe('linkingController', () => {
       await server.stop({ timeout: 0 })
     })
 
-    describe('GET /account/mural-linking', () => {
-      test('redirects to sign in', async () => {
-        const response = await server.inject({
-          method: 'GET',
-          url: '/account/mural-linking'
-        })
+    test('GET /account/mural-linking redirects to sign in', async () => {
+      const response = await get(server, '/account/mural-linking')
 
-        expect(response.statusCode).toBe(302)
-        expect(response.headers.location).toBe('/')
-      })
+      expect(response.statusCode).toBe(302)
+      expect(response.headers.location).toBe('/')
     })
   })
 })

@@ -48,21 +48,21 @@ describe('when authenticated', () => {
       mockLinkingStatus(false)
     })
 
-    test('GET /board-requests/new redirects to the connect-Mural gate page', async () => {
+    test('GET /board-requests/new redirects to the linking page', async () => {
       const { statusCode, headers } = await get(server, '/board-requests/new', cookie)
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
-      expect(headers.location).toBe('/account/mural-linking/required')
+      expect(headers.location).toBe('/account/mural-linking')
     })
 
-    test('POST /board-requests/new redirects to the connect-Mural gate page', async () => {
+    test('POST /board-requests/new redirects to the linking page', async () => {
       const { statusCode, headers } = await post(server, '/board-requests/new', form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON }), cookie)
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_FOUND)
-      expect(headers.location).toBe('/account/mural-linking/required')
+      expect(headers.location).toBe('/account/mural-linking')
     })
 
-    test('the connect-Mural gate page explains what was being attempted and links to the linking page', async () => {
+    test('the linking page says what the user was trying to do', async () => {
       const postRes = await post(server, '/board-requests/new', form({ boardId: 'abc-123', iao: 'jane.smith@defra.gov.uk', reason: VALID_REASON }), cookie)
 
       const sessionCookie = mergeCookies(cookie, postRes.headers['set-cookie'])
@@ -71,10 +71,10 @@ describe('when authenticated', () => {
       // interceptor of its own beyond the one the POST above consumed.
       mockLinkingStatus(false)
 
-      const { statusCode, payload } = await get(server, '/account/mural-linking/required', sessionCookie)
+      const { statusCode, payload } = await get(server, '/account/mural-linking', sessionCookie)
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
-      expect(payload).toContain("You tried to request a new Mural board, but this service isn't connected to your Mural account yet.")
+      expect(payload).toContain('You need to connect your Mural account to request a new Mural board.')
       expect(payload).toContain('href="/account/mural-linking"')
     })
   })
