@@ -127,14 +127,14 @@ describe.skip('approvalsApi', () => {
       expect(result.data).toBeNull()
     })
 
-    test('throws MuralApiError on unexpected status (500)', async () => {
+    test('throws MuralMcpError on unexpected status (500)', async () => {
       nock(MURAL_MCP_URL)
         .get('/approvals/boards/board-abc')
         .reply(500, { message: 'Internal server error' })
 
       await expect(getBoardRequest('board-abc', 'test@example.com'))
         .rejects.toMatchObject({
-          name: 'MuralApiError',
+          name: 'MuralMcpError',
           statusCode: 500
         })
     })
@@ -197,14 +197,14 @@ describe.skip('approvalsApi', () => {
       expect(filtered.isDone()).toBe(false)
     })
 
-    test('throws MuralApiError on unexpected status (500)', async () => {
+    test('throws MuralMcpError on unexpected status (500)', async () => {
       nock(MURAL_MCP_URL)
         .get('/admin/access-requests')
         .reply(500, { message: 'Internal server error' })
 
       await expect(listAccessRequests('test@example.com'))
         .rejects.toMatchObject({
-          name: 'MuralApiError',
+          name: 'MuralMcpError',
           statusCode: 500
         })
     })
@@ -279,13 +279,13 @@ describe.skip('approvalsApi', () => {
       expect(result).toEqual({ ok: false, status: 404, data: null })
     })
 
-    test('throws MuralApiError on unexpected status (500)', async () => {
+    test('throws MuralMcpError on unexpected status (500)', async () => {
       nock(MURAL_MCP_URL)
         .post('/admin/access-requests/req-1/approve')
         .reply(500, { message: 'Internal server error' })
 
       await expect(decideAccessRequest('req-1', 'approve', {}, 'iao@defra.gov.uk'))
-        .rejects.toMatchObject({ name: 'MuralApiError', statusCode: 500 })
+        .rejects.toMatchObject({ name: 'MuralMcpError', statusCode: 500 })
     })
   })
 })
