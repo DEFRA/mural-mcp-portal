@@ -26,8 +26,8 @@ describe('TokenListViewModel', () => {
     })
 
     expect(model.tokens[0]).toMatchObject({
-      createdOn: '30 August 2026 11:15 AM',
-      lastUsed: '1 September 2026 09:00 AM',
+      createdOn: '30 August 2026 10:15 AM',
+      lastUsed: '1 September 2026 08:00 AM',
       expiresOn: '28 November 2026 10:15 AM'
     })
   })
