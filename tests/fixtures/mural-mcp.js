@@ -1,17 +1,4 @@
 /**
- * Mural MCP response bodies.
- *
- * Single owner of every response shape the Mural MCP API sends, so that no
- * two tests can disagree about what upstream actually returns. Each factory
- * returns a fresh object and accepts overrides — nothing here is shared
- * mutable state.
- *
- * These are the *upstream* bodies only. The `{ok, status, data}` wrapper is
- * `src/infra/mural/client.js`'s own shape, not something the API sends, so it
- * is not modelled here.
- */
-
-/**
  * Body of `POST /approvals/boards` on 201 Created.
  *
  * Verified by reading the consumers: `src/infra/mural/client.js` derives `ok`
@@ -102,9 +89,79 @@ function accessRequestList (requests = [accessRequest()]) {
   return requests
 }
 
+/**
+ * Body of `POST /tokens` on 201 Created.
+ *
+ * Verified against `MintedTokenResponse` in
+ * `../mural-mcp/app/infra/rest/token_router.py`. That router's pydantic models
+ * are plain - no `alias_generator` - so unlike every other shape in this file
+ * its fields cross the wire in `snake_case`. `services/personal-tokens.js` is
+ * the one place that maps them.
+ *
+ * `token` is the plaintext secret, `mmcp_` + `secrets.token_urlsafe(32)`, and
+ * appears in this response and nowhere else - upstream persists only its
+ * SHA-256 hash.
+ *
+ * @param {Object} [overrides] - Fields to override on the representation
+ * @returns {{id: string, token: string, label: string, expires_at: string}}
+ */
+function mintedToken (overrides = {}) {
+  return {
+    id: 'pat_3f9c1a2b4d5e6f708192a3b4c5d6e7f8',
+    token: 'example-token-for-testing',
+    label: 'Claude Code',
+    expires_at: '2026-11-28T10:15:30.123456Z',
+    ...overrides
+  }
+}
+
+/**
+ * One element of `GET /tokens` on 200.
+ *
+ * Verified against `TokenSummaryResponse` in the same router. Note what is
+ * absent: there is no `token` field - the integration test upstream asserts
+ * that explicitly - and no status field either, which is why
+ * `services/personal-tokens.js` derives Active/Expired/Revoked from
+ * `revoked_at` and `expires_at`.
+ *
+ * `prefix` is the first 13 characters of the secret, stored by upstream for
+ * display so a user can tell their tokens apart.
+ *
+ * @param {Object} [overrides] - Fields to override on the representation
+ * @returns {Object}
+ */
+function tokenSummary (overrides = {}) {
+  return {
+    id: 'pat_3f9c1a2b4d5e6f708192a3b4c5d6e7f8',
+    label: 'Claude Code',
+    prefix: 'mmcp_xJ8v3kQz',
+    created_at: '2026-08-30T10:15:30.123456Z',
+    expires_at: '2026-11-28T10:15:30.123456Z',
+    last_used_at: null,
+    revoked_at: null,
+    ...overrides
+  }
+}
+
+/**
+ * Body of `GET /tokens` on 200 - a bare JSON array.
+ *
+ * The return annotation upstream is `list[TokenSummaryResponse]`, so FastAPI
+ * serialises it with no envelope.
+ *
+ * @param {Object[]} [tokens] - Tokens to return
+ * @returns {Object[]}
+ */
+function tokenList (tokens = [tokenSummary()]) {
+  return tokens
+}
+
 export {
   createdBoardRequest,
   boardRequestConflict,
   accessRequest,
-  accessRequestList
+  accessRequestList,
+  mintedToken,
+  tokenSummary,
+  tokenList
 }
