@@ -51,12 +51,14 @@
           <li class="defra-service-navigation__item">
             <a class="defra-service-navigation__link" href="/dashboard" {% if currentUrl == '/dashboard' %}aria-current="page"{% endif %}>Dashboard</a>
           </li>
+          {% if features and features.selfServiceAccess %}
           <li class="defra-service-navigation__item">
             <a class="defra-service-navigation__link" href="/approvals" {% if currentUrl and currentUrl.startsWith('/approvals') %}aria-current="page"{% endif %}>My approvals</a>
           </li>
           <li class="defra-service-navigation__item">
             <a class="defra-service-navigation__link" href="/board-requests/new" {% if currentUrl and currentUrl.startsWith('/board-requests') %}aria-current="page"{% endif %}>Request a board</a>
           </li>
+          {% endif %}
         </ul>
       </div>
     </nav>

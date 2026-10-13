@@ -213,6 +213,20 @@ const config = convict({
       default: isDevelopment
     }
   },
+  features: {
+    selfServiceAccess: {
+      doc: 'Enable self-service board access requests and the approvals pages. When off, board access is governed solely by the MCP server\'s environment allow list',
+      format: Boolean,
+      default: false,
+      env: 'SELF_SERVICE_ACCESS_ENABLED'
+    },
+    dataHandlingUpload: {
+      doc: 'Enable the data handling form upload (CDP Uploader). Only meaningful when selfServiceAccess is also enabled; cdpUploader settings are ignored when off',
+      format: Boolean,
+      default: false,
+      env: 'DATA_HANDLING_UPLOAD_ENABLED'
+    }
+  },
   cdpUploader: {
     url: {
       doc: 'CDP Uploader base URL for server-to-server calls. Only required in development to target the local emulator',

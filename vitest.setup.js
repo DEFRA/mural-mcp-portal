@@ -3,6 +3,11 @@
 process.env.MURAL_MCP_URL = 'http://localhost:8086'
 process.env.MURAL_MCP_PUBLIC_URL = 'http://localhost:8086/mcp'
 
+// Feature flags default off in the app; most tests exercise the full feature
+// set. Tests of the flags-off state reset modules and override these.
+process.env.SELF_SERVICE_ACCESS_ENABLED = 'true'
+process.env.DATA_HANDLING_UPLOAD_ENABLED = 'true'
+
 process.env.SESSION_COOKIE_PASSWORD = 'the-password-must-be-at-least-32-characters-long'
 process.env.REDIS_USERNAME = 'user'
 process.env.REDIS_PASSWORD = 'pass'

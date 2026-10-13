@@ -10,7 +10,11 @@
 #}
 {% set pageTitle = 'Home' %}
 {% set title = 'Manage your Mural board access' %}
-{% set description = 'Request governed access to Mural boards, and review the requests waiting on you.' %}
+{% if features and features.selfServiceAccess %}
+  {% set description = 'Request governed access to Mural boards, and review the requests waiting on you.' %}
+{% else %}
+  {% set description = 'Connect your Mural account and manage the tokens your MCP client uses.' %}
+{% endif %}
 
 {% block content %}
   <div class="govuk-grid-row">
@@ -41,22 +45,27 @@
       description: 'Search governed Mural boards and check the status of requests you have made.'
     },
     {
-      text: 'Approvals to review',
-      href: '/approvals',
-      description: 'Board requests waiting for your decision as Information Asset Owner.',
-      count: reviewCount
-    },
-    {
-      text: 'Request a board',
-      href: '/board-requests/new',
-      description: 'Ask for a Mural board to be approved for use with the MCP server.'
-    },
-    {
       text: 'Access tokens',
       href: '/account/tokens',
       description: 'Create and manage the tokens your MCP client uses to sign in as you.'
     }
   ] -%}
+
+  {% if features and features.selfServiceAccess %}
+    {%- set tiles = (tiles.push(
+      {
+        text: 'Approvals to review',
+        href: '/approvals',
+        description: 'Board requests waiting for your decision as Information Asset Owner.',
+        count: reviewCount
+      },
+      {
+        text: 'Request a board',
+        href: '/board-requests/new',
+        description: 'Ask for a Mural board to be approved for use with the MCP server.'
+      }
+    ), tiles) -%}
+  {% endif %}
 
   {{ appTileGrid(tiles) }}
 {% endblock %}

@@ -2,10 +2,14 @@
 
 {% set navItems = [
   { text: "Home", href: "/dashboard", prefix: "/dashboard" },
-  { text: "Boards", href: "/boards", prefix: "/boards" },
-  { text: "Approvals to review", href: "/approvals", prefix: "/approvals", count: reviewCount },
-  { text: "Request a board", href: "/board-requests/new", prefix: "/board-requests" }
+  { text: "Boards", href: "/boards", prefix: "/boards" }
 ] %}
+{% if features and features.selfServiceAccess %}
+  {% set navItems = (navItems.push(
+    { text: "Approvals to review", href: "/approvals", prefix: "/approvals", count: reviewCount },
+    { text: "Request a board", href: "/board-requests/new", prefix: "/board-requests" }
+  ), navItems) %}
+{% endif %}
 
 {% block head %}
   <link href="{{ getAssetPath('src/client/stylesheets/application.scss') }}" rel="stylesheet">
