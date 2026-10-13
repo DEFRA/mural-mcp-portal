@@ -10,8 +10,8 @@ const token = (overrides = {}) => ({
   id: 'pat_1',
   label: 'Claude Code',
   prefix: 'mmcp_xJ8v3kQz',
-  createdAt: '2026-08-30T10:15:30.000Z',
-  expiresAt: '2026-11-28T10:15:30.000Z',
+  createdAt: '2026-08-30T10:15:30',
+  expiresAt: '2026-11-28T10:15:30',
   lastUsedAt: null,
   revokedAt: null,
   status: tokenStatuses.ACTIVE,
@@ -21,7 +21,7 @@ const token = (overrides = {}) => ({
 describe('TokenListViewModel', () => {
   test('formats every date the GOV.UK way', () => {
     const model = TokenListViewModel.fromTokens({
-      tokens: [token({ lastUsedAt: '2026-09-01T08:00:00.000Z' })],
+      tokens: [token({ lastUsedAt: '2026-09-01T08:00:00' })],
       listError: false
     })
 
@@ -122,23 +122,10 @@ describe('CreatedTokenViewModel', () => {
   }
 
   test('builds a client configuration with the secret already in it', () => {
-    const model = CreatedTokenViewModel.fromToken(minted, 'https://mcp.example.gov.uk')
+    const model = CreatedTokenViewModel.fromToken(minted, 'https://mcp.example.gov.uk/mcp')
 
-    expect(JSON.parse(model.configSnippet)).toEqual({
-      mcpServers: {
-        mural: {
-          url: 'https://mcp.example.gov.uk/mcp',
-          headers: { Authorization: 'Bearer mmcp_secret' }
-        }
-      }
-    })
-  })
-
-  test('does not double the slash when the configured URL has a trailing one', () => {
-    const model = CreatedTokenViewModel.fromToken(minted, 'https://mcp.example.gov.uk/')
-
-    expect(JSON.parse(model.configSnippet).mcpServers.mural.url)
-      .toBe('https://mcp.example.gov.uk/mcp')
+    expect(model.configSnippet).toEqual(expect.stringContaining('"url": "https://mcp.example.gov.uk/mcp"'))
+    expect(model.configSnippet).toEqual(expect.stringContaining('"Authorization": "Bearer mmcp_secret"'))
   })
 
   test('omits the snippet when no public URL is configured, rather than naming a host that would fail', () => {

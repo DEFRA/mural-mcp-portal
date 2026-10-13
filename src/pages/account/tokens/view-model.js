@@ -91,7 +91,7 @@ class CreatedTokenViewModel {
 
   /**
    * @param {{label: string, secret: string, expiresAt: string}} token
-   * @param {string|null} mcpUrl - `muralMcp.publicUrl`, as an MCP client reaches it
+   * @param {string|null} mcpUrl - `muralMcp.publicUrl`, the full MCP endpoint an MCP client connects to
    * @returns {CreatedTokenViewModel}
    */
   static fromToken (token, mcpUrl) {
@@ -165,15 +165,15 @@ function _expiryItems (selected) {
 
 /**
  * @private
- * A `mcpServers` entry for the client's configuration file. `mural-mcp` mounts
- * its MCP app at `/mcp`, and authenticates it with the same bearer token this
- * page has just issued.
+ * A `mcpServers` entry for the client's configuration file. `mcpUrl` is the
+ * full MCP endpoint (including `/mcp`), and the client authenticates to it with
+ * the same bearer token this page has just issued.
  */
 function _configSnippet (secret, mcpUrl) {
   const config = {
     mcpServers: {
       mural: {
-        url: `${mcpUrl}/mcp`,
+        url: mcpUrl,
         headers: { Authorization: `Bearer ${secret}` }
       }
     }

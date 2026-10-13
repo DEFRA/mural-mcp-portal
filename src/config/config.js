@@ -238,10 +238,10 @@ const config = convict({
       env: 'MURAL_MCP_URL'
     },
     publicUrl: {
-      doc: 'Mural MCP public base URL',
+      doc: 'Mural MCP public endpoint URL, including the /mcp path',
       format: String,
       nullable: true,
-      default: '#',
+      default: null,
       env: 'MURAL_MCP_PUBLIC_URL'
     }
   },
