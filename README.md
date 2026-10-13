@@ -269,3 +269,14 @@ information providers in the public sector to license the use and re-use of thei
 licence.
 
 It is designed to encourage use and re-use of information freely and flexibly, with only a few conditions.
+
+## Feature flags
+
+Both flags default to `false`. Set them to `true` to enable.
+
+| Variable | Effect when `true` |
+| --- | --- |
+| `SELF_SERVICE_ACCESS_ENABLED` | Registers the board request (`/board-requests/*`) and approvals (`/approvals`) pages and shows them in the navigation and dashboard. When `false` those routes return 404 and board access is governed solely by the MCP server's environment allow list. |
+| `DATA_HANDLING_UPLOAD_ENABLED` | Enables the data handling form upload via CDP Uploader (`CDP_UPLOADER_*` settings). When `false` those settings are ignored and the content security policy is always applied. Only meaningful when `SELF_SERVICE_ACCESS_ENABLED` is `true`. |
+
+The MCP server (`mural-mcp`) has matching flags; keep them in step.

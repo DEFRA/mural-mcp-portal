@@ -48,6 +48,7 @@ function loadManifest () {
 const aceSlackChannel = config.get('aceSlackChannel')
 const assetPath = config.get('assetPath')
 const serviceName = config.get('serviceName')
+const features = config.get('features')
 
 const viteManifest = loadManifest()
 
@@ -81,6 +82,7 @@ const viewPlugin = {
         return `${assetPath}/${viteAsset ?? asset}`
       },
       serviceName,
+      features,
       // Blankie generates nonces when configured with generateNonces: true.
       // `blankie.nonces` is an object like { script, style }, but the template
       // expects the script nonce string itself.

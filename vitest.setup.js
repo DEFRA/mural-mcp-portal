@@ -2,6 +2,11 @@
 // state (e.g. controller-gated.test.js) override this in their own beforeAll.
 process.env.MURAL_MCP_URL = 'http://localhost:8086'
 
+// Feature flags default off in the app; most tests exercise the full feature
+// set. Tests of the flags-off state reset modules and override these.
+process.env.SELF_SERVICE_ACCESS_ENABLED = 'true'
+process.env.DATA_HANDLING_UPLOAD_ENABLED = 'true'
+
 process.env.SESSION_COOKIE_PASSWORD = 'the-password-must-be-at-least-32-characters-long'
 process.env.REDIS_USERNAME = 'user'
 process.env.REDIS_PASSWORD = 'pass'

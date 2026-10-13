@@ -1,3 +1,4 @@
+import { config } from '../../../config/config.js'
 import * as boardRequestController from './controller.js'
 import { boardRequestSchema } from './schemas.js'
 
@@ -15,7 +16,7 @@ import { boardRequestSchema } from './schemas.js'
  * The boards listing and board page are deliberately ungated - see
  * `pages/boards/routes.js`.
  */
-const routes = [
+const allRoutes = [
   {
     method: 'GET',
     path: '/board-requests/new',
@@ -37,6 +38,8 @@ const routes = [
     handler: boardRequestController.postBoardRequest
   }
 ]
+
+const routes = config.get('features.selfServiceAccess') ? allRoutes : []
 
 export {
   routes
