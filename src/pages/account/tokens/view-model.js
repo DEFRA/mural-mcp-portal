@@ -173,7 +173,7 @@ function _configSnippet (secret, mcpUrl) {
   const config = {
     mcpServers: {
       mural: {
-        url: `${mcpUrl.replace(/\/+$/, '')}/mcp`,
+        url: `${mcpUrl}/mcp`,
         headers: { Authorization: `Bearer ${secret}` }
       }
     }

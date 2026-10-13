@@ -3,6 +3,7 @@ import Joi from 'joi'
 import { tokenExpiryValues } from '../../../constants/token-expiry.js'
 
 const MAX_LABEL_LENGTH = 50
+const EXPIRY_REQUIRED_MESSAGE = 'Select when this token should expire'
 
 /**
  * The generate-a-token form.
@@ -25,9 +26,9 @@ const mintTokenSchema = Joi.object({
     'string.max': `Token name must be ${MAX_LABEL_LENGTH} characters or fewer`
   }),
   ttlDays: Joi.number().valid(...tokenExpiryValues).required().messages({
-    'number.base': 'Select when this token should expire',
-    'any.only': 'Select when this token should expire',
-    'any.required': 'Select when this token should expire'
+    'number.base': EXPIRY_REQUIRED_MESSAGE,
+    'any.only': EXPIRY_REQUIRED_MESSAGE,
+    'any.required': EXPIRY_REQUIRED_MESSAGE
   })
 })
 
