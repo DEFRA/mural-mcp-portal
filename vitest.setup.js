@@ -1,6 +1,7 @@
 // Default-on for tests: AI content visible. Tests that exercise the gated
 // state (e.g. controller-gated.test.js) override this in their own beforeAll.
 process.env.MURAL_MCP_URL = 'http://localhost:8086'
+process.env.MURAL_MCP_PUBLIC_URL = 'http://localhost:8086/mcp'
 
 process.env.SESSION_COOKIE_PASSWORD = 'the-password-must-be-at-least-32-characters-long'
 process.env.REDIS_USERNAME = 'user'
